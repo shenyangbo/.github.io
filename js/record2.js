@@ -1,5 +1,6 @@
 $(document).ready(function() {
    $('.num_container').hide();
+	$('.number').css('color','#000000');
 
 	// =============== 全局变量 ===============
 	var bt_recoding = document.getElementById("bt_recoding");
