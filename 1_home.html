@@ -1,0 +1,761 @@
+<!DOCTYPE>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+
+		<!--H5页面窗口自动调整到设备宽度，并禁止用户缩放页面-->
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+
+		<link rel="stylesheet" href="css/css.css">
+		<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+		<script src="js/js2.js"></script>
+		<script src="js/record.js"></script>
+		<link rel="stylesheet" href="js/swiper-bundle.min.css" />
+		<script src="js/swiper-bundle.min.js"></script>
+
+		<title>10000助理</title>
+		<style>
+			body {
+				background: #EFF5FF;
+			}
+
+			.top_package_details li p {
+				display: flex;
+				align-items: center;
+			}
+			
+		
+		</style>
+	</head>
+	<body>
+		<!-- 号码信息 -->
+		<div class="num_container">
+			<div class="number btn-list">
+				当前登录号码12
+				<p>133****1526</p>
+				<button class="btn" type="button" data-action="navigateBack">
+					<img src="images/ic_log_out.png" alt="">
+				</button>
+
+			</div>
+		</div>
+
+		<div class="dialog_container">
+			<div class="service_content2">
+				<p class="service_time">10:50</p>
+				<div class="message_left">
+					<img src="image/service_dialog.png" alt="">
+					<p>尊敬的用户，欢迎您从10000号热线切换至星
+						卡助理，下面由小助继续为您服务!</p>
+				</div>
+				<div class="message_left">
+					<img src="image/service_dialog.png" alt="">
+					<p>
+						小助提醒您您的号码133****5678当前欠费19
+						元需要缴费后自动复通使用，如需缴费请点击
+						【充值缴费】充值成功后3小时内复机。
+					</p>
+				</div>
+			</div>
+
+			<div class="home_top">
+				<div class="home_top_data">
+					<div class="home_top_package">
+						<p>
+							当前套餐 <span>星卡29元套餐</span>
+						</p>
+						<ul class="top_package_details">
+							<li class="warn">
+								<p><span>19</span>元</p>
+								<p class="bg_linear">话费余额 <img src="image/ic_arrow_right.png" alt=""
+										style="width: 12px;"></p>
+							</li>
+							<li>
+								<p><span>29</span>GB</p>
+								<p class="bg_linear">剩余通用流量 <img src="image/ic_arrow_right.png" alt=""
+										style="width: 12px;"></p>
+							</li>
+							<li>
+								<p><span>198</span>分钟</p>
+								<p class="bg_linear">剩余通用语音 <img src="image/ic_arrow_right.png" alt=""
+										style="width: 12px;"></p>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="home_question_container">
+				<div class="home_question">
+					<p class="home_question_tab background">
+						<img src="image/question.png" alt="">
+					</p>
+
+					<p class="home_question_tab">
+						<span>热点问题</span>
+						<span class="bg_active"></span>
+					</p>
+					<p class="home_question_refresh">
+						<img src="image/refresh.png" alt="" class="img_refresh">刷新
+					</p>
+				</div>
+				<div class="swiper mySwiper2" style="margin-top: 0px;">
+					<div class="swiper-wrapper">
+						<!-- 流量 -->
+						<div class="swiper-slide">
+							<ul class="home_question_ul">
+								<li>我有余额为什么还停机? <img src="image/ic_arrow_right.png" alt=""></li>
+								<li>消费是怎么产生的?<img src="image/ic_arrow_right.png" alt=""></li>
+								<li>怎么查往月欠费明细?<img src="image/ic_arrow_right.png" alt=""></li>
+								<li>我要充值多少钱?<img src="image/ic_arrow_right.png" alt=""></li>
+							</ul>
+						</div>
+
+						<!-- 语音 -->
+						<div class="swiper-slide" style="">
+							<ul class="home_question_ul">
+								<li>我有余额为什么还停机? <img src="image/ic_arrow_right.png" alt=""></li>
+								<li>消费是怎么产生的?<img src="image/ic_arrow_right.png" alt=""></li>
+								<li>怎么查往月欠费明细?<img src="image/ic_arrow_right.png" alt=""></li>
+								<li>我要充值多少钱?<img src="image/ic_arrow_right.png" alt=""></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- 2024.11.01隐藏不显示 -->
+			<div class="home_content" style="display: none;">
+				<ul class="ic_function_container">
+					<li>
+						<img src="image/cyfw_ic_zdcx.png" alt="">账单查询
+					</li>
+					<li>
+						<img src="image/cyfw_ic_llcx.png" alt="">流量查询
+					</li>
+					<li>
+						<img src="image/cyfw_ic_tcyl.png" alt="">套餐用量
+					</li>
+					<li>
+						<img src="image/cyfw_ic_yecx.png" alt="">余额查询
+					</li>
+					<li>
+						<img src="image/cyfw_ic_czjfjl.png" alt="">充值交费记录
+					</li>
+					<li>
+						<img src="image/cyfw_ic_hfycfh.png" alt="">话费预存返还
+					</li>
+					<li>
+						<img src="image/cyfw_ic_ydywcx.png" alt="">已订业务
+					</li>
+					<li>
+						<img src="image/cyfw_ic_gzkx.png" alt="">故障快修
+					</li>
+				</ul>
+			</div>
+			<div class="service_content">
+				<p class="service_time">10:50</p>
+				<div class="message_left">
+					<img src="image/service_dialog.png" alt="">
+					<p>尊敬的用户，欢迎您从10000号热线切换至星
+						卡助理，下面由小助继续为您服务!</p>
+				</div>
+				<div class="tishi_ai">
+					<span>内容由AI生成，供您参考使用</span>
+					<p>
+						<img src="image/poorly_grey.png" alt="" class="poorly" />
+						<img src="image/praise_grey.png" alt="" class="praise" />
+					</p>
+				</div>
+				<p class="service_time">10:50</p>
+				<div class="message_left">
+					<img src="image/service_dialog.png" alt="">
+					<p>
+						asd
+						sdf
+						465
+						456
+
+					</p>
+				</div>
+
+				<div class="message_left">
+					<img src="image/service_dialog.png" alt="">
+
+					<div class="waiting_container">
+						<span>
+							正在查询中
+						</span>
+
+						<span class="loading-dots">
+							<span class="dot"></span>
+							<span class="dot"></span>
+							<span class="dot"></span>
+						</span>
+					</div>
+				</div>
+
+				<div class="message_left">
+					<img src="image/service_dialog.png" alt="">
+					<p>
+						<span>趋势分析(2025-09 vs 2025-08)</span>
+					<table>
+						<tr>
+							<th>号码</th>
+							<th>2025-09</th>
+							<th>2025-08 </th>
+							<th>变化量 </th>
+							<th>变化率 </th>
+						</tr>
+						<tr>
+							<td>2025-12-01 10:35:422025-12-01 10:35:42</td>
+							<td>139.20</td>
+							<td>157.83</td>
+							<td>-18.63 </td>
+							<td>-11.8%</td>
+						</tr>
+						<tr>
+							<td>18926776626(副卡)</td>
+							<td>139.20</td>
+							<td>157.83</td>
+							<td>-18.63 </td>
+							<td>-100%</td>
+						</tr>
+						<tr>
+							<td>13310838366(主卡)</td>
+							<td>139.20</td>
+							<td>157.83</td>
+							<td>-18.63 </td>
+							<td>-11.8%</td>
+						</tr>
+						<tr>
+							<td>13310838366(主卡)</td>
+							<td>139.20</td>
+							<td>157.83</td>
+							<td>-18.63 </td>
+							<td>-11.8%</td>
+						</tr>
+						<tr>
+							<td>本期赠费抵扣</td>
+							<td>0.00</td>
+							<td>0.00</td>
+							<td>0.00 </td>
+							<td>-</td>
+						</tr>
+						<tr>
+							<td>本期应付费用</td>
+							<td>173.20 </td>
+							<td>333.00 </td>
+							<td>-159.80-</td>
+							<td>-48.0%</td>
+						</tr>
+					</table>
+					<span>2025年8月账期副卡18926776626的套餐外上网费用较高，建议您留意一下使用情况
+						哦。</span>
+					</p>
+
+				</div>
+
+				<!-- <div class="message_left">
+					<img src="image/service_dialog.png" alt="">
+					<p>
+						<span class="spinner">
+							<span class="bg_white"></span>
+							<span class="circle large"></span>
+							  <span class="circle small"></span>
+						</span>
+					</p>
+				</div>
+
+				<div class="message_left">
+					<img src="image/service_dialog.png" alt="">
+					<p>
+					  <img src="image/testing.png" class="icon_right2 loading" alt="">
+					</p>
+				</div>
+				
+				
+				<div class="message_left">
+					<img src="image/service_dialog.png" alt="">
+					<p>
+					  <span class="container animation-6">
+					  	<span class="shape shape-1"></span>
+					  	<span class="shape shape-2"></span>
+					  	<span class="shape shape-3"></span>
+					  	<span class="shape shape-4"></span>
+					  </span>
+					</p>
+				</div> -->
+			</div>
+
+			<div class="feedback">
+				<div class="feedback_mask"></div>
+				<div class="feedback_container">
+					<img src="image/message_ic_close.png" class="feedback_close" alt="" />
+					<div class="feedback_content">
+						<div class="feedback_content_title">
+							<p>您的反馈会让我们做的更好</p>
+							<img src="image/feedback_servicer.png" alt="" />
+						</div>
+						<div class="feedback_content_details">
+							<p>
+								<span>语音识别不准确</span>
+								<span>不理解我的问题</span>
+							</p>
+							<p>
+								<span>回复的内容不相关</span>
+								<span>回复无法解决我的问题</span>
+							</p>
+							<p>
+								<span>语音识别不准确</span>
+								<span>跳转链接打不开</span>
+							</p>
+							<p>
+								<span class="feedback_other">其他</span>
+								<span style="border: none;"></span>
+							</p>
+
+
+							<div class="feedback_textarea" id="4">
+								<textarea placeholder='请输入不少于10字的故障问题描述' rows="3" id="content" maxlength="120"
+									minlength="10"></textarea>
+
+								<span class="position_right"><span id="numCount">0</span>/120</span>
+
+							</div>
+							<button disabled class="button_large">提交反馈</button>
+						</div>
+					</div>
+				</div>
+
+			</div>
+
+
+			<div class="bottom">
+				<div class="bottom_presuppose">
+					<p>查账单 </p>
+					<p>查余额 </p>
+					<p>已订业务 </p>
+					<p>手机上网慢 </p>
+					<p>定向流量范围 </p>
+				</div>
+				<div class="bottom_presuppose">
+					<p>换卡 </p>
+					<p>补卡 </p>
+					<p>查流量 </p>
+					<p>业务退订 </p>
+					<p>加流量 </p>
+					<div class="bottom_presuppose_more">
+						<p>
+							<img src="image/more.png" alt="" width="16px" /> 更多业务
+						</p>
+					</div>
+				</div>
+				<div class="bottom_input">
+					<!-- 文字输入 -->
+					<div class="text_input" style="flex: 1;display: flex;align-items: center;">
+						<img src="image/ic_voice_circle.png" alt="" class="input_voice_switch">
+						<div id="" class="input_content">
+							<input type="text" placeholder="请输入..." id="userInput">
+							<img src="image/ic_send.png" alt="" class="send" id="submitButton">
+						</div>
+					</div>
+					<!-- 语音输入 -->
+					<div class="voice_input" style="flex: 1;display: none;align-items: center;">
+						<img src="image/ic_keybord_circle.png" alt="" class="input_text_switch">
+						<input type="button" id="bt_recoding" class="input_content noselect bg_blue" value="按住说话">
+					</div>
+					<section class="z_file">
+						<img src="image/ic_plus_circle.png" class="add-img">
+						<input type="file" class="file" accept="image/*" />
+					</section>
+				</div>
+			</div>
+		</div>
+	</body>
+	<!-- 录音状态 -->
+	<div class="blackBoxSpeak">
+		<!-- <p class="blackBoxSpeakConent">手指上划，取消发送</p> -->
+	</div>
+
+	<!-- 暂停状态 -->
+	<div class="blackBoxPause">
+		<!-- <p class="blackBoxPauseContent">松开手指， 取消发送</p> -->
+	</div>
+
+	<!-- Base64 编码输出容器 -->
+	<div class="base64Container" id="base64Output"></div>
+	<div id="audioContainer" style="margin-bottom: 620px;"></div>
+
+	<div class="toast" id="toast"></div>
+
+	<!-- 生成客户消息模板 -->
+	<div type="text/template" id="template" style="display: none;">
+		<div class="message_right">
+			<p> {userInput}</p>
+			<!-- <img src="image/user.png" alt=""> -->
+		</div>
+	</div>
+	<!-- 生成客服消息模板 -->
+	<div type="text/template" id="template2" style="display: none;">
+		<div class="message_left">
+			<img src="image/service_dialog.png" alt="">
+			<p>
+				<a href="#" style="color: #3473F4;">链接内容</a>
+			</p>
+		</div>
+	</div>
+	<!-- 生成客服消息模板 -->
+	<div type="text/template" id="template3" style="display: none;">
+		<div class="message_left">
+			<img src="image/service_dialog.png" alt="">
+			<p>{serviceInput} </p>
+		</div>
+	</div>
+
+	<!-- 新消息提醒 -->
+	<!-- <p class="message_new">
+		<img src="image/ic_arrow_left_white.png" alt="">
+		有新的消息
+	</p> -->
+
+	<!-- 加载动画 -->
+	<div class="loading_container" style="display: none;">
+		<div class="loading_mask"></div>
+		<div class="loading_circle">
+			<!-- 最外层的盒子 使用 svg 格式绘制图形 -->
+			<svg class="box" width="200" height="160">
+				<!-- 浅灰色的背景圆形 -->
+				<circle class="background-circle" cx="100" cy="80" r="60" />
+				<!-- circle用于定义圆形进度条，stroke 可以直接使用纯色：stroke="skyblue" -->
+				<circle class="progress_circle" cx="100" cy="80" r="60" fill="transparent" stroke="#108ee9"
+					stroke-width="10"></circle>
+				<!-- 进度图标 -->
+				<image class="icon" x="70" y="50" href="image/airplane.gif" preserveAspectRatio="xMidYMid slice" />
+			</svg>
+			<span>正在查询中，请耐心等候...</span>
+		</div>
+	</div>
+
+	<div class="login_tip_container">
+		<div class="loading_mask"></div>
+		<div class="login_tip">
+			<!-- 1、省内21个地市非星卡用户 -->
+			<p>抱歉，本专区为星卡用户专属自助服务页面，未检测到您名下有星卡套餐，您可访问 <a class="link">线上服务大厅</a>体验自助服务。</p>
+			<!-- 2、省内非深圳市的星卡用户： -->
+			<p style="display: none;">抱歉，本专区仅限部分地市开放，您可访问<a class="link">星卡专区</a>享受自助服务。</p>
+			<!-- 3、外省内网用户： -->
+			<p style="display: none;">您好，您的号码非广东电信所属，请使用广东电信号码登录。</p>
+			<!-- 4、其他运营商号码： -->
+			<p style="display: none;">您好！您的号码非中国电信手机号，请使用中国电信号码登录。</p>
+			<div class="btn-list">
+				<button class=" btn_plain">退出</button>
+				<button class=" btn_solid">立即前往</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="disable_mask"></div>
+
+
+
+	<script>
+		$(document).ready(function() {
+			//监听消息事件，处理来自 iframe 内部的消息
+			window.addEventListener('message', function(event) {
+				const data = event.data;
+
+				if (data && data.type === 'resize' && typeof data.height === 'number') {
+					$('.iframe').height(data.height + 'px');
+				} else {
+					console.log('高度未调整:', data);
+				}
+			});
+
+			$('#content').on('input', function() {
+				// 获取当前输入内容的长度
+				const len = $(this).val().length;
+				// 更新字数显示
+				$('#numCount').text(len);
+			});
+
+			$('.feedback_close').on('click', function() {
+				$('.feedback').hide()
+			});
+
+
+			$('#userInput').on('keydown', function(event) {
+
+				// 检查是否按下了 Enter 键
+				if (event.which == 13) {
+					event.preventDefault();
+					$('#submitButton').trigger('click')
+					$(this).val('');
+				}
+			});
+
+			function sendMessage(message) {
+				console.log("发送的消息: " + message);
+				// 在这里你可以添加代码来处理实际的消息发送逻辑，
+				// 比如通过 AJAX 请求将消息发送到服务器。
+			}
+			// 绑定点击事件到按钮
+			$('#submitButton').click(function() {
+				$('.disable_mask').show();
+				$('.disable_mask').hide();
+				// 获取输入框中的值
+				var userInput = $('#userInput').val();
+
+				var template2 = $('#template2').html();
+
+				// 如果用户输入为空，直接返回，不做任何处理
+				if (userInput === '') {
+					return;
+				}
+
+				// 获取模板并填充用户输入
+				var template = $('#template').html();
+				var filledTemplate = template.replace('{userInput}', userInput);
+
+				// 在指定的div中追加用户输入的内容
+				$('.service_content').append(filledTemplate);
+
+				// 清空输入框
+				$('#userInput').val('');
+				var newIframe;
+				if (userInput === '账单查询') {
+					var serviceInputValue = '已为您找到账单查询的相关内容';
+					// 插入bill.html
+					newIframe = $('<iframe>', {
+						src: '5_bill.html',
+						class: 'iframe'
+					});
+				} else if (userInput === '流量查询') {
+					var serviceInputValue = '已为您找到流量的相关内容';
+					// 插入index.html
+					newIframe = $('<iframe>', {
+						src: '2_index.html',
+						class: 'iframe'
+					});
+				} else if (userInput === '流量历史') {
+					var serviceInputValue = '已为您找到流量历史的相关内容';
+					// 插入index.html
+					newIframe = $('<iframe>', {
+						src: '3_data_history.html',
+						class: 'iframe'
+					});
+				} else if (userInput === '套餐与优惠') {
+					var serviceInputValue = '已为您找到套餐与优惠的相关内容';
+					// 插入index.html
+					newIframe = $('<iframe>', {
+						src: '4_business_orderd.html',
+						class: 'iframe'
+					});
+				} else if (userInput === '流量使用情况') {
+					var serviceInputValue = '已为您找到流量使用情况的相关内容';
+					// 插入index.html
+					newIframe = $('<iframe>', {
+						src: '6_histogram_data.html',
+						class: 'iframe'
+					});
+				} else if (userInput === '语音使用情况') {
+					var serviceInputValue = '已为您找到语音使用情况的相关内容';
+					// 插入index.html
+					newIframe = $('<iframe>', {
+						src: '6_histogram_voice.html',
+						class: 'iframe'
+					});
+				} else if (userInput === '短信使用情况') {
+					var serviceInputValue = '已为您找到短信使用情况的相关内容';
+					// 插入index.html
+					newIframe = $('<iframe>', {
+						src: '6_histogram_message.html',
+						class: 'iframe'
+					});
+				} else if (userInput === '当前号码总余额') {
+					var serviceInputValue = '已为您找到当前号码总余额的相关内容';
+					// 插入index.html
+					newIframe = $('<iframe>', {
+						src: '8_balance_account.html',
+						class: 'iframe'
+					});
+				} else if (userInput === '定向流量') {
+					var serviceInputValue = '已为您找到定向流量的相关内容';
+					// 插入index.html
+					newIframe = $('<iframe>', {
+						src: '9_seach.html',
+						class: 'iframe'
+					});
+				} else if (userInput === '充值记录') {
+					var serviceInputValue = '已为您找到充值记录的相关内容';
+					// 插入index.html
+					newIframe = $('<iframe>', {
+						src: '10_recharge_history.html',
+						class: 'iframe'
+					});
+				} else if (userInput === '预存返还') {
+					// 插入index.html
+					var serviceInputValue =
+						'小助为您查询到您的 <img src="image/404.png" alt=""> 当前号码可用余额: <span class="text_red">0.00</span> 元;往月欠费: <span class="text_red">19.00</span>元。(仅供参考， 实际以出账为准)';
+
+					newIframe = $('<iframe>', {
+						src: '11_prepayment_rebate.html',
+						class: 'iframe'
+					});
+				} else if (userInput === '实时费用') {
+					// 插入index.html
+					var serviceInputValue = '小助为您查询到实时费用的相关内容';
+
+					newIframe = $('<iframe>', {
+						src: '12_realtime_cost.html',
+						class: 'iframe'
+					});
+				} else if (userInput === '密码验证') {
+					// 插入index.html
+					var serviceInputValue = '小助为您查询到实时费用的相关内容';
+
+					newIframe = $('<iframe>', {
+						src: 'verify_password.html',
+						class: 'iframe'
+					});
+				} else if (userInput === '短信验证码') {
+					// 插入index.html
+					var serviceInputValue = '小助为您查询到实时费用的相关内容';
+
+					newIframe = $('<iframe>', {
+						src: 'verify_code.html',
+						class: 'iframe'
+					});
+				} else if (userInput === '验证') {
+					// 插入index.html
+					var serviceInputValue = '小助为您查询到实时费用的相关内容';
+
+					newIframe = $('<iframe>', {
+						src: 'verify.html',
+						class: 'iframe'
+					});
+				} else if (userInput === '余额') {
+					// 插入index.html
+					var serviceInputValue = '小助为您查询到实时费用的相关内容';
+
+					newIframe = $('<iframe>', {
+						src: '15_balance.html',
+						class: 'iframe'
+					});
+				} else if (userInput === '继续排障') {
+					// 插入index.html
+					var serviceInputValue = '小助为您查询到实时费用的相关内容';
+
+					newIframe = $('<iframe>', {
+						src: '../手机排障-精简/2_paizhang.html',
+						class: 'iframe'
+					});
+				} else if (userInput === '流量日历') {
+					// 插入index.html
+					var serviceInputValue = '小助为您查询到实时费用的相关内容';
+
+					newIframe = $('<iframe>', {
+						src: '16_calender_data.html',
+						class: 'iframe'
+					});
+				}else if (userInput === '手机指引') {
+					// 插入index.html
+					var serviceInputValue = '小助为您查询到实时费用的相关内容';
+
+					newIframe = $('<iframe>', {
+						src: '18_guidance.html',
+						class: 'iframe'
+					});
+				} else if (userInput === '17') {
+					// 插入index.html
+					var serviceInputValue = '小助为您查询到实时费用的相关内容';
+
+					newIframe = $('<iframe>', {
+						src: '17_under_number.html',
+						class: 'iframe'
+					});
+				} else if (userInput === '') {
+
+				} else {
+					// 显示提示信息
+					$('.service_content').append(template2);
+					$('html, body').animate({
+						scrollTop: $(document).height()
+					}, 1000); // 1000是动画持续时间（毫秒）
+					return; // 如果没有匹配的情况，则不继续执行
+				}
+				// 客服回复模板
+				var template3 = $('#template3').html();
+				var filledTemplate3 = template3.replace('{serviceInput}', serviceInputValue);
+				$('.service_content').append(filledTemplate3);
+
+				// 将新的 iframe 追加到 .service_content 中
+				$('.service_content').append(newIframe);
+
+				// 当 iframe 加载完成后调整高度
+				newIframe.on('load', function() {
+					resizeIframe(this);
+				});
+
+				// 如果 iframe 内容会变化，可以监听窗口大小改变事件
+				$(window).on('resize', function() {
+					resizeIframe(newIframe[0]);
+				});
+
+				//11.26新增   
+
+
+
+				// 如果 iframe 内容是动态加载的，可以定时检查高度
+				setInterval(function() {
+					resizeIframe(newIframe[0]);
+				}, 100);
+
+				//11.26新增
+
+				// 调整 iframe 高度的函数
+				function resizeIframe(iframe) {
+					try {
+						// 获取 iframe 文档的高度
+						var body = iframe.contentDocument.body;
+						var html = iframe.contentDocument.documentElement;
+						var height = Math.max(body.scrollHeight);
+						$(iframe).height(height);
+					} catch (err) {
+						console.error("Error resizing iframe:", err);
+					}
+				};
+				// 滚动到最底部
+				$('html, body').animate({
+					scrollTop: $(document).height()
+				}, 1000); // 1000是动画持续时间（毫秒）
+			});
+
+
+			$('.input_voice_switch').click(function() {
+				$('.text_input').hide();
+				$('.voice_input').css('display', 'flex');
+				resumeAudioContext();
+			});
+			$('.input_text_switch').click(function() {
+				$('.voice_input').hide();
+				$('.text_input').css('display', 'flex')
+			});
+
+			// 点击新消息滚动到最底部
+			$('.message_new').click(function() {
+
+				$('html, body').animate({
+					scrollTop: $(document).height()
+				}, 1000); // 1000是动画持续时间（毫秒）
+			});
+			// 隐藏新消息
+			function hidemessage() {
+				$('.message_new').hide()
+			};
+			// 显示新消息
+			function showmessage() {
+				$('.message_new').show();
+			}
+		});
+	</script>
+
+</html>

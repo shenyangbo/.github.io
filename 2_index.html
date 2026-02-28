@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+
+		<!--H5页面窗口自动调整到设备宽度，并禁止用户缩放页面-->
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, userscalable=no" />
+
+		<title>星卡自助伴</title>
+		<link rel="stylesheet" type="text/css" href="css/css.css">
+		<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+		<style>
+			.swiper-slide {
+				display: none;
+				/* 默认隐藏 */
+			}
+
+			.swiper-slide.active {
+				display: block;
+				/* 显示激活的 slide */
+			}
+		</style>
+	</head>
+	<body>
+		<!-- 套餐内容 -->
+		<div class="div_ul div_listUl">
+			<div class="box_title">
+				<p for="change1" class="radiostyle1 background">
+					<span>流量</span>
+					<!-- <img src="image/tabs01_left_bg.png" alt="" class="tab_1"> -->
+					<span class="bg_active"></span>
+				</p>
+
+				<p for="change2" class="radiostyle1">
+					<span>语音</span>
+					<!-- <img src="image/tabs01_center_bg.png" alt="" class="tab_1"> -->
+					<span class="bg_active"></span>
+				</p>
+
+				<p for="change3" class="radiostyle1">
+					<span>短信</span>
+					<!-- <img src="image/tabs01_right_bg.png" alt="" class="tab_1"> -->
+					<span class="bg_active"></span>
+				</p>
+			</div>
+			<div class="swiper mySwiper" style="margin-top: 0px;">
+				<div class="swiper-wrapper">
+					<!-- 流量 -->
+					<div class="swiper-slide">
+						<div style="padding:64px 16px 16px;background:linear-gradient(#ffffff,#DBE8FE);">
+							<!-- 套餐内 -->
+							<div class="package">
+								<!-- 标题 -->
+								<div class="package_title">
+									<span></span>
+									套餐内
+									<span></span>
+								</div>
+								<!-- 国内通用流量 -->
+								<div class="data_container">
+									<div class="data_title">
+										<img src="image/ic_gntyll.png" alt="" />
+										<p>国内通用流量</p>
+									</div>
+									<!-- 总流量数据 -->
+									<div style="width: 100%;">
+										<p class="surplus">本月剩余流量</p>
+										<p class="data_number">
+											<span>29</span>
+											.00GB
+										</p>
+										<div class="data_composition">
+											<img src="image/triangle_blue.png" alt="" />
+											<p>主套餐5.00GB+其他套餐24GB</p>
+										</div>
+										<div class="progress">
+											<p></p>
+										</div>
+										<div class="progress_data">
+											<div>
+												已使用： <p><span>11</span>.00GB</p>
+											</div>
+											<div>
+												本月总流量： <p><span>40</span>.00GB</p>
+											</div>
+										</div>
+									</div>
+									<!-- 展开收起 -->
+									<div class="accordion">
+										<div class="accordion-panel" id="panel2">
+											<div class="detail_title">
+												<span></span>
+												套餐内
+												<span></span>
+											</div>
+											<div class="details_container">
+												<div class="details">
+													<div class="data_title">
+														<p>星卡29元套餐国内通用流量</p>
+													</div>
+													<div class="progress">
+														<p></p>
+													</div>
+													<div class="progress_data">
+														<div>
+															已使用： <p><span>11</span>.00GB</p>
+														</div>
+														<div>
+															本月总流量： <p><span>40</span>.00GB</p>
+														</div>
+													</div>
+													<P class="deadline">失效时间:2022-07-01 12:00:00</P>
+												</div>
+												<div class="details">
+													<div class="data_title">
+														<p>星卡29元套餐国内通用流量</p>
+													</div>
+													<div class="progress">
+														<p></p>
+													</div>
+													<div class="progress_data">
+														<div>
+															已使用： <p><span>11</span>.00GB</p>
+														</div>
+														<div>
+															本月总流量： <p><span>40</span>.00GB</p>
+														</div>
+													</div>
+													<P class="deadline">失效时间:2022-07-01 12:00:00</P>
+												</div>
+												<div class="details">
+													<div class="data_title">
+														<p>星卡29元套餐国内通用流量</p>
+													</div>
+													<div class="progress">
+														<p></p>
+													</div>
+													<div class="progress_data">
+														<div>
+															已使用： <p><span>11</span>.00GB</p>
+														</div>
+														<div>
+															本月总流量： <p><span>40</span>.00GB</p>
+														</div>
+													</div>
+													<P class="deadline">失效时间:2022-07-01 12:00:00</P>
+												</div>
+											</div>
+										</div>
+										<div class="accordion-header" data-target="#panel2">
+											<span id="toggleText1">点击展开</span>
+											<img class="arrow" id="arrow1" src="image/ic_arrow_down.png" alt="Arrow">
+										</div>
+									</div>
+								</div>
+								<!-- 国内定向流量 -->
+								<div class="data_container">
+									<div class="data_title">
+										<img src="image/ic_gntyll.png" alt="" />
+										<p>国内定向流量</p>
+										<div class="realm">
+											<span>使用范围查询</span>
+											<img src="image/ic_arrow_right.png" alt="" />
+										</div>
+									</div>
+									<!-- 总流量数据 -->
+									<div style="width: 100%;">
+										<p class="surplus">本月剩余流量</p>
+										<p class="data_number">
+											<span>29</span>
+											.00GB
+										</p>
+										<div class="data_composition">
+											<img src="image/triangle_blue.png" alt="" />
+											<p>主套餐5.00GB+其他套餐24GB</p>
+										</div>
+										<div class="progress">
+											<p></p>
+										</div>
+										<div class="progress_data">
+											<div>
+												已使用： <p><span>11</span>.00GB</p>
+											</div>
+											<div>
+												本月总流量： <p><span>40</span>.00GB</p>
+											</div>
+										</div>
+									</div>
+									<!-- 展开收起 -->
+									<div class="accordion">
+										<div class="accordion-panel2" id="test">
+											<div class="detail_title">
+												<span></span>
+												套餐内
+												<span></span>
+											</div>
+											<div class="details_container">
+												<div class="details">
+													<div class="data_title">
+														<p>星卡29元套餐国内通用流量</p>
+													</div>
+													<div class="progress">
+														<p></p>
+													</div>
+													<div class="progress_data">
+														<div>
+															已使用： <p><span>11</span>.00GB</p>
+														</div>
+														<div>
+															本月总流量： <p><span>40</span>.00GB</p>
+														</div>
+													</div>
+													<P class="deadline">失效时间:2022-07-01 12:00:00</P>
+												</div>
+												<div class="details">
+													<div class="data_title">
+														<p>星卡29元套餐国内通用流量</p>
+													</div>
+													<div class="progress">
+														<p></p>
+													</div>
+													<div class="progress_data">
+														<div>
+															已使用： <p><span>11</span>.00GB</p>
+														</div>
+														<div>
+															本月总流量： <p><span>40</span>.00GB</p>
+														</div>
+													</div>
+													<P class="deadline">失效时间:2022-07-01 12:00:00</P>
+												</div>
+											</div>
+										</div>
+										<div class="accordion-header2" data-target="#test">
+											<span id="toggleText1">点击展开</span>
+											<img class="arrow" id="arrow1" src="image/ic_arrow_down.png" alt="Arrow">
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- 套餐外 -->
+							<div class="package">
+								<!-- 标题 -->
+								<div class="package_title">
+									<span></span>
+									套餐外
+									<span></span>
+								</div>
+								<!-- 超出流量 -->
+								<div class="data_container">
+									<div class="data_title">
+										<img src="image/ic_gndxll.png" alt="" />
+										<p>套餐外流量</p>
+									</div>
+									<!-- 总流量数据 -->
+									<div style="width: 100%;">
+										<p class="surplus">已超出流量</p>
+										<p class="overstep_number">
+											<span>29</span>
+											.00GB
+										</p>
+										<div class="overstep_composition">
+											<img src="image/triangle_red.png" alt="" />
+											<p>已产生套餐外流量费用50.00元</p>
+
+										</div>
+										<p class="overstep_p">
+											实时话费信息可能同步有所滞后，实际费用请以出账为准
+										</p>
+									</div>
+								</div>
+							</div>
+							<!-- 没有套餐 -->
+							<div class="no_package">
+								<img src="image/no_package.png" alt="" />
+								<p>没有订购语音业务！</p>
+							</div>
+
+						</div>
+					</div>
+
+					<!-- 语音 -->
+					<div class="swiper-slide" style="">
+						<div style="padding:64px 16px 16px;background:linear-gradient(#ffffff,#DBE8FE);">
+							<!-- 套餐内 -->
+							<div class="package">
+								<!-- 标题 -->
+								<div class="package_title">
+									<span></span>
+									套餐内
+									<span></span>
+								</div>
+								<!-- 国内通用语音 -->
+								<div class="data_container">
+									<div class="data_title">
+										<img src="image/ic_yuyin.png" alt="" />
+										<p>国内通用语音</p>
+
+									</div>
+									<!-- 总语音数据 -->
+									<div style="width: 100%;">
+										<p class="surplus">本月剩余语音</p>
+										<p class="data_number">
+											<span>29</span>分钟
+										</p>
+										<div class="data_composition">
+											<img src="image/triangle_blue.png" alt="" />
+											<p>主套餐100分钟+语音包30分钟</p>
+										</div>
+										<div class="progress">
+											<p></p>
+										</div>
+										<div class="progress_data">
+											<div>
+												已使用： <p><span>11</span>分钟</p>
+											</div>
+											<div>
+												本月总时长： <p><span>40</span>分钟</p>
+											</div>
+										</div>
+									</div>
+									<!-- 展开收起 -->
+									<div class="accordion">
+										<div class="accordion-panel4" id="voice_common">
+											<div class="detail_title">
+												<span></span>
+												套餐内
+												<span></span>
+											</div>
+											<div class="details_container">
+												<div class="details">
+													<div class="data_title">
+														<p>星卡29元套餐国内通用语音</p>
+
+													</div>
+													<div class="progress">
+														<p></p>
+													</div>
+													<div class="progress_data">
+														<div>
+															已使用： <p><span>11</span>分钟</p>
+														</div>
+														<div>
+															本月时长： <p><span>40</span>分钟</p>
+														</div>
+													</div>
+													<P class="deadline">失效时间:2022-07-01 12:00:00</P>
+												</div>
+												<div class="details">
+													<div class="data_title">
+														<p>星卡29元套餐国内通用语音</p>
+
+													</div>
+													<div class="progress">
+														<p></p>
+													</div>
+													<div class="progress_data">
+														<div>
+															已使用： <p><span>11</span>分钟</p>
+														</div>
+														<div>
+															本月总时长： <p><span>40</span>分钟</p>
+														</div>
+													</div>
+													<P class="deadline">失效时间:2022-07-01 12:00:00</P>
+												</div>
+											</div>
+										</div>
+										<div class="accordion-header4" data-target="#voice_common">
+											<span id="toggleText1">点击展开</span>
+											<img class="arrow" id="arrow1" src="image/ic_arrow_down.png" alt="Arrow">
+										</div>
+									</div>
+								</div>
+								<!-- 国内专用语音 -->
+								<div class="data_container">
+									<div class="data_title">
+										<img src="image/ic_yuyin.png" alt="" />
+										<p>国内专用语音</p>
+
+
+									</div>
+									<!-- 总语音数据 -->
+									<div style="width: 100%;">
+										<p class="surplus">本月剩余语音</p>
+										<p class="data_number">
+											<span>29</span>分钟
+										</p>
+										<div class="data_composition">
+											<img src="image/triangle_blue.png" alt="" />
+											<p>国内亲情互打包25.00G</p>
+										</div>
+										<div class="progress">
+											<p></p>
+										</div>
+										<div class="progress_data">
+											<div>
+												已使用： <p><span>11</span>分钟</p>
+											</div>
+											<div>
+												本月总时长： <p><span>40</span>分钟</p>
+											</div>
+										</div>
+									</div>
+									<!-- 展开收起 -->
+									<div class="accordion">
+										<div class="accordion-panel3" id="voice">
+											<div class="detail_title">
+												<span></span>
+												套餐内
+												<span></span>
+											</div>
+											<div class="details_container">
+												<div class="details">
+													<div class="data_title">
+														<p>星卡29元套餐国内通用流量</p>
+
+													</div>
+													<div class="progress">
+														<p></p>
+													</div>
+													<div class="progress_data">
+														<div>
+															已使用： <p><span>11</span>分钟</p>
+														</div>
+														<div>
+															本月总时长： <p><span>40</span>分钟</p>
+														</div>
+													</div>
+													<P class="deadline">失效时间:2022-07-01 12:00:00</P>
+												</div>
+												<div class="details">
+													<div class="data_title">
+														<p>星卡29元套餐国内通用流量</p>
+
+													</div>
+													<div class="progress">
+														<p></p>
+													</div>
+													<div class="progress_data">
+														<div>
+															已使用： <p><span>11</span>分钟</p>
+														</div>
+														<div>
+															本月总时长： <p><span>40</span>分钟</p>
+														</div>
+													</div>
+													<P class="deadline">失效时间:2022-07-01 12:00:00</P>
+												</div>
+											</div>
+										</div>
+										<div class="accordion-header3" data-target="#voice">
+											<span id="toggleText1">点击展开</span>
+											<img class="arrow" id="arrow1" src="image/ic_arrow_down.png" alt="Arrow">
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- 套餐外 -->
+							<div class="package">
+								<!-- 标题 -->
+								<div class="package_title">
+									<span></span>
+									套餐外
+									<span></span>
+								</div>
+								<!-- 超出语音 -->
+								<div class="data_container">
+									<div class="data_title">
+										<img src="image/ic_yuyin.png" alt="" />
+										<p>套餐外语音</p>
+									</div>
+									<!-- 总流量数据 -->
+									<div style="width: 100%;">
+										<p class="surplus">已超出语音</p>
+										<p class="overstep_number">
+											<span>29</span>分钟
+										</p>
+										<div class="overstep_composition">
+											<img src="image/triangle_red.png" alt="" />
+											<p>已产生套餐外语音费用50.00元</p>
+
+										</div>
+										<p class="overstep_p">
+											实时话费信息可能同步有所滞后，实际费用请以出账为准
+										</p>
+									</div>
+								</div>
+							</div>
+							<!-- 没有套餐 -->
+							<div class="no_package">
+								<img src="image/no_package.png" alt="" />
+								<p>没有订购语音业务！</p>
+							</div>
+						</div>
+					</div>
+					<!-- 短信 -->
+					<div class="swiper-slide" style="">
+						<div style="padding: 64px 16px 16px;background:linear-gradient(#ffffff,#DBE8FE);">
+							<!-- 套餐内 -->
+							<div class="package">
+								<!-- 标题 -->
+								<div class="package_title">
+									<span></span>
+									套餐内
+									<span></span>
+								</div>
+								<!-- 国内通用短信 -->
+								<div class="data_container">
+									<div class="data_title">
+										<img src="image/ic_duanxin.png" alt="" />
+										<p>国内通用短信</p>
+									</div>
+									<!-- 总语音数据 -->
+									<div style="width: 100%;">
+										<p class="surplus">本月剩余短信</p>
+										<p class="data_number">
+											<span>29</span>条
+										</p>
+										<div class="data_composition">
+											<img src="image/triangle_blue.png" alt="" />
+											<p>短信套餐内容</p>
+										</div>
+										<div class="progress">
+											<p></p>
+										</div>
+										<div class="progress_data">
+											<div>
+												已使用： <p><span>11</span>条</p>
+											</div>
+											<div>
+												本月总短信： <p><span>40</span>条</p>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<!-- 套餐外 -->
+							<div class="package">
+								<!-- 标题 -->
+								<div class="package_title">
+									<span></span>
+									套餐外
+									<span></span>
+								</div>
+								<!-- 超出短信 -->
+								<div class="data_container">
+									<div class="data_title">
+										<img src="image/ic_duanxin.png" alt="" />
+										<p>套餐外短信</p>
+									</div>
+									<!-- 总流量数据 -->
+									<div style="width: 100%;">
+										<p class="surplus">已超出短信</p>
+										<p class="overstep_number">
+											<span>29</span>条
+										</p>
+										<div class="overstep_composition">
+											<img src="image/triangle_red.png" alt="" />
+											<p>已产生套餐外短信费用50.00元</p>
+
+										</div>
+										<p class="overstep_p">
+											实时话费信息可能同步有所滞后，实际费用请以出账为准
+										</p>
+									</div>
+								</div>
+							</div>
+							<!-- 没有套餐 -->
+							<div class="no_package">
+								<img src="image/no_package.png" alt="" />
+								<p>没有订购短信业务！</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+		<script>
+			$(document).ready(function() {
+				// 初始化第一个 swiper-slide 为活动状态
+				$('.swiper-slide').first().addClass('active');
+
+				// 点击 .div_listUl .box_title p 时切换内容
+				$(document).on('click', '.div_listUl .box_title p', function() {
+					var index = $(this).index(); // 获取当前点击的索引
+					var $slides = $('.swiper-slide'); // 获取所有 swiper-slide 元素
+
+					// 移除所有 swiper-slide 的 active 类
+					$slides.removeClass('active');
+
+					// 添加 active 类到对应的内容
+					$slides.eq(index).addClass('active');
+
+					// 滚动到顶部
+					$('html, body').animate({
+						scrollTop: 0
+					}, 400);
+
+					// 更新标题样式
+					$(this).addClass('background').siblings().removeClass('background');
+					
+				});
+				// 通用的展开收起功能
+				function setupAccordion(headerSelector, panelClass) {
+					$(headerSelector).click(function() {
+						var target = $(this).data('target');
+						var panel = $(target);
+						var arrow = $(this).find('.arrow');
+						var toggleText = $(this).find('span');
+
+						if (panel.is(':visible')) {
+							panel.slideUp();
+							toggleText.text('点击展开');
+							arrow.attr('src', 'image/ic_arrow_down.png'); // 切换为下箭头图片
+						} else {
+							panel.slideDown();
+							panel.css('display', 'flex'); // 确保面板显示时使用 flex 布局
+							toggleText.text('点击收起');
+							arrow.attr('src', 'image/ic_arrow_up.png'); // 切换为上箭头图片
+						}
+						
+					});
+				}
+
+				// 初始化各个部分的展开收起功能
+				setupAccordion('.accordion-header', '.accordion-panel');
+				setupAccordion('.accordion-header2', '.accordion-panel2');
+				setupAccordion('.accordion-header3', '.accordion-panel3');
+				setupAccordion('.accordion-header4', '.accordion-panel4');
+			});
+		</script>
+	</body>
+	</body>
+</html>
