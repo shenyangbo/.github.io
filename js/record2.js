@@ -1,5 +1,5 @@
 $(document).ready(function() {
-$('.num_container').hide();
+//////$('.num_container').hide();
 	// =============== 全局变量 ===============
 	var bt_recoding = document.getElementById("bt_recoding");
 	var blackBoxSpeak = document.querySelector(".blackBoxSpeak");
@@ -8,7 +8,7 @@ $('.num_container').hide();
 
 	// 重构核心：使用 MediaRecorder 相关的变量
 	let mediaRecorder = null;
-	let audioChunks = []; 
+	let audioChunks = []; 
 	let currentStream = null;
 	let isRecording = false;
 	let posStart = 0;
@@ -277,4 +277,4 @@ $('.num_container').hide();
 		blackBoxSpeak.style.display = "none";
 		blackBoxPause.style.display = "none";
 	}
-});
+});上面的问题是HTTPS的问题，不用解决了，但是有个新问题，就是用了几次后，会有前面几个字没有录到的情况
