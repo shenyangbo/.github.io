@@ -525,4 +525,4 @@ $(document).ready(function() {
 			base64Output.innerText = '';
 		}
 	}
-})语音转写，为什么我在 Safari 上面测试没有问题，但是上线到微信小程序使用 ,如果中途切换到其他app再切换回来就会录音出现问题，转写错误。是 scriptProcessorNode残留的脏数据吗，需要换成换成 MediaRecorder吗
+})
