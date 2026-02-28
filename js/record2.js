@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    $('.num_container').hide();
+    // $('.num_container').hide();
     // =============== 1. 全局变量 ===============
     const bt_recoding = document.getElementById("bt_recoding");
     const blackBoxSpeak = document.querySelector(".blackBoxSpeak");
@@ -60,57 +60,81 @@ $(document).ready(function() {
         }
     }
 
-    async function startRecording() {
-        if (isRecording || !permissionGranted) return;
-        
-        // 【核心修复1】：每次录音前彻底清空旧的实例数据
-        audioChunks = []; 
-        if (mediaRecorder) {
-            mediaRecorder = null; 
+   // 在全局变量中记录当前的音频上下文（如果需要）
+let audioCtx = null;
+
+async function startRecording() {
+    if (isRecording || !permissionGranted) return;
+
+    // --- 【新增：核心修复方案】 ---
+    // 1. 停止所有正在播放的 audio 标签，释放硬件占用
+    const allAudios = document.querySelectorAll('audio');
+    allAudios.forEach(audio => {
+        audio.pause();
+        audio.src = ''; // 彻底断开连接
+        audio.load();
+    });
+
+    // 2. 尝试激活/恢复 AudioContext (iOS 26 唤醒硬件的关键)
+    try {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
-
-        try {
-            // 【核心修复2】：检查流的可用性，如果被系统杀掉则重新获取
-            if (!currentStream || !currentStream.active || currentStream.getAudioTracks().some(t => t.readyState === 'ended')) {
-                console.log("重新获取音频流...");
-                currentStream = await navigator.mediaDevices.getUserMedia({
-                    audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false }
-                });
-            }
-
-            const mimeType = getBestMimeType();
-            const options = mimeType ? { mimeType } : {};
-            
-            // 【核心修复3】：创建全新的 MediaRecorder 实例
-            mediaRecorder = new MediaRecorder(currentStream, options);
-
-            mediaRecorder.ondataavailable = (e) => {
-                if (e.data.size > 0) audioChunks.push(e.data);
-            };
-
-            mediaRecorder.onstop = () => {
-                const finalMime = mediaRecorder ? (mediaRecorder.mimeType || mimeType) : 'audio/mp4';
-                const audioBlob = new Blob(audioChunks, { type: finalMime });
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    if (reader.result) {
-                        const base64 = reader.result.split(',')[1];
-                        updateBase64Output(base64, finalMime);
-                    }
-                };
-                reader.readAsDataURL(audioBlob);
-            };
-
-            mediaRecorder.start();
-            isRecording = true;
-            console.log("录音已启动");
-        } catch (err) {
-            console.error("启动失败详情:", err);
-            // 如果报错，尝试重置流状态
-            currentStream = null; 
-            showToast("录音启动失败，请重试");
+        if (audioCtx.state === 'suspended') {
+            await audioCtx.resume();
         }
+    } catch (e) {
+        console.warn("AudioContext 唤醒失败，尝试继续录音...");
     }
+    // --- 【修复结束】 ---
+
+    audioChunks = []; 
+    if (mediaRecorder) mediaRecorder = null; 
+
+    try {
+        // 确保流活跃，如果之前播放过声音，这里必须重新捕获最新的流
+        if (!currentStream || !currentStream.active) {
+            currentStream = await navigator.mediaDevices.getUserMedia({
+                audio: { 
+                    echoCancellation: true, // 开启回声消除有助于解决播放后的冲突
+                    noiseSuppression: true,
+                    autoGainControl: true 
+                }
+            });
+        }
+
+        const mimeType = getBestMimeType();
+        const options = mimeType ? { mimeType } : {};
+        
+        mediaRecorder = new MediaRecorder(currentStream, options);
+
+        mediaRecorder.ondataavailable = (e) => {
+            if (e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+            const finalMime = mediaRecorder ? (mediaRecorder.mimeType || mimeType) : 'audio/mp4';
+            const audioBlob = new Blob(audioChunks, { type: finalMime });
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                if (reader.result) {
+                    const base64 = reader.result.split(',')[1];
+                    updateBase64Output(base64, finalMime);
+                }
+            };
+            reader.readAsDataURL(audioBlob);
+        };
+
+        mediaRecorder.start();
+        isRecording = true;
+        console.log("录音已启动");
+    } catch (err) {
+        console.error("播放后启动失败:", err);
+        // 如果是因为播放导致的冲突，尝试彻底重置流再试一次
+        currentStream = null;
+        showToast("音频通道冲突，请重试");
+    }
+}
 
     function stopRecording() {
         if (!isRecording || !mediaRecorder) return;
