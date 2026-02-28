@@ -1,280 +1,216 @@
 $(document).ready(function() {
+	$('.number').css('color','#000000');
+    // =============== 全局变量 ===============
+    const bt_recoding = document.getElementById("bt_recoding");
+    const blackBoxSpeak = document.querySelector(".blackBoxSpeak");
+    const blackBoxPause = document.querySelector(".blackBoxPause");
+    const toast = document.getElementById("toast");
 
-	// =============== 全局变量 ===============
-	var bt_recoding = document.getElementById("bt_recoding");
-	var blackBoxSpeak = document.querySelector(".blackBoxSpeak");
-	var blackBoxPause = document.querySelector(".blackBoxPause");
-	const toast = document.getElementById("toast");
+    let mediaRecorder = null;
+    let audioChunks = []; 
+    let currentStream = null;
+    let isRecording = false;
+    let isCancelled = false; // 新增：用于标记是否是“取消发送”操作
+    let posStart = 0;
+    let permissionGranted = false;
 
-	// 重构核心：使用 MediaRecorder 相关的变量
-	let mediaRecorder = null;
-	let audioChunks = []; 
-	let currentStream = null;
-	let isRecording = false;
-	let posStart = 0;
-	let isFirstTime = true;
-	let permissionGranted = false;
-	let hasPermissionBeenDenied = false;
-	let isPreInitialized = false;
+    // =============== 工具函数 ===============
+    function showToast(message) {
+        toast.innerText = message;
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 1500);
+    }
 
-	// =============== 核心修复：重置状态（MediaRecorder 版） ==========
-	function resetRecordingState() {
-		isRecording = false;
-		audioChunks = [];
+    function initStatus() {
+        bt_recoding.value = '按住说话';
+        showBlackBoxNone();
+        $(bt_recoding).css({'color': '#333333', 'background': 'white'});
+    }
 
-		if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-			try {
-				mediaRecorder.stop();
-			} catch (e) {}
-		}
-		
-		if (currentStream) {
-			try {
-				currentStream.getTracks().forEach(track => track.stop());
-			} catch (e) {}
-			currentStream = null;
-		}
-		console.log("录音状态已重置");
-	}
+    function showBlackBoxNone() {
+        blackBoxSpeak.style.display = "none";
+        blackBoxPause.style.display = "none";
+    }
 
-	// =============== 核心修复：页面切后台处理 ==========
-	document.addEventListener('visibilitychange', function() {
-		if (document.hidden) {
-			// 切后台时停止当前录音，MediaRecorder 会更稳定地释放资源
-			if (isRecording) {
-				stopRecording();
-			}
-			resetAllRecordingState();
-			initStatus();
-			showBlackBoxNone();
-			showToast("录音已暂停（切换应用）");
-		}
-	});
+    // =============== 录音核心重构 ===============
 
-	function resetAllRecordingState() {
-		resetRecordingState();
-		isPreInitialized = false;
-	}
+    async function startRecording() {
+        if (isRecording) return;
+        isCancelled = false; // 重置取消标志
+        audioChunks = [];    // 清空旧数据
 
-	// =============== 工具函数 ===============
-	function showToast(message) {
-		toast.innerText = message;
-		toast.style.display = 'block';
-		setTimeout(() => {
-			toast.style.display = 'none';
-		}, 1000);
-	}
+        try {
+            // 1. 获取流（iOS 必须在 touchstart 同步逻辑中调用）
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: {
+                    echoCancellation: true,
+                    noiseSuppression: true,
+                    autoGainControl: true
+                }
+            });
 
-	function initStatus() {
-		bt_recoding.value = '按住说话';
-		showBlackBoxNone();
-	}
+            currentStream = stream;
 
-	function showBlackBoxNone() {
-		blackBoxSpeak.style.display = "none";
-		blackBoxPause.style.display = "none";
-	}
+            // 2. 自动适配 MIME 类型 (iOS 不支持 webm)
+            const types = ['audio/webm', 'audio/mp4', 'audio/ogg', 'audio/wav'];
+            const mimeType = types.find(type => MediaRecorder.isTypeSupported(type)) || '';
 
-	function updateBase64Output(base64, mimeType) {
-		const base64Output = document.getElementById('base64Output');
-		if (base64Output) {
-			base64Output.innerHTML = `<pre>${base64}</pre>`;
-		}
+            mediaRecorder = new MediaRecorder(stream, { mimeType });
 
-		const audioContainer = document.getElementById('audioContainer');
-		if (audioContainer) {
-			const audioElement = document.createElement('audio');
-			audioElement.controls = true;
-			// 注意：MediaRecorder 的 MIME 类型可能是 audio/webm 或 audio/mp4(iOS)
-			audioElement.src = `data:${mimeType};base64,${base64}`;
-			audioContainer.innerHTML = '';
-			audioContainer.appendChild(audioElement);
-		}
-		console.log("音频 Base64 已生成");
-	}
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunks.push(event.data);
+                }
+            };
 
-	// =============== 核心重构：开始录音（MediaRecorder） ==========
-	async function startRecording() {
-		if (isRecording) return;
+            mediaRecorder.onstop = () => {
+                // 如果标记为取消，则不进行 Base64 处理
+                if (isCancelled) {
+                    console.log("录音已取消，停止处理数据");
+                    return;
+                }
+                
+                const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
+                if (blob.size > 0) {
+                    processAudioBlob(blob);
+                }
+            };
 
-		resetRecordingState();
+            mediaRecorder.start();
+            isRecording = true;
+            console.log("录音已开始, 格式:", mimeType);
 
-		if (!permissionGranted) {
-			if (!hasPermissionBeenDenied) {
-				showToast("请先点击获取麦克风权限");
-			} else {
-				showToast("麦克风权限已被拒绝，请刷新页面。");
-			}
-			initStatus();
-			showBlackBoxNone();
-			return;
-		}
+        } catch (err) {
+            console.error('录音启动失败:', err);
+            if (err.name === 'NotAllowedError') {
+                showToast("麦克风权限被拒绝");
+            } else {
+                showToast("无法启动录音");
+            }
+            resetRecordingState();
+        }
+    }
 
-		try {
-			console.log("开始录音（MediaRecorder）...");
+    function stopRecording(isCancelAction = false) {
+        isCancelled = isCancelAction; 
+        isRecording = false;
 
-			const stream = await navigator.mediaDevices.getUserMedia({
-				audio: {
-					echoCancellation: true,
-					noiseSuppression: true,
-					autoGainControl: true
-				}
-			});
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+        }
 
-			currentStream = stream;
-			
-			// 自动检测浏览器支持的格式 (iOS Safari 通常支持 audio/mp4)
-			const mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : 'audio/mp4';
-			
-			mediaRecorder = new MediaRecorder(stream);
-			audioChunks = [];
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+            currentStream = null;
+        }
+    }
 
-			mediaRecorder.ondataavailable = (event) => {
-				if (event.data.size > 0) {
-					audioChunks.push(event.data);
-				}
-			};
+    function resetRecordingState() {
+        isRecording = false;
+        isCancelled = false;
+        audioChunks = [];
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+        }
+    }
 
-			mediaRecorder.onstop = () => {
-				const audioBlob = new Blob(audioChunks, { type: mimeType });
-				processAudioBlob(audioBlob);
-			};
+    function processAudioBlob(blob) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64String = reader.result.split(',')[1];
+            updateBase64Output(base64String, blob.type);
+        };
+        reader.readAsDataURL(blob);
+    }
 
-			// 开启采集
-			mediaRecorder.start();
-			isRecording = true;
-			isFirstTime = false;
-			console.log("MediaRecorder 启动成功");
+    function updateBase64Output(base64, mimeType) {
+        console.log("生成 Base64 完成");
+        // 这里放入你原本处理成功的逻辑，如显示预览、上传等
+        const audioContainer = document.getElementById('audioContainer');
+        if (audioContainer) {
+            const audioElement = document.createElement('audio');
+            audioElement.controls = true;
+            audioElement.src = `data:${mimeType};base64,${base64}`;
+            audioContainer.innerHTML = '';
+            audioContainer.appendChild(audioElement);
+        }
+    }
 
-		} catch (err) {
-			console.error('录音启动失败:', err);
-			resetRecordingState();
-			alert(`录音失败: ${err.name}`);
-			initStatus();
-			showBlackBoxNone();
-		}
-	}
+    // =============== 事件绑定 ===============
 
-	function stopRecording() {
-		if (!isRecording || !mediaRecorder) return;
-		isRecording = false;
+    function initEvent() {
+        // 1. 触摸开始
+        bt_recoding.addEventListener("touchstart", async function(event) {
+            event.preventDefault();
+            posStart = event.touches[0].pageY;
+            
+            showBlackBoxSpeak();
+            if (navigator.vibrate) navigator.vibrate(50);
+            
+            await startRecording();
+        });
 
-		try {
-			mediaRecorder.stop(); // 触发 onstop 回调进行数据处理
-		} catch (e) {
-			console.error("停止录音异常:", e);
-		}
+        // 2. 触摸移动（判断是否上划取消）
+        bt_recoding.addEventListener("touchmove", function(event) {
+            event.preventDefault();
+            const posMove = event.targetTouches[0].pageY;
+            if (posStart - posMove < 50) {
+                showBlackBoxSpeak();
+            } else {
+                showBlackBoxPause();
+            }
+        });
 
-		if (currentStream) {
-			currentStream.getTracks().forEach(track => track.stop());
-		}
-	}
+        // 3. 触摸结束
+        bt_recoding.addEventListener("touchend", function(event) {
+            event.preventDefault();
+            const posEnd = event.changedTouches[0].pageY;
+            
+            // 判断是否满足取消条件
+            if (posStart - posEnd >= 50) {
+                stopRecording(true); // 传入 true，标记为取消
+                showToast("取消发送");
+            } else {
+                stopRecording(false);
+                console.log("正常发送");
+            }
+            
+            initStatus();
+        });
 
-	// 处理录音生成的 Blob
-	function processAudioBlob(blob) {
-		if (blob.size === 0) return;
+        // 鼠标兼容逻辑
+        bt_recoding.addEventListener("mousedown", startRecording);
+        bt_recoding.addEventListener("mouseup", () => {
+            stopRecording(false);
+            initStatus();
+        });
+    }
 
-		const reader = new FileReader();
-		reader.onloadend = () => {
-			const base64String = reader.result.split(',')[1];
-			updateBase64Output(base64String, blob.type);
-		};
-		reader.readAsDataURL(blob);
-	}
+    // 处理页面切后台
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden && isRecording) {
+            stopRecording(true);
+            initStatus();
+            showToast("录音已中断");
+        }
+    });
 
-	// =============== 权限与初始化（保持原有逻辑） ==========
-	async function requestMicrophonePermission() {
-		try {
-			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-			stream.getTracks().forEach(track => track.stop());
-			permissionGranted = true;
-			hasPermissionBeenDenied = false;
-			showToast("麦克风权限已获取");
-			isFirstTime = false;
-		} catch (err) {
-			permissionGranted = false;
-			if (err.name === 'NotAllowedError') {
-				hasPermissionBeenDenied = true;
-				alert('权限被拒绝，请刷新重试');
-			}
-		}
-	}
+    // 辅助 UI 函数
+    function showBlackBoxSpeak() {
+        bt_recoding.value = '松开 结束';
+        blackBoxSpeak.style.display = "block";
+        blackBoxPause.style.display = "none";
+        $(bt_recoding).css({'background': '#3473F4', 'color': '#ffffff'});
+    }
 
-	$('.input_voice_switch').click(function() {
-		requestMicrophonePermission();
-	});
+    function showBlackBoxPause() {
+        bt_recoding.value = '松开手指，取消发送';
+        blackBoxSpeak.style.display = "none";
+        blackBoxPause.style.display = "block";
+        $(bt_recoding).css('background', '#f44336');
+    }
 
-	function initEvent() {
-		// touchstart / mousedown 等事件保持不变，内部调用重构后的 startRecording
-		bt_recoding.addEventListener("touchstart", async function(event) {
-			event.preventDefault();
-			posStart = event.touches[0].pageY;
-			showBlackBoxSpeak();
-			if (navigator.vibrate) navigator.vibrate(100);
-			if (hasPermissionBeenDenied) return;
-			await startRecording();
-		});
-
-		bt_recoding.addEventListener("touchmove", function(event) {
-			event.preventDefault();
-			const posMove = event.targetTouches[0].pageY;
-			if (posStart - posMove < 40) showBlackBoxSpeak();
-			else showBlackBoxPause();
-		});
-
-		bt_recoding.addEventListener("touchend", function(event) {
-			event.preventDefault();
-			const posEnd = event.changedTouches[0].pageY;
-			stopRecording();
-			initStatus();
-			if (posStart - posEnd >= 40) {
-				showToast("取消发送");
-				resetRecordingState();
-				showBlackBoxNone();
-			} else {
-				showBlackBoxNone();
-			}
-			$('#bt_recoding').css({'color': '#333333', 'background': 'white'});
-		});
-
-		// 鼠标事件兼容
-		bt_recoding.addEventListener("mousedown", async function(event) {
-			event.preventDefault();
-			showBlackBoxSpeak();
-			await startRecording();
-		});
-
-		bt_recoding.addEventListener("mouseup", function(event) {
-			event.preventDefault();
-			stopRecording();
-			initStatus();
-			showBlackBoxNone();
-			$('#bt_recoding').css({'color': '#333333', 'background': 'white'});
-		});
-	}
-
-	window.addEventListener('load', function() {
-		initEvent();
-		console.log("MediaRecorder 录音组件加载完成");
-	});
-
-	// UI 辅助函数保持不变
-	var showBlackBoxSpeak = function() {
-		bt_recoding.value = '松开结束';
-		blackBoxSpeak.style.display = "block";
-		blackBoxPause.style.display = "none";
-		$('#bt_recoding').css({'background': '#3473F4', 'color': '#ffffff'});
-	}
-
-	var showBlackBoxPause = function() {
-		bt_recoding.value = '松开手指，取消发送';
-		blackBoxSpeak.style.display = "none";
-		blackBoxPause.style.display = "block";
-		$('#bt_recoding').css('background', 'red');
-	}
-
-	var showBlackBoxNone = function() {
-		blackBoxSpeak.style.display = "none";
-		blackBoxPause.style.display = "none";
-	}
+    // 页面加载完成初始化
+    initEvent();
+    console.log("MediaRecorder 组件初始化成功");
 });
