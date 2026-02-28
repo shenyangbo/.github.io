@@ -1,5 +1,5 @@
 $(document).ready(function() {
-   $('.num_container').hide();
+  // $('.num_container').hide();
 	$('.number').css('color','#000000');
 
 	// =============== 全局变量 ===============
