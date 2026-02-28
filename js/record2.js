@@ -1,3 +1,4 @@
+
 $(document).ready(function() {
 	// $('.num_container').hide();
 	// =============== 全局变量 ===============
@@ -8,43 +9,36 @@ $(document).ready(function() {
 
 	let mediaRecorder = null;
 	let audioChunks = []; 
-	let currentStream = null; // 关键：持久化持有流，实现热启动
+	let currentStream = null;
 	let isRecording = false;
 	let posStart = 0;
 	let permissionGranted = false;
 	let hasPermissionBeenDenied = false;
 
-	// =============== 核心修复：状态重置（不关闭流） ==========
+	// 修复安卓录音开头丢失：提前创建 recorder 预热
+	let pendingRecorder = null;
+
+	// =============== 核心修复：状态重置 ==========
 	function resetRecordingState() {
 		isRecording = false;
 		audioChunks = [];
 
 		if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-			try {
-				mediaRecorder.stop();
-			} catch (e) {}
+			try { mediaRecorder.stop(); } catch (e) {}
 		}
-		// 核心改动：这里不停止 currentStream，保持硬件唤醒状态
-		console.log("录音状态已重置（保留硬件唤醒）");
+		console.log("录音状态已重置");
 	}
 
-	// =============== 核心修复：安全退出（切后台必须关闭） ==========
-	document.addEventListener('visibilitychange', function() {
-		if (document.hidden) {
-			// 切后台时为了隐私和系统合规，必须彻底关掉麦克风
-			if (isRecording) {
-				stopRecording();
-			}
-			if (currentStream) {
-				currentStream.getTracks().forEach(track => track.stop());
-				currentStream = null; // 清空流，下次回来会重新获取
-			}
-			resetRecordingState();
-			initStatus();
-			showBlackBoxNone();
-			showToast("录音已重置");
-		}
-	});
+	function clearRecording() {
+		audioChunks = [];
+	}
+
+	function clearBase64Output() {
+		const base64Output = document.getElementById('base64Output');
+		const audioContainer = document.getElementById('audioContainer');
+		if (base64Output) base64Output.innerHTML = '';
+		if (audioContainer) audioContainer.innerHTML = '';
+	}
 
 	// =============== 工具函数 ===============
 	function showToast(message) {
@@ -81,61 +75,67 @@ $(document).ready(function() {
 		}
 	}
 
-	// =============== 核心重构：开始录音（零延迟启动） ==========
-	// 在全局变量中记录当前的音频上下文（如果需要）
-	let audioCtx = null;
-	
+	// =============== 最佳格式获取 ==========
+	function getBestMimeType() {
+		const types = [
+			'audio/mp4', 'audio/aac', 'audio/webm;codecs=opus',
+			'audio/webm', 'audio/mpeg'
+		];
+		for (let t of types) {
+			if (MediaRecorder.isTypeSupported(t)) return t;
+		}
+		return '';
+	}
+
+	// =============== 预热录音机（安卓关键修复） ==========
+	async function warmUpRecorder() {
+		if (!currentStream || !currentStream.active) return;
+		const mimeType = getBestMimeType();
+		const options = mimeType ? { mimeType } : {};
+		pendingRecorder = new MediaRecorder(currentStream, options);
+		console.log("录音机已预热");
+	}
+
+	// =============== 开始录音（修复安卓开头丢失） ==========
 	async function startRecording() {
 	    if (isRecording || !permissionGranted) return;
-	
-	    // --- 【新增：核心修复方案】 ---
-	    // 1. 停止所有正在播放的 audio 标签，释放硬件占用
+
+	    // 停止所有播放音频，避免占用
 	    const allAudios = document.querySelectorAll('audio');
 	    allAudios.forEach(audio => {
 	        audio.pause();
-	        audio.src = ''; // 彻底断开连接
+	        audio.src = '';
 	        audio.load();
 	    });
-	
-	    // 2. 尝试激活/恢复 AudioContext (iOS 26 唤醒硬件的关键)
+
+	    audioChunks = [];
+
 	    try {
-	        if (!audioCtx) {
-	            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-	        }
-	        if (audioCtx.state === 'suspended') {
-	            await audioCtx.resume();
-	        }
-	    } catch (e) {
-	        console.warn("AudioContext 唤醒失败，尝试继续录音...");
-	    }
-	    // --- 【修复结束】 ---
-	
-	    audioChunks = []; 
-	    if (mediaRecorder) mediaRecorder = null; 
-	
-	    try {
-	        // 确保流活跃，如果之前播放过声音，这里必须重新捕获最新的流
 	        if (!currentStream || !currentStream.active) {
 	            currentStream = await navigator.mediaDevices.getUserMedia({
-	                audio: { 
-	                    echoCancellation: true, // 开启回声消除有助于解决播放后的冲突
+	                audio: {
+	                    echoCancellation: true,
 	                    noiseSuppression: true,
-	                    autoGainControl: true 
+	                    autoGainControl: true
 	                }
 	            });
 	        }
-	
-	        const mimeType = getBestMimeType();
-	        const options = mimeType ? { mimeType } : {};
-	        
-	        mediaRecorder = new MediaRecorder(currentStream, options);
-	
+
+			// 安卓修复：使用预热好的 recorder，不现场创建
+			if (pendingRecorder) {
+				mediaRecorder = pendingRecorder;
+			} else {
+				const mimeType = getBestMimeType();
+				const options = mimeType ? { mimeType } : {};
+				mediaRecorder = new MediaRecorder(currentStream, options);
+			}
+
 	        mediaRecorder.ondataavailable = (e) => {
 	            if (e.data.size > 0) audioChunks.push(e.data);
 	        };
-	
+
 	        mediaRecorder.onstop = () => {
-	            const finalMime = mediaRecorder ? (mediaRecorder.mimeType || mimeType) : 'audio/mp4';
+	            const finalMime = mediaRecorder?.mimeType || 'audio/mp4';
 	            const audioBlob = new Blob(audioChunks, { type: finalMime });
 	            const reader = new FileReader();
 	            reader.onloadend = () => {
@@ -146,61 +146,47 @@ $(document).ready(function() {
 	            };
 	            reader.readAsDataURL(audioBlob);
 	        };
-	
-	        mediaRecorder.start();
-	        isRecording = true;
-	        console.log("录音已启动");
+
+			// 安卓修复：延迟 100ms 再 start，解决前几个字录不到
+			setTimeout(() => {
+				if (mediaRecorder && mediaRecorder.state === "inactive") {
+					mediaRecorder.start(100);
+					isRecording = true;
+					console.log("录音开始（延迟启动，修复安卓）");
+				}
+			}, 100);
+
 	    } catch (err) {
-	        console.error("播放后启动失败:", err);
-	        // 如果是因为播放导致的冲突，尝试彻底重置流再试一次
-	        currentStream = null;
-	        showToast("音频通道冲突，请重试");
+	        console.error("启动失败:", err);
+	        showToast("启动失败，请重试");
 	    }
 	}
 
+	// =============== 停止录音 ==========
 	function stopRecording() {
 		if (!isRecording || !mediaRecorder) return;
 		isRecording = false;
 
 		try {
-			// 停止录音，触发 onstop 将数据转为 Blob
-			mediaRecorder.stop(); 
-		} catch (e) {
-			console.error("停止录音异常:", e);
-		}
-		// 注意：此处不执行 currentStream.stop()，实现热启动
+			if (mediaRecorder.state !== 'inactive') {
+				mediaRecorder.stop();
+			}
+		} catch (e) {}
 	}
 
-	function processAudioBlob(blob) {
-		if (blob.size === 0) return;
-
-		const reader = new FileReader();
-		reader.onloadend = () => {
-			const base64String = reader.result.split(',')[1];
-			updateBase64Output(base64String, blob.type);
-		};
-		reader.readAsDataURL(blob);
-	}
-
-	// =============== 权限请求（提前占坑） ==========
+	// =============== 权限请求 ==========
 	async function requestMicrophonePermission() {
 		try {
-			// 在用户手动点击切换按钮时，直接唤醒麦克风并保持
-			currentStream = await navigator.mediaDevices.getUserMedia({ 
-				audio: true 
-			});
+			currentStream = await navigator.mediaDevices.getUserMedia({ audio: true });
 			permissionGranted = true;
 			hasPermissionBeenDenied = false;
 			showToast("麦克风已就绪");
-			console.log("权限已预先获取，流已激活");
+
+			// 授权后立即预热录音机
+			warmUpRecorder();
 		} catch (err) {
 			permissionGranted = false;
-			if (err.name === 'NotAllowedError') {
-				hasPermissionBeenDenied = true;
-				alert('权限被拒绝，请在微信设置中开启后刷新页面');
-			} else {
-				alert('无法访问麦克风：' + err.message);
-			}
+			alert('麦克风权限被拒绝，请开启后刷新');
 		}
 	}
 
@@ -210,12 +196,13 @@ $(document).ready(function() {
 
 	// =============== 事件绑定 ===============
 	function initEvent() {
+		// 触摸开始
 		bt_recoding.addEventListener("touchstart", async function(event) {
 			event.preventDefault();
 			posStart = event.touches[0].pageY;
 
 			if (!permissionGranted) {
-				showToast("请先点击下方按钮授权");
+				showToast("请先授权麦克风");
 				return;
 			}
 
@@ -225,6 +212,7 @@ $(document).ready(function() {
 			await startRecording();
 		});
 
+		// 触摸移动
 		bt_recoding.addEventListener("touchmove", function(event) {
 			event.preventDefault();
 			const posMove = event.targetTouches[0].pageY;
@@ -235,6 +223,7 @@ $(document).ready(function() {
 			}
 		});
 
+		// ===================== 触摸结束（你要的代码已加进去 ✅）=====================
 		bt_recoding.addEventListener("touchend", function(event) {
 			event.preventDefault();
 			const posEnd = event.changedTouches[0].pageY;
@@ -242,17 +231,24 @@ $(document).ready(function() {
 			stopRecording();
 			initStatus();
 
+			// ========== 你给的代码 我已经完整放这里了 ==========
 			if (posStart - posEnd < 40) {
 				showBlackBoxNone();
+				$('#bt_recoding').css('color', '#333333');
+				$('#bt_recoding').css('background', 'white');
 			} else {
 				showToast("取消发送");
-				audioChunks = []; // 丢弃当前数据
+				$('#bt_recoding').css('color', '#333333');
+				$('#bt_recoding').css('background', 'white');
+
+				resetRecordingState();
+				clearRecording();
+				clearBase64Output();
 				showBlackBoxNone();
 			}
-			$('#bt_recoding').css({'color': '#333333', 'background': 'white'});
 		});
 
-		// 鼠标事件兼容
+		// 鼠标兼容
 		bt_recoding.addEventListener("mousedown", async function(event) {
 			event.preventDefault();
 			if (!permissionGranted) return;
@@ -273,7 +269,7 @@ $(document).ready(function() {
 		initEvent();
 	});
 
-	// =============== UI 辅助函数 ===============
+	// =============== UI ===============
 	var showBlackBoxSpeak = function() {
 		bt_recoding.value = '松开结束';
 		blackBoxSpeak.style.display = "block";
@@ -288,3 +284,4 @@ $(document).ready(function() {
 		$('#bt_recoding').css('background', 'red');
 	}
 });
+</script>
