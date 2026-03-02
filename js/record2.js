@@ -1,5 +1,5 @@
 $(document).ready(function() {
-	$('.number').css('color','#000000');
+	$('.number').css('color','red');
     // =============== 全局变量 ===============
     const bt_recoding = document.getElementById("bt_recoding");
     const blackBoxSpeak = document.querySelector(".blackBoxSpeak");
@@ -10,9 +10,9 @@ $(document).ready(function() {
     let audioChunks = []; 
     let currentStream = null;
     let isRecording = false;
-    let isCancelled = false; // 新增：用于标记是否是“取消发送”操作
+    let isCancelled = false;
     let posStart = 0;
-    let permissionGranted = false;
+    let permissionGranted = false; // 权限标记
 
     // =============== 工具函数 ===============
     function showToast(message) {
@@ -32,15 +32,35 @@ $(document).ready(function() {
         blackBoxPause.style.display = "none";
     }
 
-    // =============== 录音核心重构 ===============
+    // =============== 新增：提前获取麦克风权限 ===============
+    async function requestMicrophonePermission() {
+        if (permissionGranted) return; // 已授权则不再请求
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            // 授权成功后立即关闭流（不录音，仅授权）
+            stream.getTracks().forEach(track => track.stop());
+            permissionGranted = true;
+            showToast("麦克风权限已获取");
+            console.log("麦克风权限授权成功");
+        } catch (err) {
+            console.error("权限请求失败：", err);
+            if (err.name === 'NotAllowedError') {
+                showToast("麦克风权限被拒绝，请在设置中开启");
+            } else {
+                showToast("获取麦克风权限失败");
+            }
+            permissionGranted = false;
+        }
+    }
 
+    // =============== 录音核心重构 ===============
     async function startRecording() {
         if (isRecording) return;
-        isCancelled = false; // 重置取消标志
-        audioChunks = [];    // 清空旧数据
+        isCancelled = false;
+        audioChunks = [];
 
+        // 如果已经提前授权，直接跳过权限请求，更快启动
         try {
-            // 1. 获取流（iOS 必须在 touchstart 同步逻辑中调用）
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
                     echoCancellation: true,
@@ -50,8 +70,8 @@ $(document).ready(function() {
             });
 
             currentStream = stream;
+            permissionGranted = true; // 同步标记
 
-            // 2. 自动适配 MIME 类型 (iOS 不支持 webm)
             const types = ['audio/webm', 'audio/mp4', 'audio/ogg', 'audio/wav'];
             const mimeType = types.find(type => MediaRecorder.isTypeSupported(type)) || '';
 
@@ -64,7 +84,6 @@ $(document).ready(function() {
             };
 
             mediaRecorder.onstop = () => {
-                // 如果标记为取消，则不进行 Base64 处理
                 if (isCancelled) {
                     console.log("录音已取消，停止处理数据");
                     return;
@@ -125,7 +144,6 @@ $(document).ready(function() {
 
     function updateBase64Output(base64, mimeType) {
         console.log("生成 Base64 完成");
-        // 这里放入你原本处理成功的逻辑，如显示预览、上传等
         const audioContainer = document.getElementById('audioContainer');
         if (audioContainer) {
             const audioElement = document.createElement('audio');
@@ -137,8 +155,12 @@ $(document).ready(function() {
     }
 
     // =============== 事件绑定 ===============
-
     function initEvent() {
+        // 新增：点击 .input_voice_switch 提前请求权限
+        $(document).on('click', '.input_voice_switch', function() {
+            requestMicrophonePermission();
+        });
+
         // 1. 触摸开始
         bt_recoding.addEventListener("touchstart", async function(event) {
             event.preventDefault();
@@ -150,7 +172,7 @@ $(document).ready(function() {
             await startRecording();
         });
 
-        // 2. 触摸移动（判断是否上划取消）
+        // 2. 触摸移动
         bt_recoding.addEventListener("touchmove", function(event) {
             event.preventDefault();
             const posMove = event.targetTouches[0].pageY;
@@ -166,9 +188,8 @@ $(document).ready(function() {
             event.preventDefault();
             const posEnd = event.changedTouches[0].pageY;
             
-            // 判断是否满足取消条件
             if (posStart - posEnd >= 50) {
-                stopRecording(true); // 传入 true，标记为取消
+                stopRecording(true);
                 showToast("取消发送");
             } else {
                 stopRecording(false);
@@ -178,15 +199,18 @@ $(document).ready(function() {
             initStatus();
         });
 
-        // 鼠标兼容逻辑
-        bt_recoding.addEventListener("mousedown", startRecording);
+        // 鼠标兼容
+        bt_recoding.addEventListener("mousedown", async () => {
+            showBlackBoxSpeak();
+            await startRecording();
+        });
         bt_recoding.addEventListener("mouseup", () => {
             stopRecording(false);
             initStatus();
         });
     }
 
-    // 处理页面切后台
+    // 页面切后台中断录音
     document.addEventListener('visibilitychange', function() {
         if (document.hidden && isRecording) {
             stopRecording(true);
@@ -195,7 +219,7 @@ $(document).ready(function() {
         }
     });
 
-    // 辅助 UI 函数
+    // 辅助 UI
     function showBlackBoxSpeak() {
         bt_recoding.value = '松开 结束';
         blackBoxSpeak.style.display = "block";
@@ -210,7 +234,7 @@ $(document).ready(function() {
         $(bt_recoding).css('background', '#f44336');
     }
 
-    // 页面加载完成初始化
+    // 初始化
     initEvent();
     console.log("MediaRecorder 组件初始化成功");
 });
