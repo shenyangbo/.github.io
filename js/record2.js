@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    $('.number').css('color','yellow');
+    $('.number').css('color','red');
     
     // =============== 全局变量 ===============
     const bt_recoding = document.getElementById("bt_recoding");
@@ -10,7 +10,7 @@ $(document).ready(function() {
     let mediaRecorder = null;
     let audioChunks = []; 
     let currentStream = null;
-    let audioCtx = null; // 用于代码层面优化硬件唤醒
+    let audioCtx = null; 
     let isRecording = false;
     let isCancelled = false;
     let posStart = 0;
@@ -34,55 +34,49 @@ $(document).ready(function() {
         blackBoxPause.style.display = "none";
     }
 
-    async function requestMicrophonePermission() {
-        if (permissionGranted) return;
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            stream.getTracks().forEach(track => track.stop());
-            permissionGranted = true;
-            showToast("麦克风权限已获取");
-        } catch (err) {
-            console.error("权限请求失败：", err);
-            permissionGranted = false;
-        }
-    }
-
-    // =============== 录音核心重构 (代码层面优化) ===============
+    // =============== 录音核心逻辑 ===============
     async function startRecording() {
         if (isRecording) return;
         isCancelled = false;
         audioChunks = [];
 
         try {
-            // 1. 获取基础流
+            // 1. 获取流 - 安卓杂音优化：关闭部分软件处理，减少冲突
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
-                    echoCancellation: true,
-                    noiseSuppression: true,
-                    autoGainControl: true
+                    echoCancellation: false, // 安卓建议关闭，由硬件处理
+                    noiseSuppression: false,  // 安卓建议关闭
+                    autoGainControl: true    // 保留自动增益以维持音量稳定
                 }
             });
             currentStream = stream;
 
-            // 2. 【核心优化】使用 AudioContext 桥接方案
-            // 强制 iOS 唤醒音频管道并开始处理帧
+            // 2. iOS 启动优化 - AudioContext 桥接
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') {
                 await audioCtx.resume();
             }
 
-            // 创建源和目标节点
             const source = audioCtx.createMediaStreamSource(stream);
             const destination = audioCtx.createMediaStreamDestination();
             
-            // 连接节点：这样流会经过 Web Audio 引擎处理，变得更稳定
-            source.connect(destination);
+            // 3. 安卓电流声优化 - 增加极短淡入
+            const gainNode = audioCtx.createGain();
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 0.05); // 50ms淡入
 
-            // 3. 使用桥接后的 destination.stream 进行录制
-            const types = ['audio/webm', 'audio/mp4', 'audio/ogg', 'audio/wav'];
+            source.connect(gainNode);
+            gainNode.connect(destination);
+
+            // 4. MediaRecorder 编码优化
+            const types = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/wav'];
             const mimeType = types.find(type => MediaRecorder.isTypeSupported(type)) || '';
             
-            mediaRecorder = new MediaRecorder(destination.stream, { mimeType });
+            // 指定较高码率减少杂音
+            mediaRecorder = new MediaRecorder(destination.stream, { 
+                mimeType,
+                audioBitsPerSecond: 128000 
+            });
 
             mediaRecorder.ondataavailable = (event) => {
                 if (event.data.size > 0) audioChunks.push(event.data);
@@ -94,13 +88,12 @@ $(document).ready(function() {
                 if (blob.size > 0) processAudioBlob(blob);
             };
 
-            // 4. 利用 requestAnimationFrame 确保在下一帧开始录制
-            // 这给了浏览器微量的时间来完成节点连接，而不产生体感延迟
+            // 5. 对齐帧启动
             requestAnimationFrame(() => {
                 if (!isCancelled) {
                     mediaRecorder.start();
                     isRecording = true;
-                    console.log("iOS 音频管线已对齐，开始录制");
+                    console.log("录制已开始 (优化版)");
                 }
             });
 
@@ -115,17 +108,12 @@ $(document).ready(function() {
         isCancelled = isCancelAction; 
         isRecording = false;
 
-        // 停止录制
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
             mediaRecorder.stop();
         }
-
-        // 释放 AudioContext
         if (audioCtx && audioCtx.state !== 'closed') {
             audioCtx.close();
         }
-
-        // 释放流和硬件
         if (currentStream) {
             currentStream.getTracks().forEach(track => track.stop());
             currentStream = null;
@@ -162,10 +150,17 @@ $(document).ready(function() {
         }
     }
 
-    // =============== 事件绑定 (保持原逻辑) ===============
+    // =============== 事件绑定 (维持原逻辑) ===============
     function initEvent() {
+        // 用户切换到语音界面时，点击即可获取权限
         $(document).on('click', '.input_voice_switch', function() {
-            requestMicrophonePermission();
+            if (!permissionGranted) {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(s => {
+                    s.getTracks().forEach(t => t.stop());
+                    permissionGranted = true;
+                });
+            }
         });
 
         bt_recoding.addEventListener("touchstart", async function(event) {
