@@ -1,6 +1,6 @@
 $(document).ready(function() {
-    $('.number').css('color','blue');
-
+    $('.number').css('color','yellow');
+    
     // =============== 全局变量 ===============
     const bt_recoding = document.getElementById("bt_recoding");
     const blackBoxSpeak = document.querySelector(".blackBoxSpeak");
@@ -9,10 +9,12 @@ $(document).ready(function() {
 
     let mediaRecorder = null;
     let audioChunks = []; 
-    let globalStream = null; // 保持持久流，解决 iOS 启动延迟
+    let currentStream = null;
+    let audioCtx = null; // 用于代码层面优化硬件唤醒
     let isRecording = false;
     let isCancelled = false;
     let posStart = 0;
+    let permissionGranted = false;
 
     // =============== 工具函数 ===============
     function showToast(message) {
@@ -32,14 +34,27 @@ $(document).ready(function() {
         blackBoxPause.style.display = "none";
     }
 
-    /**
-     * 关键优化：预热麦克风
-     * 在用户点击切换到语音输入时调用，提前打通音频链路
-     */
-    async function prepareMic() {
-        if (globalStream) return globalStream;
-        
+    async function requestMicrophonePermission() {
+        if (permissionGranted) return;
         try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            stream.getTracks().forEach(track => track.stop());
+            permissionGranted = true;
+            showToast("麦克风权限已获取");
+        } catch (err) {
+            console.error("权限请求失败：", err);
+            permissionGranted = false;
+        }
+    }
+
+    // =============== 录音核心重构 (代码层面优化) ===============
+    async function startRecording() {
+        if (isRecording) return;
+        isCancelled = false;
+        audioChunks = [];
+
+        try {
+            // 1. 获取基础流
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
                     echoCancellation: true,
@@ -47,43 +62,27 @@ $(document).ready(function() {
                     autoGainControl: true
                 }
             });
-            globalStream = stream;
-            console.log("麦克风流已预热就绪");
-            return stream;
-        } catch (err) {
-            console.error("无法获取麦克风权限:", err);
-            showToast("请授权麦克风权限");
-            return null;
-        }
-    }
+            currentStream = stream;
 
-    /**
-     * 关键优化：释放麦克风
-     * 当不需要录音功能或切后台时，必须释放，否则会影响其他App
-     */
-    function releaseMic() {
-        if (globalStream) {
-            globalStream.getTracks().forEach(track => track.stop());
-            globalStream = null;
-            console.log("麦克风资源已释放");
-        }
-    }
+            // 2. 【核心优化】使用 AudioContext 桥接方案
+            // 强制 iOS 唤醒音频管道并开始处理帧
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') {
+                await audioCtx.resume();
+            }
 
-    // =============== 录音核心重构 ===============
-    async function startRecording() {
-        if (isRecording) return;
-        isCancelled = false;
-        audioChunks = [];
+            // 创建源和目标节点
+            const source = audioCtx.createMediaStreamSource(stream);
+            const destination = audioCtx.createMediaStreamDestination();
+            
+            // 连接节点：这样流会经过 Web Audio 引擎处理，变得更稳定
+            source.connect(destination);
 
-        // 1. 获取预热好的流（如果没有则即时获取）
-        const stream = await prepareMic();
-        if (!stream) return;
-
-        try {
+            // 3. 使用桥接后的 destination.stream 进行录制
             const types = ['audio/webm', 'audio/mp4', 'audio/ogg', 'audio/wav'];
             const mimeType = types.find(type => MediaRecorder.isTypeSupported(type)) || '';
-
-            mediaRecorder = new MediaRecorder(stream, { mimeType });
+            
+            mediaRecorder = new MediaRecorder(destination.stream, { mimeType });
 
             mediaRecorder.ondataavailable = (event) => {
                 if (event.data.size > 0) audioChunks.push(event.data);
@@ -95,15 +94,20 @@ $(document).ready(function() {
                 if (blob.size > 0) processAudioBlob(blob);
             };
 
-            // 2. 立即开始，不再有 getUserMedia 的延迟
-            mediaRecorder.start();
-            isRecording = true;
-            console.log("录音真正开始");
+            // 4. 利用 requestAnimationFrame 确保在下一帧开始录制
+            // 这给了浏览器微量的时间来完成节点连接，而不产生体感延迟
+            requestAnimationFrame(() => {
+                if (!isCancelled) {
+                    mediaRecorder.start();
+                    isRecording = true;
+                    console.log("iOS 音频管线已对齐，开始录制");
+                }
+            });
 
         } catch (err) {
             console.error('录音启动失败:', err);
-            showToast("录音启动失败");
-            isRecording = false;
+            showToast("无法启动录音");
+            resetRecordingState();
         }
     }
 
@@ -111,10 +115,31 @@ $(document).ready(function() {
         isCancelled = isCancelAction; 
         isRecording = false;
 
+        // 停止录制
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
             mediaRecorder.stop();
         }
-        // 注意：这里不调用 track.stop()，保持 globalStream 存活以便下次秒开
+
+        // 释放 AudioContext
+        if (audioCtx && audioCtx.state !== 'closed') {
+            audioCtx.close();
+        }
+
+        // 释放流和硬件
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+            currentStream = null;
+        }
+    }
+
+    function resetRecordingState() {
+        isRecording = false;
+        isCancelled = false;
+        audioChunks = [];
+        if (audioCtx) audioCtx.close();
+        if (currentStream) {
+            currentStream.getTracks().forEach(track => track.stop());
+        }
     }
 
     function processAudioBlob(blob) {
@@ -137,25 +162,20 @@ $(document).ready(function() {
         }
     }
 
-    // =============== 事件绑定 ===============
+    // =============== 事件绑定 (保持原逻辑) ===============
     function initEvent() {
-        // 预热触发点：用户点击切换语音按钮时
         $(document).on('click', '.input_voice_switch', function() {
-            prepareMic(); 
+            requestMicrophonePermission();
         });
 
-        // 1. 触摸开始
         bt_recoding.addEventListener("touchstart", async function(event) {
             event.preventDefault();
             posStart = event.touches[0].pageY;
-            
             showBlackBoxSpeak();
-            if (navigator.vibrate) navigator.vibrate(40); // 触感反馈
-            
+            if (navigator.vibrate) navigator.vibrate(50);
             await startRecording();
         });
 
-        // 2. 触摸移动 (取消逻辑)
         bt_recoding.addEventListener("touchmove", function(event) {
             event.preventDefault();
             const posMove = event.targetTouches[0].pageY;
@@ -166,11 +186,9 @@ $(document).ready(function() {
             }
         });
 
-        // 3. 触摸结束
         bt_recoding.addEventListener("touchend", function(event) {
             event.preventDefault();
             const posEnd = event.changedTouches[0].pageY;
-            
             if (posStart - posEnd >= 50) {
                 stopRecording(true);
                 showToast("取消发送");
@@ -181,23 +199,23 @@ $(document).ready(function() {
         });
 
         // 鼠标兼容
-        bt_recoding.addEventListener("mousedown", startRecording);
+        bt_recoding.addEventListener("mousedown", async (e) => {
+            showBlackBoxSpeak();
+            await startRecording();
+        });
         bt_recoding.addEventListener("mouseup", () => {
             stopRecording(false);
             initStatus();
         });
     }
 
-    // 重要：页面不可见或关闭时，必须归还麦克风权限
     document.addEventListener('visibilitychange', function() {
-        if (document.hidden) {
+        if (document.hidden && isRecording) {
             stopRecording(true);
-            releaseMic(); // 彻底断开硬件连接
             initStatus();
         }
     });
 
-    // UI 辅助
     function showBlackBoxSpeak() {
         bt_recoding.value = '松开 结束';
         blackBoxSpeak.style.display = "block";
