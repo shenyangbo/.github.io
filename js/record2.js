@@ -10,7 +10,7 @@ $(document).ready(function() {
     let mediaRecorder = null;
     let audioChunks = []; 
     let currentStream = null;
-    let audioCtx = null;       // 单例，只需初始化一次
+    let audioCtx = null;       // 单例
     let gainNode = null;       // 增益补偿
     let isRecording = false;
     let isCancelled = false;
@@ -37,20 +37,20 @@ $(document).ready(function() {
     // =============== 核心优化：预热逻辑 ===============
     async function prepareMic() {
         try {
-            // 1. 提前初始化 AudioContext
+            // 1. 初始化 AudioContext
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
-            // 2. 在点击事件中立即激活上下文，消除 iOS 的“静音”保护
+            // 2. 立即激活上下文
             if (audioCtx.state === 'suspended') {
                 await audioCtx.resume();
             }
-            // 3. 预先请求一次权限，让浏览器弹出授权框并暖机
+            // 3. 预授权暖机
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            stream.getTracks().forEach(track => track.stop()); // 暖机后立即关闭，不占指示灯
+            stream.getTracks().forEach(track => track.stop()); 
             console.log("麦克风预热完成");
         } catch (err) {
-            console.warn("预热失败（可能用户拒绝了权限）:", err);
+            console.warn("预热失败:", err);
         }
     }
 
@@ -61,7 +61,6 @@ $(document).ready(function() {
         audioChunks = [];
 
         try {
-            // 获取流：禁用回声消除以防止 iOS 压低音量
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
                     echoCancellation: false, 
@@ -72,15 +71,14 @@ $(document).ready(function() {
             currentStream = stream;
 
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            // 关键：每次录音开始前确保 Context 是运行状态
             if (audioCtx.state === 'suspended') await audioCtx.resume();
 
-            // 
             const source = audioCtx.createMediaStreamSource(stream);
             const destination = audioCtx.createMediaStreamDestination();
             
-            // 音量补偿：解决“重启权限后声音变小”的问题
             gainNode = audioCtx.createGain();
-            gainNode.gain.value = 1.3; // 提升 30% 音量
+            gainNode.gain.value = 1.3; // 解决声音变小的问题
 
             source.connect(gainNode);
             gainNode.connect(destination);
@@ -90,22 +88,25 @@ $(document).ready(function() {
             
             mediaRecorder = new MediaRecorder(destination.stream, { 
                 mimeType,
-                audioBitsPerSecond: 128000 // 解决安卓电子杂音
+                audioBitsPerSecond: 128000 
             });
 
-            mediaRecorder.ondataavailable = (e) => e.data.size > 0 && audioChunks.push(e.data);
+            mediaRecorder.ondataavailable = (e) => {
+                if (e.data.size > 0) audioChunks.push(e.data);
+            };
+            
             mediaRecorder.onstop = () => {
                 if (isCancelled) return;
                 const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
                 if (blob.size > 0) processAudioBlob(blob);
             };
 
-            // 启动录制
             mediaRecorder.start();
             isRecording = true;
         } catch (err) {
             console.error('启动录音失败:', err);
             showToast("权限开启失败");
+            initStatus();
         }
     }
 
@@ -117,8 +118,10 @@ $(document).ready(function() {
             mediaRecorder.stop();
         }
         if (currentStream) {
-            // 延迟一点点关闭，防止 iOS 截断末尾半个字
-            currentStream.getTracks().forEach(t => setTimeout(() => t.stop(), 300));
+            // 延迟关闭 track 解决 iOS 吞末尾字
+            currentStream.getTracks().forEach(t => {
+                setTimeout(() => t.stop(), 300);
+            });
             currentStream = null;
         }
     }
@@ -145,11 +148,12 @@ $(document).ready(function() {
 
     // =============== 事件绑定 ===============
     function initEvent() {
-        // 关键：切换到语音输入界面时，利用这次点击彻底暖机
+        // 1. 切换按钮预热
         $(document).on('click', '.input_voice_switch', function() {
             prepareMic(); 
         });
 
+        // 2. 触摸开始
         bt_recoding.addEventListener("touchstart", async function(event) {
             event.preventDefault();
             posStart = event.touches[0].pageY;
@@ -158,6 +162,7 @@ $(document).ready(function() {
             await startRecording();
         });
 
+        // 3. 触摸移动
         bt_recoding.addEventListener("touchmove", function(event) {
             event.preventDefault();
             const posMove = event.targetTouches[0].pageY;
@@ -168,6 +173,7 @@ $(document).ready(function() {
             }
         });
 
+        // 4. 触摸结束
         bt_recoding.addEventListener("touchend", function(event) {
             event.preventDefault();
             const posEnd = event.changedTouches[0].pageY;
@@ -180,32 +186,33 @@ $(document).ready(function() {
             initStatus();
         });
 
-        // 鼠标兼容
-        bt_recoding.addEventListener(\"mousedown\", async (e) => {
+        // 5. 鼠标兼容 (修正了你原代码中的 \" 转义错误)
+        bt_recoding.addEventListener("mousedown", async (e) => {
             showBlackBoxSpeak();
             await startRecording();
         });
-        bt_recoding.addEventListener(\"mouseup\", () => {
+        
+        bt_recoding.addEventListener("mouseup", () => {
             stopRecording(false);
             initStatus();
         });
     }
 
     document.addEventListener('visibilitychange', function() {
-        if (document.hidden) stopRecording(true);
+        if (document.hidden && isRecording) stopRecording(true);
     });
 
     function showBlackBoxSpeak() {
         bt_recoding.value = '松开 结束';
-        blackBoxSpeak.style.display = \"block\";
-        blackBoxPause.style.display = \"none\";
+        blackBoxSpeak.style.display = "block";
+        blackBoxPause.style.display = "none";
         $(bt_recoding).css({'background': '#3473F4', 'color': '#ffffff'});
     }
 
     function showBlackBoxPause() {
         bt_recoding.value = '松开手指，取消发送';
-        blackBoxSpeak.style.display = \"none\";
-        blackBoxPause.style.display = \"block\";
+        blackBoxSpeak.style.display = "none";
+        blackBoxPause.style.display = "block";
         $(bt_recoding).css('background', '#f44336');
     }
 
