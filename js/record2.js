@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    $('.number').css('color','red');
+    $('.number').css('color','blue');
     
     // =============== 全局变量 ===============
     const bt_recoding = document.getElementById("bt_recoding");
@@ -10,11 +10,11 @@ $(document).ready(function() {
     let mediaRecorder = null;
     let audioChunks = []; 
     let currentStream = null;
-    let audioCtx = null; 
+    let audioCtx = null;       // 保持单例
+    let gainNode = null;       // 增益控制
     let isRecording = false;
     let isCancelled = false;
     let posStart = 0;
-    let permissionGranted = false;
 
     // =============== 工具函数 ===============
     function showToast(message) {
@@ -34,25 +34,29 @@ $(document).ready(function() {
         blackBoxPause.style.display = "none";
     }
 
-    // =============== 录音核心逻辑 ===============
+    // =============== 录音核心重构 ===============
     async function startRecording() {
         if (isRecording) return;
         isCancelled = false;
         audioChunks = [];
 
         try {
-            // 1. 获取流 - 安卓杂音优化：关闭部分软件处理，减少冲突
+            // 1. 获取流：显式禁用 echoCancellation 以防止 iOS 压低音量
             const stream = await navigator.mediaDevices.getUserMedia({
                 audio: {
-                    echoCancellation: false, // 安卓建议关闭，由硬件处理
-                    noiseSuppression: false,  // 安卓建议关闭
-                    autoGainControl: true    // 保留自动增益以维持音量稳定
+                    echoCancellation: false, 
+                    noiseSuppression: false,
+                    autoGainControl: true
                 }
             });
             currentStream = stream;
 
-            // 2. iOS 启动优化 - AudioContext 桥接
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            // 2. 初始化 AudioContext (只初始化一次)
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            // 必须在 touch 事件的 Promise 链中立即 resume
             if (audioCtx.state === 'suspended') {
                 await audioCtx.resume();
             }
@@ -60,19 +64,18 @@ $(document).ready(function() {
             const source = audioCtx.createMediaStreamSource(stream);
             const destination = audioCtx.createMediaStreamDestination();
             
-            // 3. 安卓电流声优化 - 增加极短淡入
-            const gainNode = audioCtx.createGain();
-            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
-            gainNode.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 0.05); // 50ms淡入
+            // 3. 音量补偿：创建一个增益节点，把声音放大
+            gainNode = audioCtx.createGain();
+            gainNode.gain.value = 1.3; // 放大 1.3 倍，解决声音小的问题
 
             source.connect(gainNode);
             gainNode.connect(destination);
 
-            // 4. MediaRecorder 编码优化
-            const types = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/wav'];
+            // 4. 配置 MediaRecorder
+            const types = ['audio/webm;codecs=opus', 'audio/mp4', 'audio/wav'];
             const mimeType = types.find(type => MediaRecorder.isTypeSupported(type)) || '';
             
-            // 指定较高码率减少杂音
+            // 指定码率确保安卓端不产生电子杂音
             mediaRecorder = new MediaRecorder(destination.stream, { 
                 mimeType,
                 audioBitsPerSecond: 128000 
@@ -88,18 +91,14 @@ $(document).ready(function() {
                 if (blob.size > 0) processAudioBlob(blob);
             };
 
-            // 5. 对齐帧启动
-            requestAnimationFrame(() => {
-                if (!isCancelled) {
-                    mediaRecorder.start();
-                    isRecording = true;
-                    console.log("录制已开始 (优化版)");
-                }
-            });
+            // 5. 立即启动
+            mediaRecorder.start();
+            isRecording = true;
+            console.log("iOS/Android 兼容录音启动成功");
 
         } catch (err) {
             console.error('录音启动失败:', err);
-            showToast("无法启动录音");
+            showToast("请检查麦克风权限");
             resetRecordingState();
         }
     }
@@ -111,11 +110,13 @@ $(document).ready(function() {
         if (mediaRecorder && mediaRecorder.state !== 'inactive') {
             mediaRecorder.stop();
         }
-        if (audioCtx && audioCtx.state !== 'closed') {
-            audioCtx.close();
-        }
+
+        // 注意：不关闭 audioCtx，只关闭当前流的 track
         if (currentStream) {
-            currentStream.getTracks().forEach(track => track.stop());
+            currentStream.getTracks().forEach(track => {
+                // 稍微延迟 200ms 关闭，防止 MediaRecorder 截断末尾
+                setTimeout(() => track.stop(), 200);
+            });
             currentStream = null;
         }
     }
@@ -124,9 +125,9 @@ $(document).ready(function() {
         isRecording = false;
         isCancelled = false;
         audioChunks = [];
-        if (audioCtx) audioCtx.close();
         if (currentStream) {
             currentStream.getTracks().forEach(track => track.stop());
+            currentStream = null;
         }
     }
 
@@ -150,24 +151,22 @@ $(document).ready(function() {
         }
     }
 
-    // =============== 事件绑定 (维持原逻辑) ===============
+    // =============== 事件绑定 ===============
     function initEvent() {
-        // 用户切换到语音界面时，点击即可获取权限
-        $(document).on('click', '.input_voice_switch', function() {
-            if (!permissionGranted) {
-                navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(s => {
-                    s.getTracks().forEach(t => t.stop());
-                    permissionGranted = true;
-                });
+        // 预授权：用户第一次点击任何地方时尝试激活 AudioContext
+        $(document).on('touchstart', function() {
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
             }
         });
 
         bt_recoding.addEventListener("touchstart", async function(event) {
             event.preventDefault();
             posStart = event.touches[0].pageY;
+            
             showBlackBoxSpeak();
-            if (navigator.vibrate) navigator.vibrate(50);
+            if (navigator.vibrate) navigator.vibrate(40);
+            
             await startRecording();
         });
 
@@ -184,6 +183,7 @@ $(document).ready(function() {
         bt_recoding.addEventListener("touchend", function(event) {
             event.preventDefault();
             const posEnd = event.changedTouches[0].pageY;
+            
             if (posStart - posEnd >= 50) {
                 stopRecording(true);
                 showToast("取消发送");
@@ -204,8 +204,9 @@ $(document).ready(function() {
         });
     }
 
+    // 页面不可见时彻底释放资源
     document.addEventListener('visibilitychange', function() {
-        if (document.hidden && isRecording) {
+        if (document.hidden) {
             stopRecording(true);
             initStatus();
         }
