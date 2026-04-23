@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
+
+		<title>电信产品查询</title>
+		<style>
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+			}
+
+			body {
+				background-color: #f5f7fa;
+			}
+
+			.header {
+				font-size: 16px;
+				color: #333;
+				padding:  8px;
+				background: #ffffff;
+			}
+			.header span{
+				color: #3473F4;
+			}
+			.tabs {
+				display: flex;
+				border-bottom: 1px solid #e5e9ef;
+				background: #ffffff;
+			}
+
+			.tab-item-title {
+				font-size: 14px;
+				color: #333;
+				margin-bottom: 12px;
+				display: flex;
+				align-items: center;
+			}
+
+			.under_icon {
+				width: 24px;
+				margin-right: 4px;
+			}
+
+			.tab-item {
+				flex: 1;
+				text-align: center;
+				padding:0px 0 8px 0;
+				font-size: 16px;
+				color: #666;
+				cursor: pointer;
+				position: relative;
+				transition: all 0.3s;
+			}
+
+			.tab-item.active {
+				color: #3473F4;
+				font-weight: 500;
+			}
+
+			.tab-item.active::after {
+				content: '';
+				position: absolute;
+				bottom: -1px;
+				left: 0;
+				width: 100%;
+				height: 2px;
+				background-color: #3473F4;
+			}
+
+			.card {
+				background-color: #fff;
+				border-radius: 8px;
+				padding: 8px;
+				margin: 8px;
+				box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+				border: 1px solid #D6E3FD;
+			}
+
+			.product-list {
+				display: flex;
+				align-items: center;
+				padding: 12px 8px;
+				background: #F7FAFF;
+				border:1px solid #D6E3FD ;
+				border-radius: 8px;
+				margin-bottom: 4px;
+			}
+
+			.product-list:last-child {
+				margin-bottom: 1px;
+			}
+			
+			.product-none{
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				padding: 32px;
+				border-radius: 8px;
+				margin-bottom: 8px;
+				color: #999999;
+			}
+			.product-none img{
+				width: 150px;
+			}
+			.tag {
+				display: inline-block;
+				padding: 2px 4px;
+				border-radius: 8px 2px 8px 2px;
+				font-size: 12px;
+				color: #fff;
+				margin-right: 8px;
+			}
+
+			.tag.main {
+				background-color: #36c66b;
+			}
+
+			.tag.sub {
+				background-color: #4080ff;
+			}
+
+			.phone-number {
+				flex: 1;
+				font-size: 14px;
+				color: #333;
+			}
+
+			.status {
+				font-size: 13px;
+				color: #ff9500;
+				margin-right: 12px;
+			}
+
+			.current {
+				font-size: 13px;
+				color: #36c66b;
+				background-color: #e8f5e9;
+				padding: 2px 8px;
+				border-radius: 4px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="header">
+			尊敬的 <span>李*娟</span>，您目前使用的电信产品如下
+		</div>
+		<div class="tabs">
+			<div class="tab-item active" data-tab="phone">手机(3)</div>
+			<div class="tab-item" data-tab="landline">固话(2)</div>
+			<div class="tab-item" data-tab="broadband">宽带(2)</div>
+			<div class="tab-item" data-tab="other">其他(0)</div>
+		</div>
+		<div class="card">
+			<div class="tab-content" id="phone">
+				<div class="tab-item-title">
+					<img src="image/under_phone.png" class="under_icon" alt="" />
+					手机
+				</div>
+				<div class="product-list">
+					<span class="tag main">主卡</span>
+					<span class="phone-number">133****4567</span>
+					<span class="status">在用</span>
+					<span class="current">当前登录</span>
+				</div>
+				<div class="product-list">
+					<span class="tag sub">副卡</span>
+					<span class="phone-number">133****4567</span>
+					<span class="status">在用</span>
+				</div>
+				<div class="product-list">
+					<span class="tag sub">副卡</span>
+					<span class="phone-number">133****4567</span>
+					<span class="status">在用</span>
+				</div>
+			</div>
+			<div class="tab-content" id="landline" style="display: none;">
+				<!-- <div class="tab-item-title">
+					<img src="image/under_linephone.png" class="under_icon" alt="" />
+					固话
+				</div> -->
+				<div class="product-list">
+					<span class="phone-number">010-8888****</span>
+					<span class="status">在用</span>
+				</div>
+				<div class="product-list">
+					<span class="phone-number">021-6666****</span>
+					<span class="status">在用</span>
+				</div>
+			</div>
+			<div class="tab-content" id="broadband" style="display: none;">
+				<!-- <div class="tab-item-title">
+					<img src="image/under_network.png" class="under_icon" alt="" />宽带
+				</div> -->
+				<div class="product-list">
+					<span class="phone-number">100M 光纤宽带</span>
+					<span class="status">在用</span>
+				</div>
+				<div class="product-list">
+					<span class="phone-number">500M 光纤宽带</span>
+					<span class="status">在用</span>
+				</div>
+			</div>
+			<div class="tab-content" id="other" style="display: none;">
+				<!-- <div class="tab-item-title">
+					<img src="image/under_others.png" class="under_icon" alt="" />其他
+				</div> -->
+				<div class="product-none">
+					<img src="image/under_number_none.png" alt="" />暂无号码
+				</div>
+				
+			</div>
+		</div>
+
+		<script>
+			// Tab 切换逻辑
+			const tabItems = document.querySelectorAll('.tab-item');
+			const tabContents = document.querySelectorAll('.tab-content');
+
+			tabItems.forEach(item => {
+				item.addEventListener('click', () => {
+					// 移除所有tab的active状态
+					tabItems.forEach(i => i.classList.remove('active'));
+					// 隐藏所有内容
+					tabContents.forEach(c => c.style.display = 'none');
+					// 激活当前tab
+					item.classList.add('active');
+					// 显示对应内容
+					const tabId = item.getAttribute('data-tab');
+					document.getElementById(tabId).style.display = 'block';
+				});
+			});
+		</script>
+	</body>
+</html>

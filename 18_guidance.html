@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="mobile-web-app-capable" content="yes">
+		<title>手机设置指引</title>
+		<style>
+			/* 样式部分保持不变，省略以节省篇幅 */
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+				font-family: -apple-system, BlinkMacSystemFont, "微软雅黑", sans-serif;
+				-webkit-tap-highlight-color: transparent;
+				outline: none;
+			}
+
+			html,
+			body {
+				height: auto;
+				overflow: auto;
+				-webkit-overflow-scrolling: touch;
+				max-width: 640px;
+				width: 100%;
+				margin: 0 auto;
+			}
+
+			body {
+				background: linear-gradient(180deg, #b8d9ff, #ffffff);
+				font-size: 16px;
+				/* padding: 8px; */
+				padding-top: 88px;
+			}
+
+			.tab-fixed-container {
+			  position: fixed;
+			  top: 0;
+			  left: 50%;         /* 新增 */
+			  transform: translateX(-50%); /* 新增 */
+			  z-index: 999;
+			  padding-top: 8px;
+			  background: #b8d9ff;
+			  max-width: 640px;
+			  width: 100%;      /* 新增 */
+			}
+
+			.container {
+				overflow: visible;
+				background: #ffffff;
+			}
+
+			.tab-nav-primary {
+				display: flex;
+				background-color: #F0F6FF;
+				margin-bottom: 8px;
+				padding: 4px;
+				border-radius: 32px;
+			}
+
+			.tab-item-primary {
+				flex: 1;
+				padding: 4px 0;
+				font-size: 16px;
+				color: #333;
+				border: none;
+				border-radius: 32px;
+				background: none;
+				text-align: center;
+			}
+
+			.tab-item-primary.active {
+				color: #fff;
+				background-color: #3473F4;
+				font-weight: 600;
+			}
+
+			/* .tab-nav-secondary {
+				display: flex;
+				border-bottom: 1px solid #eee;
+				background: #fff;
+				border-radius: 8px 8px 0 0;
+				overflow-x: auto;
+				scrollbar-width: none;
+				justify-content: center;
+				max-width: 640px;
+			} */
+			.tab-nav-secondary {
+			  display: flex;
+			  border-bottom: 1px solid #eee;
+			  background: #fff;
+			  border-radius: 8px 8px 0 0;
+			  overflow-x: auto;
+			  scrollbar-width: none;
+			  justify-content: center;
+			  max-width: 100%; /* 改为 100%，继承父级宽度即可 */
+			}
+			
+
+			.tab-nav-secondary::-webkit-scrollbar {
+				display: none
+			}
+
+			.tab-item-secondary {
+				padding: 8px 16px;
+				font-size: 14px;
+				color: #666;
+				border: none;
+				background: none;
+				white-space: nowrap;
+			}
+
+			.tab-item-secondary.active {
+				color: #3473F4;
+				background-color: #e8f4ff;
+				font-weight: 500;
+				border-bottom: 1px solid #3473F4;
+			}
+
+			.content-wrapper {
+				background: #fff;
+				border-radius: 0 0 8px 8px;
+				overflow: visible;
+			}
+
+			.content-panel-primary {
+				display: none
+			}
+
+			.content-panel-primary.active {
+				display: block
+			}
+
+			.content-panel-secondary {
+				display: none
+			}
+
+			.content-panel-secondary.active {
+				display: block;
+				padding: 16px;
+			}
+
+			.image-swipe-container {
+				width: 100%;
+				overflow: hidden;
+				position: relative;
+			}
+
+			.swipe-arrow {
+				width: 40px;
+				height: 40px;
+				border-radius: 50%;
+				background: rgba(255, 255, 255, 0.8);
+				position: absolute;
+				z-index: 10;
+				align-items: center;
+				justify-content: center;
+				display: flex; /* 这里已修改为显示 */
+				top: 50%;
+				transform: translateY(-50%);
+			}
+
+			.swipe-arrow.left {
+				left: 0px
+			}
+
+			.swipe-arrow.right {
+				right: 0px
+			}
+
+			.swipe-arrow::after {
+				content: "";
+				width: 14px;
+				height: 14px;
+				border-top: 4px solid #3473F4;
+				border-right: 4px solid #3473F4;
+			}
+
+			.swipe-arrow.left::after {
+				transform: rotate(-135deg)
+			}
+
+			.swipe-arrow.right::after {
+				transform: rotate(45deg)
+			}
+
+			.swipe-arrow.disabled::after {
+				border-color: #ccc
+			}
+
+			.image-swipe-wrapper {
+				display: flex;
+				width: 100%;
+				transition: transform 0.3s ease;
+			}
+
+			.image-item {
+				flex: 0 0 100%;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				padding: 0 40px;
+				gap: 8px;
+			}
+
+			.img-placeholder {
+				width: 100%;
+				border: 1px dashed #ddd;
+				border-radius: 8px;
+				background: #fafafa;
+			}
+
+			.swipe-indicator {
+				display: flex;
+				gap: 8px;
+				justify-content: center;
+				margin-top: 8px;
+			}
+
+			.indicator-dot {
+				width: 8px;
+				height: 8px;
+				border-radius: 50%;
+				background: #ddd
+			}
+
+			.indicator-dot.active {
+				background: #3473F4;
+				width: 20px;
+				border-radius: 4px
+			}
+
+			.step-text {
+				font-size: 14px;
+				line-height: 1.6;
+				color: #333
+			}
+
+			.step-text img {
+				height: 24px
+			}
+
+			.step-text span {
+				color: #3473F4
+			}
+
+			.tishi-mask {
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				align-items: center;
+				justify-content: center;
+				z-index: 999;
+				display: flex;
+			}
+
+			.tishi-popup {
+				background: rgba(0, 0, 0, 0.2);
+				padding: 20px 30px;
+				border-radius: 8px;
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				font-size: 14px;
+				color: #333;
+				display: flex;
+				flex-direction: column;
+				width: 30ch;
+				color: #ffffff;
+			}
+
+			.tishi-icon {
+				width: 24px;
+				animation: move 1s infinite;
+			}
+
+			@keyframes move {
+				0% {
+					transform: translateX(20px)
+				}
+
+				100% {
+					transform: translateX(-20px)
+				}
+			}
+
+			.tishi-text {
+				margin-top: 8px;
+				font-size: 14px;
+				color: #666;
+				line-height: 1.6;
+			}
+
+			.tishi-text span {
+				color: #333;
+				font-size: 14px;
+				font-weight: bold;
+			}
+		</style>
+	</head>
+	<body>
+
+		<div class="container">
+			<div class="tab-fixed-container">
+				<div class="tab-nav-primary">
+					<button class="tab-item-primary " data-tab="android">安卓手机</button>
+					<button class="tab-item-primary active" data-tab="ios">苹果手机</button>
+				</div>
+				<div class="tab-nav-secondary" id="secondary-tab-container"></div>
+			</div>
+
+			<div class="content-wrapper">
+				<div class="content-panel-primary " id="android">
+					<div class="content-panel-secondary active" id="android-basic">
+						<div class="image-swipe-container" id="android-basic-swipe">
+							<div class="swipe-arrow left disabled" id="android-basic-arrow-left"></div>
+							<div class="swipe-arrow right" id="android-basic-arrow-right"></div>
+							<div class="image-swipe-wrapper">
+								<div class="image-item">
+									<p class="step-text"><img src="images/step1.png"
+											alt="">语音漫游无需设置，境外漫游自动登网。数据漫游设置：点击“<span>设置</span>”→“<span>移动网络</span>”</p>
+									<img class="img-placeholder" src="images/android-basic-1.png">
+								</div>
+								<div class="image-item">
+									<p class="step-text"><img src="images/step2.png" alt="">点击进入<span>“移动数据”</span></p>
+									<img class="img-placeholder" src="images/android-basic-2.png">
+								</div>
+								<div class="image-item">
+									<p class="step-text"><img src="images/step3.png"
+											alt="">打开<span>“移动数据”</span>开关和电信卡所在卡槽的<span>“数据漫游”</span>开关</p>
+									<img class="img-placeholder" src="images/android-basic-3.png">
+								</div>
+							</div>
+							<div class="swipe-indicator" id="android-basic-indicator">
+								<span class="indicator-dot active"></span>
+								<span class="indicator-dot"></span>
+								<span class="indicator-dot"></span>
+							</div>
+						</div>
+					</div>
+
+					<div class="content-panel-secondary" id="android-manual-network">
+						<div class="image-swipe-container" id="android-manual-network-swipe">
+							<div class="swipe-arrow left disabled" id="android-manual-network-arrow-left"></div>
+							<div class="swipe-arrow right" id="android-manual-network-arrow-right"></div>
+							<div class="image-swipe-wrapper">
+								<div class="image-item">
+									<p class="step-text"><img src="images/step1.png"
+											alt="">点击<span>设置</span>→<span>移动网络</span></p><img class="img-placeholder"
+										src="images/android-hand-1.png">
+								</div>
+								<div class="image-item">
+									<p class="step-text"><img src="images/step2.png" alt="">点击<span>移动数据</span></p><img
+										class="img-placeholder" src="images/android-hand-2.png">
+								</div>
+								<div class="image-item">
+									<p class="step-text"><img src="images/step3.png" alt="">点击<span>网络运营商</span></p><img
+										class="img-placeholder" src="images/android-hand-3.png">
+								</div>
+								<div class="image-item">
+									<p class="step-text"><img src="images/step4.png" alt="">关闭<span>自动选择</span>，切换运营商
+									</p><img class="img-placeholder" src="images/android-hand-4.png">
+								</div>
+							</div>
+							<div class="swipe-indicator" id="android-manual-network-indicator"><span
+									class="indicator-dot active"></span><span class="indicator-dot"></span><span
+									class="indicator-dot"></span><span class="indicator-dot"></span></div>
+						</div>
+					</div>
+
+					<div class="content-panel-secondary" id="android-apn">
+						<div class="image-swipe-container" id="android-apn-swipe">
+							<div class="swipe-arrow left disabled" id="android-apn-arrow-left"></div>
+							<div class="swipe-arrow right" id="android-apn-arrow-right"></div>
+							<div class="image-swipe-wrapper">
+								<div class="image-item">
+									<p class="step-text"><img src="images/step1.png" alt="">设置→移动网络</p><img
+										class="img-placeholder" src="images/android-apn-1.png">
+								</div>
+								<div class="image-item">
+									<p class="step-text"><img src="images/step2.png" alt="">移动数据</p><img
+										class="img-placeholder" src="images/android-apn-2.png">
+								</div>
+								<div class="image-item">
+									<p class="step-text"><img src="images/step3.png" alt="">网络运营商</p><img
+										class="img-placeholder" src="images/android-apn-3.png">
+								</div>
+								<div class="image-item">
+									<p class="step-text"><img src="images/step4.png" alt="">关闭自动选择</p><img
+										class="img-placeholder" src="images/android-apn-4.png">
+								</div>
+								<div class="image-item">
+									<p class="step-text"><img src="images/step5.png" alt="">APN填写CTNET</p><img
+										class="img-placeholder" src="images/android-apn-5.png">
+								</div>
+							</div>
+							<div class="swipe-indicator" id="android-apn-indicator"><span
+									class="indicator-dot active"></span><span class="indicator-dot"></span><span
+									class="indicator-dot"></span><span class="indicator-dot"></span><span
+									class="indicator-dot"></span></div>
+						</div>
+					</div>
+				</div>
+
+				<div class="content-panel-primary active" id="ios">
+					<div class="content-panel-secondary active" id="ios-basic">
+						<div class="image-swipe-container" id="ios-basic-swipe">
+							<div class="swipe-arrow left disabled" id="ios-basic-arrow-left"></div>
+							<div class="swipe-arrow right" id="ios-basic-arrow-right"></div>
+							<div class="image-swipe-wrapper">
+								<div class="image-item">
+									<p class="step-text"><img src="images/step1.png" alt="">设置→蜂窝网络</p><img
+										class="img-placeholder" src="images/iphone-basic-1.png">
+								</div>
+								<div class="image-item">
+									<p class="step-text"><img src="images/step2.png" alt="">蜂窝数据→蜂窝数据选项</p><img
+										class="img-placeholder" src="images/iphone-basic-2.png">
+								</div>
+								<div class="image-item">
+									<p class="step-text"><img src="images/step3.png" alt="">打开数据漫游</p><img
+										class="img-placeholder" src="images/iphone-basic-3.png">
+								</div>
+								<div class="image-item">
+									<p class="step-text"><img src="images/step4.png" alt="">选择4G/自动5G</p><img
+										class="img-placeholder" src="images/iphone-basic-4.png">
+								</div>
+							</div>
+							<div class="swipe-indicator" id="ios-basic-indicator"><span
+									class="indicator-dot active"></span><span class="indicator-dot"></span><span
+									class="indicator-dot"></span><span class="indicator-dot"></span></div>
+						</div>
+					</div>
+					<div class="content-panel-secondary" id="ios-manual-network">
+						<div class="image-swipe-container" id="ios-manual-network-swipe">
+							<div class="swipe-arrow left disabled" id="ios-manual-network-arrow-left"></div>
+							<div class="swipe-arrow right" id="ios-manual-network-arrow-right"></div>
+							<div class="image-swipe-wrapper">
+								<div class="image-item">
+									<p class="step-text"><img src="images/step1.png" alt="">设置→蜂窝网络</p><img
+										class="img-placeholder" src="images/iphone-basic-1.png">
+								</div>
+								<div class="image-item">
+									<p class="step-text"><img src="images/step2.png" alt="">中国电信→网络选择</p><img
+										class="img-placeholder" src="images/iphone-hand-2.png">
+								</div>
+								<div class="image-item">
+									<p class="step-text"><img src="images/step3.png" alt="">关闭自动，切换运营商</p><img
+										class="img-placeholder" src="images/iphone-hand-3.png">
+								</div>
+							</div>
+							<div class="swipe-indicator" id="ios-manual-network-indicator"><span
+									class="indicator-dot active"></span><span class="indicator-dot"></span><span
+									class="indicator-dot"></span></div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="tishi-mask">
+				<div class="tishi-popup">
+					<img src="image/Frame-right.png" style="width:48px;transform:scaleX(-1)">
+					<img src="image/finger.png" class="tishi-icon">
+					向左滑动
+				</div>
+			</div>
+		</div>
+
+		<script>
+			const secondaryTabContainer = document.getElementById('secondary-tab-container');
+			const subtabConfig = {
+				android: [{
+						key: 'basic',
+						text: '基础设置'
+					},
+					{
+						key: 'manual-network',
+						text: '手动选网'
+					},
+					{
+						key: 'apn',
+						text: '接入点APN设置'
+					}
+				],
+				ios: [{
+						key: 'basic',
+						text: '基础设置'
+					},
+					{
+						key: 'manual-network',
+						text: '手动选网'
+					}
+				]
+			};
+
+			let currentSubtab = 'basic';
+			let swipeIndexMap = {
+				'android-basic': 0,
+				'android-manual-network': 0,
+				'android-apn': 0,
+				'ios-basic': 0,
+				'ios-manual-network': 0
+			};
+
+			// ========== 新增：手动切换安卓/iOS的核心方法 ==========
+			function switchSystem(targetSystem) {
+				// 1. 验证参数合法性
+				if (!['android', 'ios'].includes(targetSystem)) {
+					console.error('切换失败：参数只能是 "android" 或 "ios"');
+					return;
+				}
+
+				// 2. 切换一级Tab的激活状态
+				document.querySelectorAll('.tab-item-primary').forEach(t => {
+					t.classList.remove('active');
+					if (t.dataset.tab === targetSystem) {
+						t.classList.add('active');
+					}
+				});
+
+				// 3. 切换一级内容面板
+				document.querySelectorAll('.content-panel-primary').forEach(p => {
+					p.classList.remove('active');
+					if (p.id === targetSystem) {
+						p.classList.add('active');
+					}
+				});
+
+				// 4. 渲染对应系统的二级Tab并激活默认项
+				renderSubTabs(targetSystem);
+				activateSub(targetSystem, 'basic');
+
+				// 5. 确保滑动事件绑定（防止重复绑定）
+				bindSwipeIfNotBound(targetSystem);
+			}
+
+			// ========== 新增：防止重复绑定滑动事件的辅助方法 ==========
+			function bindSwipeIfNotBound(system) {
+				// 遍历该系统下的所有子Tab，绑定滑动事件
+				subtabConfig[system].forEach(sub => {
+					const swipeId = `${system}-${sub.key}-swipe`;
+					if (document.getElementById(swipeId) && !document.getElementById(swipeId).dataset.bound) {
+						bindSwipe(swipeId);
+						document.getElementById(swipeId).dataset.bound = 'true'; // 标记已绑定
+					}
+				});
+			}
+
+			// 一级TAB点击事件（保留原有逻辑）
+			document.querySelectorAll('.tab-item-primary').forEach(tab => {
+				tab.addEventListener('click', () => {
+					switchSystem(tab.dataset.tab); // 复用新增的切换方法
+				})
+			})
+
+			function renderSubTabs(sys) {
+				secondaryTabContainer.innerHTML = '';
+				subtabConfig[sys].forEach((sub, i) => {
+					const btn = document.createElement('button');
+					btn.className = 'tab-item-secondary ' + (i == 0 ? 'active' : '');
+					btn.dataset.subtab = sub.key;
+					btn.innerText = sub.text;
+					btn.onclick = () => {
+						document.querySelectorAll('.tab-item-secondary').forEach(t => t.classList.remove('active'));
+						btn.classList.add('active');
+						document.querySelectorAll('.content-panel-secondary').forEach(p => p.classList.remove(
+							'active'));
+						document.getElementById(sys + '-' + sub.key).classList.add('active');
+					}
+					secondaryTabContainer.appendChild(btn);
+				})
+			}
+
+			function activateSub(sys, key) {
+				document.querySelectorAll('.tab-item-secondary').forEach(t => t.classList.remove('active'));
+				const targetSubTab = document.querySelector(`.tab-item-secondary[data-subtab="${key}"]`);
+				if (targetSubTab) targetSubTab.classList.add('active');
+				
+				document.querySelectorAll('.content-panel-secondary').forEach(p => p.classList.remove('active'));
+				const targetPanel = document.getElementById(sys + '-' + key);
+				if (targetPanel) targetPanel.classList.add('active');
+			}
+
+			// 滑动逻辑（保留原有逻辑）
+			let startX = 0;
+			let isSwiping = false;
+
+			function bindSwipe(swipeId) {
+				const el = document.getElementById(swipeId);
+				if (!el) return; // 容错：元素不存在时直接返回
+				
+				const wrap = el.querySelector('.image-swipe-wrapper');
+				const items = el.querySelectorAll('.image-item');
+				const total = items.length;
+				const key = swipeId.replace('-swipe', '');
+
+				const left = document.getElementById(key + '-arrow-left');
+				const right = document.getElementById(key + '-arrow-right');
+				const indicator = document.getElementById(key + '-indicator');
+
+				function update() {
+					wrap.style.transform = `translateX(-${swipeIndexMap[key]*100}%)`;
+					left.classList.toggle('disabled', swipeIndexMap[key] == 0);
+					right.classList.toggle('disabled', swipeIndexMap[key] == total - 1);
+					indicator.querySelectorAll('.indicator-dot').forEach((d, i) => d.classList.toggle('active', i ==
+						swipeIndexMap[key]));
+				}
+
+				left.onclick = () => {
+					if (swipeIndexMap[key] > 0) {
+						swipeIndexMap[key]--;
+						update()
+					}
+				}
+				right.onclick = () => {
+					if (swipeIndexMap[key] < total - 1) {
+						swipeIndexMap[key]++;
+						update()
+					}
+				}
+
+				el.addEventListener('touchstart', e => {
+					isSwiping = true;
+					startX = e.touches[0].clientX
+				});
+				el.addEventListener('touchmove', e => {
+					if (!isSwiping) return
+				});
+				el.addEventListener('touchend', e => {
+					if (!isSwiping) return;
+					const d = startX - e.changedTouches[0].clientX;
+					if (d > 50 && swipeIndexMap[key] < total - 1) swipeIndexMap[key]++;
+					if (d < -50 && swipeIndexMap[key] > 0) swipeIndexMap[key]--;
+					update();
+					isSwiping = false;
+				});
+			}
+
+			// 初始化（优化：只初始化默认的iOS，避免重复）
+			switchSystem('ios'); 
+			// switchSystem('android'); // 切换到安卓
+			
+			setTimeout(() => {
+			    document.querySelector('.tishi-mask').style.display = 'none';
+			}, 2000);
+
+
+		</script>
+	</body>
+</html>

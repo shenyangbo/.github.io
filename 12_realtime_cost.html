@@ -1,0 +1,125 @@
+<!DOCTYPE html">
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+
+		<!--H5页面窗口自动调整到设备宽度，并禁止用户缩放页面-->
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, userscalable=no" />
+
+		<!--当网站添加到主屏幕快速启动方式，可隐藏地址栏，仅针对ios的safari-->
+		<meta content="yes" name="apple-mobile-web-app-capable">
+
+		<!--将网站添加到主屏幕快速启动方式，仅针对ios的safari顶端状态条的样式-->
+		<meta content="black" name="apple-mobile-web-app-status-bar-style">
+
+		<!--忽略将页面中的数字识别为电话号码-->
+		<meta content="telephone=no" name="format-detection">
+
+		<!--忽略Android平台中对邮箱地址的识别-->
+		<meta content="email=no" name="format-detection">
+		<title>星卡自助伴</title>
+		<link rel="stylesheet" type="text/css" href="css/css.css">
+		<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+		<script src="js/js.js"></script>
+		<link rel="stylesheet" href="js/swiper-bundle.min.css" />
+		<script src="js/swiper-bundle.min.js"></script>
+		<style>
+			body {
+				background: #f5f5f5;
+			}
+			.bill_table{
+				width: 100%;
+				margin: 16px 0;
+			}
+			.table_content{
+				height: 36px;
+			}
+			.detail_title{
+				margin-top: 16px;
+			}
+			.table_title{
+				color: rgba(0, 0, 0, 0.9);
+				font-size: 16px;
+			}
+			.table_package_title p{
+				color: rgba(0, 0, 0, 0.65);
+			}
+			.table_last{
+				color: rgba(0, 0, 0, 0.65);
+			}
+			.table_content td:last-child {
+			    text-align: right;
+			    width: 50%;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- 余额信息 -->
+		<div class="balance_container">
+			<div>
+				<div class="balance_details">
+					<p class="balance_details_title">
+						本月实时费用
+					</p>
+					<p class="balance_details_data">
+						<span>139.00</span>元
+					</p>
+					
+					<!-- <span style="color: rgba(0, 0, 0, 0.65);">账目明显</span> -->
+					<div class="detail_title">
+						<span></span>
+						账目明细
+						<span></span>
+					</div>
+					<table class="bill_table">
+						<tr class="table_title">
+							<th>项目名称</th>
+							<th>消费费用（元）</th>
+						</tr>
+						<tr class="table_content">
+							<td class="table_package_title">
+								<p>套餐费用</p>
+							</td>
+							<td class="table_last">99.00</td>
+						</tr>
+						<tr class="table_content">
+							<td class="table_package_title">
+								<p>月基本费</p>
+							</td>
+							<td class="table_last">90.00</td>
+						</tr>
+						<tr class="table_content">
+							<td class="table_package_title">
+								<p>其他费用</p>
+							</td>
+							<td class="table_last">-50.00</td>
+						</tr>
+						<tr class="table_content" style="font-size: 16px;">
+							<td class="table_package_title">
+								<p style="color: #3473F4;">总计</p>
+							</td>
+							<td class="table_last" style="color: #3473F4;">139.00</td>
+						</tr>
+					</table>
+					<!-- <ul class="balance_ul">
+						<li>
+							<p>
+								通用余额 <span>89.60元</span>
+							</p>
+							<span>账户下全部号码和全部业务皆可使用</span>
+						</li>
+						<li>
+							<p>
+								专用余额 <span>89.60元</span>
+							</p>
+							<span>18066666666号码特定业务专用</span>
+						</li>
+					</ul> -->
+					<p style="color: #666666;">查询结果仅供参考，实际需缴纳费用已账单为准。</p>
+				</div>
+			</div>
+		</div>
+
+	</body>
+</html>

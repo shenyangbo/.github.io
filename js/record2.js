@@ -1,0 +1,350 @@
+$(document).ready(function() {
+    
+    // =============== 全局变量 ===============
+    const bt_recoding = document.getElementById("bt_recoding");
+    const blackBoxSpeak = document.querySelector(".blackBoxSpeak");
+    const blackBoxPause = document.querySelector(".blackBoxPause");
+    const toast = document.getElementById("toast");
+
+    let audioChunks = []; 
+    let currentStream = null;  // iOS 优化：持久化单例流
+    let audioCtx = null;       // 单例音频上下文
+    let gainNode = null;       // 增益补偿
+    let isRecording = false;
+    let isCancelled = false;
+    let posStart = 0;
+    let workletNode = null;    // 替代ScriptProcessor的AudioWorklet节点
+    let isWorkletReady = false;// Worklet加载状态标记
+
+    // =============== 工具函数 ===============
+    function showToast(message) {
+        toast.innerText = message;
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 1500);
+    }
+
+    function initStatus() {
+        bt_recoding.value = '按住说话';
+        showBlackBoxNone();
+        $(bt_recoding).css({'color': '#333333', 'background': 'white'});
+    }
+
+    function showBlackBoxNone() {
+        blackBoxSpeak.style.display = "none";
+        blackBoxPause.style.display = "none";
+    }
+
+    // WAV编码核心函数（标准16位单声道WAV，和你之前可识别的格式完全一致）
+    function encodeWav(samples, sampleRate, numChannels = 1) {
+        const buffer = new ArrayBuffer(44 + samples.length * 2);
+        const view = new DataView(buffer);
+
+        // RIFF文件头
+        writeString(view, 0, 'RIFF');
+        view.setUint32(4, 36 + samples.length * 2, true);
+        writeString(view, 8, 'WAVE');
+        // fmt格式子块
+        writeString(view, 12, 'fmt ');
+        view.setUint32(16, 16, true);
+        view.setUint16(20, 1, true); // PCM线性编码
+        view.setUint16(22, numChannels, true); // 单声道
+        view.setUint32(24, sampleRate, true); // 采样率
+        view.setUint32(28, sampleRate * numChannels * 2, true); // 字节率
+        view.setUint16(32, numChannels * 2, true); // 块对齐
+        view.setUint16(34, 16, true); // 16位深
+        // data数据块
+        writeString(view, 36, 'data');
+        view.setUint32(40, samples.length * 2, true);
+        // 浮点转16位PCM
+        floatTo16BitPCM(view, 44, samples);
+        return buffer;
+    }
+
+    function writeString(view, offset, string) {
+        for (let i = 0; i < string.length; i++) {
+            view.setUint8(offset + i, string.charCodeAt(i));
+        }
+    }
+
+    function floatTo16BitPCM(view, offset, input) {
+        for (let i = 0; i < input.length; i++, offset += 2) {
+            const s = Math.max(-1, Math.min(1, input[i]));
+            view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+        }
+    }
+
+    // =============== 核心：iOS兼容的预热+Worklet初始化 ===============
+    async function prepareMic() {
+        try {
+            // 1. 初始化音频上下文（必须在用户交互中触发，iOS强制要求）
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)({
+                    latencyHint: 'interactive',
+                    sampleRate: 48000 // 固定采样率，避免iOS不同设备采样率不一致
+                });
+            }
+            if (audioCtx.state === 'suspended') {
+                await audioCtx.resume();
+            }
+
+            // 2. 预加载AudioWorklet（仅加载一次，避免重复初始化）
+            if (!isWorkletReady) {
+                // 内联Worklet代码，无需单独文件，方便部署
+                const workletCode = `
+                    class RecorderProcessor extends AudioWorkletProcessor {
+                        process(inputs, outputs) {
+                            const input = inputs[0];
+                            if (input.length > 0) {
+                                // 把单声道音频数据发送到主线程
+                                this.port.postMessage(input[0]);
+                            }
+                            return true;
+                        }
+                    }
+                    registerProcessor('recorder-processor', RecorderProcessor);
+                `;
+                const workletBlob = new Blob([workletCode], { type: 'application/javascript' });
+                const workletUrl = URL.createObjectURL(workletBlob);
+                await audioCtx.audioWorklet.addModule(workletUrl);
+                URL.revokeObjectURL(workletUrl); // 释放内存
+                isWorkletReady = true;
+                console.log("AudioWorklet 初始化完成，iOS兼容就绪");
+            }
+            
+            // 3. 持久化麦克风流（避免频繁申请权限，解决iOS多次录音后吞字问题）
+            if (!currentStream || !currentStream.active) {
+                currentStream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        echoCancellation: false, 
+                        noiseSuppression: false,
+                        autoGainControl: true,
+                        sampleRate: 48000
+                    }
+                });
+                console.log("麦克风流已持久化预热");
+            }
+        } catch (err) {
+            console.warn("麦克风预热/Worklet初始化失败:", err);
+        }
+    }
+
+    // =============== 录音核心功能（AudioWorklet版，iOS完美兼容） ===============
+    async function startRecording() {
+        if (isRecording) return;
+        isCancelled = false;
+        audioChunks = [];
+
+        try {
+            // 先确保预热完成、Worklet就绪、音频上下文激活
+            await prepareMic();
+            if (!isWorkletReady || !currentStream || !audioCtx) {
+                throw new Error("录音环境未就绪");
+            }
+
+            // 音频链路：麦克风音源 -> 增益节点 -> Worklet录音节点 -> 输出（iOS必须连接destination才能正常运行）
+            const source = audioCtx.createMediaStreamSource(currentStream);
+            gainNode = audioCtx.createGain();
+            gainNode.gain.value = 1.3; // 保留原有的增益补偿
+
+            // 清理旧的Worklet节点
+            if (workletNode) {
+                workletNode.port.onmessage = null;
+                workletNode.disconnect();
+            }
+
+            // 创建录音Worklet节点
+            workletNode = new AudioWorkletNode(audioCtx, 'recorder-processor');
+            // 接收Worklet传来的PCM音频数据
+            workletNode.port.onmessage = (e) => {
+                if (!isRecording) return;
+                audioChunks.push(new Float32Array(e.data));
+            };
+
+            // 连接音频链路
+            source.connect(gainNode);
+            gainNode.connect(workletNode);
+            workletNode.connect(audioCtx.destination); // iOS强制要求：必须连接到输出，否则音频上下文会被暂停
+
+            isRecording = true;
+        } catch (err) {
+            console.error('启动录音失败:', err);
+            showToast("录音启动失败，请检查麦克风权限");
+            initStatus();
+        }
+    }
+
+    function stopRecording(isCancelAction = false) {
+        isCancelled = isCancelAction; 
+        isRecording = false;
+
+        // 停止采集，清理节点
+        if (workletNode) {
+            try {
+                workletNode.port.onmessage = null;
+                workletNode.disconnect();
+                workletNode = null;
+            } catch (e) {
+                console.error('停止采集失败:', e);
+            }
+        }
+
+        // 取消发送直接清空数据
+        if (isCancelled) {
+            audioChunks = [];
+            return;
+        }
+
+        // 无音频数据直接返回
+        if (audioChunks.length === 0) {
+            console.warn('未采集到有效音频数据');
+            showToast("未录到有效声音");
+            return;
+        }
+
+        // 合并所有PCM采样数据
+        let totalLength = 0;
+        for (const chunk of audioChunks) {
+            totalLength += chunk.length;
+        }
+        const mergedData = new Float32Array(totalLength);
+        let offset = 0;
+        for (const chunk of audioChunks) {
+            mergedData.set(chunk, offset);
+            offset += chunk.length;
+        }
+
+        // 编码为标准WAV格式（和你之前可识别的格式完全一致）
+        const wavBuffer = encodeWav(mergedData, audioCtx.sampleRate, 1);
+        const wavBlob = new Blob([wavBuffer], { type: 'audio/wav' });
+
+        // 完全复用你原有的处理逻辑，无需修改后续接口调用
+        processAudioBlob(wavBlob);
+
+        // 清理数据
+        audioChunks = [];
+
+        // 【重点】iOS优化：不在这里关闭麦克风流，避免频繁申请权限导致的硬件休眠、吞字问题
+        // 仅在页面隐藏/销毁时关闭流，已在下方visibilitychange事件中处理
+    }
+
+    function processAudioBlob(blob) {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            const base64String = reader.result.split(',')[1];
+            updateBase64Output(base64String, blob.type);
+        };
+        reader.readAsDataURL(blob);
+    }
+
+    function updateBase64Output(base64, mimeType) {
+        const audioContainer = document.getElementById('audioContainer');
+        if (audioContainer) {
+            const audioElement = document.createElement('audio');
+            audioElement.controls = true;
+            audioElement.src = `data:${mimeType};base64,${base64}`;
+            audioContainer.innerHTML = '';
+            audioContainer.appendChild(audioElement);
+        }
+    }
+
+    // =============== 事件绑定（100%保留你原有的交互逻辑） ===============
+    function initEvent() {
+        // 1. 切换按钮提前预热麦克风和Worklet
+        $(document).on('click', '.input_voice_switch', function() {
+            prepareMic(); 
+        });
+
+        // 2. 触摸开始（按住说话）
+        bt_recoding.addEventListener("touchstart", async function(event) {
+            event.preventDefault();
+            posStart = event.touches[0].pageY;
+            showBlackBoxSpeak();
+            if (navigator.vibrate) navigator.vibrate(40);
+            
+            // 直接启动录音，预热逻辑已在startRecording内处理
+            await startRecording();
+        });
+
+        // 3. 触摸移动（上滑取消）
+        bt_recoding.addEventListener("touchmove", function(event) {
+            event.preventDefault();
+            const posMove = event.targetTouches[0].pageY;
+            if (posStart - posMove < 50) {
+                showBlackBoxSpeak();
+            } else {
+                showBlackBoxPause();
+            }
+        });
+
+        // 4. 触摸结束（松开结束/取消）
+        bt_recoding.addEventListener("touchend", function(event) {
+            event.preventDefault();
+            const posEnd = event.changedTouches[0].pageY;
+            if (posStart - posEnd >= 50) {
+                stopRecording(true);
+                showToast("取消发送");
+            } else {
+                stopRecording(false);
+            }
+            initStatus();
+        });
+
+        // 5. 鼠标兼容（PC端调试用）
+        bt_recoding.addEventListener("mousedown", async (e) => {
+            showBlackBoxSpeak();
+            await startRecording();
+        });
+        
+        bt_recoding.addEventListener("mouseup", () => {
+            stopRecording(false);
+            initStatus();
+        });
+
+        bt_recoding.addEventListener("mouseleave", () => {
+            if (isRecording) {
+                stopRecording(true);
+                showToast("取消发送");
+                initStatus();
+            }
+        });
+    }
+
+    // 页面隐藏时清理资源（仅在这里彻底关闭麦克风，避免iOS休眠问题）
+    document.addEventListener('visibilitychange', function() {
+        if (document.hidden) {
+            if (isRecording) stopRecording(true);
+            if (currentStream) {
+                currentStream.getTracks().forEach(t => t.stop());
+                currentStream = null;
+            }
+        }
+    });
+
+    // 页面卸载时清理资源
+    window.addEventListener('beforeunload', function() {
+        if (currentStream) {
+            currentStream.getTracks().forEach(t => t.stop());
+        }
+        if (audioCtx) {
+            audioCtx.close();
+        }
+    });
+
+    // =============== UI状态函数（完全保留原有逻辑） ===============
+    function showBlackBoxSpeak() {
+        bt_recoding.value = '松开 结束';
+        blackBoxSpeak.style.display = "block";
+        blackBoxPause.style.display = "none";
+        $(bt_recoding).css({'background': '#3473F4', 'color': '#ffffff'});
+    }
+
+    function showBlackBoxPause() {
+        bt_recoding.value = '松开手指，取消发送';
+        blackBoxSpeak.style.display = "none";
+        blackBoxPause.style.display = "block";
+        $(bt_recoding).css('background', '#f44336');
+    }
+
+    // 初始化事件
+    initEvent();
+});

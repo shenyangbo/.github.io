@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>CSS3 Loading Animation</title>
+		<style>
+			body {
+				background-color: #abcdef;
+			}
+
+		
+
+			.container {
+				width: 30px;
+				height: 30px;
+				position: relative;
+			}
+
+			.shape {
+				width: 10px;
+				height: 10px;
+				position: absolute;
+				border-radius: 2px;
+				display:block
+			}
+
+			/* Google Animation 6 */
+			.animation-6 .shape-1 {
+				left: 0;
+				background-color: #1875E5;
+				animation: Animation6Shape1 2s linear infinite;
+			}
+
+			.animation-6 .shape-2 {
+				right: 0;
+				background-color: #C5523F;
+				animation: Animation6Shape2 2s linear infinite;
+			}
+
+			.animation-6 .shape-3 {
+				bottom: 0;
+				background-color: #499255;
+				animation: Animation6Shape3 2s linear infinite;
+			}
+
+			.animation-6 .shape-4 {
+				right: 0;
+				bottom: 0;
+				background-color: #F2B736;
+				animation: Animation6Shape4 2s linear infinite;
+			}
+
+			@keyframes Animation6Shape1 {
+
+				0%,
+				100% {
+					transform: translate(0);
+				}
+
+				25% {
+					transform: translateX(17px);
+				}
+
+				50% {
+					transform: translate(17px, 17px);
+				}
+
+				75% {
+					transform: translate(0, 17px);
+				}
+			}
+
+			@keyframes Animation6Shape2 {
+
+				0%,
+				100% {
+					transform: translate(0);
+				}
+
+				25% {
+					transform: translateY(17px);
+				}
+
+				50% {
+					transform: translate(-17px, 17px);
+				}
+
+				75% {
+					transform: translate(-17px, 0);
+				}
+			}
+
+			@keyframes Animation6Shape3 {
+
+				0%,
+				100% {
+					transform: translate(0);
+				}
+
+				25% {
+					transform: translateY(-17px);
+				}
+
+				50% {
+					transform: translate(17px, -17px);
+				}
+
+				75% {
+					transform: translate(17px, 0);
+				}
+			}
+
+			@keyframes Animation6Shape4 {
+
+				0%,
+				100% {
+					transform: translate(0);
+				}
+
+				25% {
+					transform: translateX(-17px);
+				}
+
+				50% {
+					transform: translate(-17px, -17px);
+				}
+
+				75% {
+					transform: translate(0, -17px);
+				}
+			}
+			span{
+				display:block
+			}
+		</style>
+	</head>
+	<body>
+
+
+		<span class="container animation-6">
+			<span class="shape shape-1"></span>
+			<span class="shape shape-2"></span>
+			<span class="shape shape-3"></span>
+			<span class="shape shape-4"></span>
+		</span>
+
+
+	</body>
+</html>

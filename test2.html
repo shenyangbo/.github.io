@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>音频权限测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <h1>音频权限测试</h1>
+    
+    <div id="status" class="status info">
+        点击下面的按钮来请求麦克风权限
+    </div>
+    
+    <button onclick="requestPermission()">请求麦克风权限</button>
+    <button onclick="checkPermission()">检查当前权限状态</button>
+    <button onclick="resetPermission()">重置权限提示</button>
+    
+    <div id="audioContainer"></div>
+    
+    <h2>调试信息：</h2>
+    <div id="debugInfo"></div>
+    
+    <script>
+        const statusDiv = document.getElementById('status');
+        const debugDiv = document.getElementById('debugInfo');
+        
+        function updateStatus(message, type = 'info') {
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+        }
+        
+        function addDebugInfo(message) {
+            const p = document.createElement('p');
+            p.textContent = `${new Date().toLocaleTimeString()}: ${message}`;
+            debugDiv.appendChild(p);
+        }
+        
+        // 检查浏览器支持
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            updateStatus('您的浏览器不支持麦克风访问', 'error');
+            addDebugInfo('浏览器不支持 getUserMedia API');
+        } else {
+            addDebugInfo('浏览器支持 getUserMedia API');
+        }
+        
+        // 检查协议
+        addDebugInfo(`当前协议: ${window.location.protocol}`);
+        if (window.location.protocol !== 'https:' && window.location.hostname !== 'localhost') {
+            updateStatus('注意：非HTTPS环境可能影响权限请求', 'error');
+        }
+        
+        async function requestPermission() {
+            try {
+                addDebugInfo('开始请求麦克风权限...');
+                updateStatus('正在请求麦克风权限...', 'info');
+                
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: true
+                });
+                
+                // 获取权限后立即停止流
+                stream.getTracks().forEach(track => {
+                    track.stop();
+                    addDebugInfo(`停止音频轨道: ${track.label}`);
+                });
+                
+                updateStatus('麦克风权限获取成功！', 'success');
+                addDebugInfo('权限请求成功');
+                
+            } catch (err) {
+                console.error('权限请求失败:', err);
+                updateStatus(`权限请求失败: ${err.message}`, 'error');
+                addDebugInfo(`权限请求失败: ${err.name} - ${err.message}`);
+            }
+        }
+        
+        async function checkPermission() {
+            try {
+                if (navigator.permissions) {
+                    const result = await navigator.permissions.query({name: 'microphone'});
+                    updateStatus(`当前麦克风权限状态: ${result.state}`, 'info');
+                    addDebugInfo(`权限状态: ${result.state}`);
+                } else {
+                    updateStatus('浏览器不支持权限查询API', 'error');
+                    addDebugInfo('不支持 navigator.permissions API');
+                }
+            } catch (err) {
+                updateStatus(`权限查询失败: ${err.message}`, 'error');
+                addDebugInfo(`权限查询失败: ${err.message}`);
+            }
+        }
+        
+        function resetPermission() {
+            updateStatus('要重置权限，请在浏览器地址栏左侧点击锁图标，然后重置麦克风权限', 'info');
+            addDebugInfo('用户请求重置权限提示');
+        }
+        
+        // 页面加载完成后的初始化
+        window.addEventListener('load', function() {
+            addDebugInfo('页面加载完成');
+            checkPermission();
+        });
+    </script>
+</body>
+</html>

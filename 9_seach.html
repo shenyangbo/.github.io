@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+
+		<!--H5页面窗口自动调整到设备宽度，并禁止用户缩放页面-->
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, userscalable=no" />
+
+		<!--当网站添加到主屏幕快速启动方式，可隐藏地址栏，仅针对ios的safari-->
+		<meta content="yes" name="apple-mobile-web-app-capable">
+
+		<!--将网站添加到主屏幕快速启动方式，仅针对ios的safari顶端状态条的样式-->
+		<meta content="black" name="apple-mobile-web-app-status-bar-style">
+
+		<!--忽略将页面中的数字识别为电话号码-->
+		<meta content="telephone=no" name="format-detection">
+
+		<!--忽略Android平台中对邮箱地址的识别-->
+		<meta content="email=no" name="format-detection">
+		<title>星卡自助伴</title>
+		<link rel="stylesheet" type="text/css" href="css/css.css">
+		<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+		<script src="js/js.js"></script>
+		<link rel="stylesheet" href="js/swiper-bundle.min.css" />
+		<script src="js/swiper-bundle.min.js"></script>
+		<style>
+			/* .highlight {
+				background-color: yellow;
+				display: inline;
+			} */
+
+			.count-badge {
+				color: red;
+				display: none;
+				width: 20px;
+				height: 20px;
+				border-radius: 50%;
+				background: red;
+				color: #ffffff;
+				    line-height: 20px;
+				    text-align: center;
+					font-size: 14px;
+			}
+
+
+			.alert {
+				    position: fixed;
+				    top: 50%;
+				    left: 50%;
+				    transform: translateX(-50%);
+				    background-color: rgba(0, 0, 0, 0.65);
+				    color: white;
+				    padding: 10px 20px;
+				    border-radius: 5px;
+				    z-index: 1000;
+				    display: none;
+			}
+
+			.swiper-slide {
+				background-color: #ffffff;
+				padding:0 16px;
+			}
+
+			.subproject_title {
+				text-align: left;
+			}
+
+			.subproject_details {
+				text-align: left;
+			}
+			/* 动画效果 */
+			.home_question_tab {
+				/* padding: 10px 20px; */
+				cursor: pointer;
+				/* transition: background-color 0.3s; */
+				position: relative;
+				left: -100%;
+				/* 初始位置在左侧外 */
+				opacity: 0;
+				transform: translateX(-100%);
+				/* 初始位置在左侧外 */
+				transition: all 0.4s ease-in-out;
+			}
+			
+			.home_question_tab.show {
+				left: 0;
+				opacity: 1;
+				transform: translateX(0);
+			}
+			
+		</style>
+	</head>
+	<body>
+		<div class="home_container">
+			<div class="home_top">
+				<img src="image/home_blue_bg.jpg" alt="" class="home_top_bg" />
+
+				<!-- 号码信息 -->
+				<div class="header">
+					<div class="search_text">
+						<input type="text" id="searchInput" placeholder="请输入搜索词">
+						<button id="searchButton">搜索</button>
+					</div>
+				</div>
+			</div>
+
+			<div class="home_question">
+				<div class="home_question_tab background" id="tab1-tab">
+					<p><span>头条系</span><span class="count-badge"></span></p>
+					<span class="bg_active"></span>
+				</div>
+				<div class="home_question_tab" id="tab2-tab">
+					<p><span>百度系</span><span class="count-badge"></span></p>
+					<span class="bg_active"></span>
+				</div>
+				<div class="home_question_tab" id="tab3-tab">
+					<p><span>网易系</span><span class="count-badge"></span></p>
+					<span class="bg_active"></span>
+				</div>
+				<div class="home_question_tab" id="tab4-tab">
+					<p><span>腾讯视频客户端</span><span class="count-badge"></span></p>
+					<span class="bg_active"></span>
+				</div>
+				<div class="home_question_tab" id="tab5-tab">
+					<p><span>优酷</span><span class="count-badge"></span></p>
+					<span class="bg_active"></span>
+				</div>
+				<div class="home_question_tab" id="tab6-tab">
+					<p><span>芒果</span><span class="count-badge"></span></p>
+					<span class="bg_active"></span>
+				</div>
+
+			</div>
+			<div class="swiper mySwiper2" style="margin-top: 0px;" id="content">
+				<div class="swiper-wrapper">
+					<!-- 头条 -->
+					<div id="tab1" class="swiper-slide">
+						<p class="search_item_title">
+							<img src="image/ic_app_jinritoutiao.png" alt="">头条系
+						</p>
+						<div class="search_item_subproject">
+							<p class="subproject_title">
+								<span class="dot_red"></span>
+								应用包含
+							</p>
+							<p class="subproject_details">1、今日头条、今日头条lite版(今日头条极速版)、西瓜视频、
+								火山小视频(抖音火山版)、抖音短视频、抖音极速版、皮皮
+								虾、懂车帝、半次元、番茄畅听、剪映、图虫、多闪、飞聊、
+								gogokid、轻颜相机、激萌、时光相册、飞书APP。</p>
+						</div>
+						<div class="search_item_subproject">
+							<p class="subproject_title">
+								<span class="dot_red"></span>
+								定向流量不包含以下使用范围:
+							</p>
+							<p class="subproject_details">
+								1、以上应用内第三方广告、弹幕、在线观看/下载/缓存第三方视频、直播、APP视频通话产生的流量所产生的流量。<br>
+								2、在无线上网卡、移动WIF1、MIF1、平板电脑(如ipad)等设
+								备使用。<br>
+								3、手机号码作为手机热点使用。<br>
+								4、打开登录头条系产品时加载图片、文字等产生的流量。
+								（番茄畅听应用说明:1、APP下载:I0S、安卓均可在应用商店
+								搜案“番茄畅听”下载。2、番茄畅听定向流量包含范围:听音
+								频、看视频、看小说、下载。剪映应用说明:定向流量包含范
+								围:1、分享视频、模板至抖音、西瓜等字节系平台，观看视
+								频。2、下载素材、特效。3、PP内云存储功能，上传下载。)</p>
+						</div>
+					</div>
+
+					<!-- 百度 -->
+					<div id="tab2" class="swiper-slide">
+						<p class="search_item_title">
+							<img src="image/ic_app_baidu.png" alt="">百度系
+						</p>
+						<div class="search_item_subproject">
+							<p class="subproject_title">
+								<span class="dot_blue"></span>
+								应用包含
+							</p>
+							<p class="subproject_details">手机百度、百度贴吧、百度地图、爱奇艺视频、百度网盘（超
+								级会员）、百度手机助手、百度百科、秒懂百科、百度知道、
+								百度文库、百度输入法、地图淘金、百度糯米、千千音乐、百
+								度翻译、百度新闻、百度浏览器、好看视频。</p>
+						</div>
+						<div class="search_item_subproject">
+							<p class="subproject_title">
+								<span class="dot_blue"></span>
+								定向流量不包含以下使用范围:
+							</p>
+							<p class="subproject_details">
+								<i>定量流量涵盖：</i><br>
+								1、通过搜索（试用版）打开并跳转的网页。<br>
+								2、个性化资讯推荐板块（基本全部可以使用定向流量，动漫、逛逛、畅听以及少部分第三方小说无法使用定向流量。广告无法使用定向流量）。<br>
+								3、其他用户自主进入频道（右上方），小说观看文字和在线高质量阅读（个别第三方内容有提示无法使用定向流量）。<br>
+								<i>定向流量不包括：</i><br>
+								1、通过搜索（试用版）打开的以下内容：<br>
+								2、通过搜索打开的所有音频文件。<br>
+								3、通过搜索进行下载的文件、图片、音频、手机应用（调起前往百度助手下载的除外）等下载类目。<br>
+								4、其中苹果系统IOS11以下（不包含IOS11）不在定向流量范围内。<br>
+								5、其他用户自主进入频道（右上方）音乐、地图、糯米等。
+							</p>
+						</div>
+
+					</div>
+					<!-- 网易 -->
+					<div id="tab3" class="swiper-slide">
+						<p class="search_item_title">
+							<img src="image/ic_app_wangyi.png" alt="">网易系
+						</p>
+						<div class="search_item_subproject">
+							<p class="subproject_title">
+								<span class="dot_red"></span>
+								应用包含
+							</p>
+							<p class="subproject_details">
+								<i>1、网易系非游戏应用：</i>网易云音乐、网易新闻、网易公开课、网易云阅读、网易云课堂、易信、网易蜗牛阅读、网易100分。<br>
+								<i>2、网易系游戏应用包含：</i>梦幻西游、大话西游、阴阳师、荒野行动、终结者2、倩女幽魂、率土之滨、镇魔曲、三国如龙传、坦克连、决战平安京、我的世界、天下、光明大陆、格罗娅传奇。。<br>
+							</p>
+						</div>
+						<div class="search_item_subproject">
+							<p class="subproject_title">
+								<span class="dot_red"></span>
+								定向流量不包含以下使用范围:
+							</p>
+							<p class="subproject_details">
+								<i>电信网络下，使用网易云音乐手机APP的流量可使用定向流量。定向流量不包括以下使用范围：</i><br>
+								1、iOS和安卓客户端版本低于4、3、1版本不能使用定向流量（不包含4、3、1）。<br>
+								2、客户端启动广告、其他部分客户端广告、客户端内的直播业务的流量。<br>
+								3、APP内添加并关注微博、微信等好友。客户端内分享到其他APP。动态、私信等打开第三方链接。<br>
+								4、第三方APP访问网易云音乐产生的流量不能使用定向流量，如微博、微信内播放网易云音乐的音频、视频等。<br>
+								5、手机号码处于国际或港澳台地区漫游状态下产生的流量。<br>
+								6、手机卡作为手机热点使用，或使用网络加速器、代理服务器、VPN等工具。<br>
+								7、在无线上网卡、移动WIFI、MIFI、平板电脑（如iPad）等设备使用时，不能使用定向流量。<br>
+								8、使用非iPhone、非android版本的客户端APP（如WindowsPhone）产生的流量。<br>
+								9、双卡用户切换到其他手机卡使用流量。<br>
+								10、iPhone用户需要关闭无线局域网助理（设置路径：设置-蜂窝移动网络-无线局域网助理）。<br>
+							</p>
+						</div>
+
+					</div>
+					<!-- 腾讯 -->
+					<div id="tab4" class="swiper-slide">
+						<p class="search_item_title">
+							<img src="image/ic_app_tengxun.png" alt="">腾讯视频
+
+						</p>
+						<div class="search_item_subproject">
+							<p class="subproject_title">
+								<span class="dot_red"></span>
+								应用包含:
+
+							</p>
+							<p class="subproject_details">
+								腾讯视频APP、腾讯体育APP。
+							</p>
+						</div>
+						<div class="search_item_subproject">
+							<p class="subproject_title">
+								<span class="dot_red"></span>
+								使用说明:
+							</p>
+							<p class="subproject_details">
+								<i>腾讯视频/腾讯体育定向流量范围：腾讯视频APP、腾讯体育APP（请升级至最新版本），使用定向流量服务前需重新启动APP，其中以下情况不在定向流量业务范围内：</i><br>
+								1、客户端启动、登录及客户端内的图片、文字、视频内插播广告、弹幕、第三方广告或直播、主播类视频、在线观看和下载缓存第三方视频等。<br>
+								2、手机号码处于国际或港澳台地区漫游状态下产生的流量。<br>
+								3、更换手机号、更换至其他运营商、携号转至其他运营商的用户，将不能使用定向流量。<br>
+								4、市场解锁、网络VPN代理或运营商模拟等可能会修改手机运营商信息的软件，将导致服务不可用，请不要使用。<br>
+								5、流量监控、网络加速、权限管理软件，将导致服务不可用，请不要使用。<br>
+								6、双卡用户切换手机sim卡将会导致流量扣费。<br>
+								7、iPhone用户请关闭手机设置-蜂窝移动网络-无线局域网助理，以免产生流量扣费。<br>
+								8、iOS7系统可能会出现网络判断错误的问题，将导致流量扣费。请尽快升级系统到最新版本，或在wifi网络下手动关闭蜂窝移动网络开关。<br>
+								9、使用CMWAP接入点方式访问APP所产生的流量无法免除。<br>
+								10、用无线上网卡、平板电脑、CPE、MIFI等非手机设备，或使用黑莓、WindowsPhone等其他操作系统产生的流量。<br>
+								11、通过手机wifi热点等方式使用的流量。<br>
+							</p>
+						</div>
+
+					</div>
+					<!-- 优酷 -->
+					<div id="tab5" class="swiper-slide">
+						<p class="search_item_title">
+							<img src="image/ic_app_tengxun.png" alt="">优酷
+					
+						</p>
+						<div class="search_item_subproject">
+							<p class="subproject_title">
+								<span class="dot_red"></span>
+								应用包含:
+					
+							</p>
+							<p class="subproject_details">
+								优酷
+							</p>
+						</div>
+						<div class="search_item_subproject">
+							<p class="subproject_title">
+								<span class="dot_red"></span>
+								使用说明:
+							</p>
+							<p class="subproject_details">
+								优酷
+							</p>
+						</div>
+					</div>
+					<!-- 芒果 -->
+					<div id="tab6" class="swiper-slide">
+						<p class="search_item_title">
+							<img src="image/ic_app_tengxun.png" alt="">芒果
+											
+						</p>
+						<div class="search_item_subproject">
+							<p class="subproject_title">
+								<span class="dot_red"></span>
+								应用包含:
+											
+							</p>
+							<p class="subproject_details">
+								芒果
+							</p>
+						</div>
+						<div class="search_item_subproject">
+							<p class="subproject_title">
+								<span class="dot_red"></span>
+								使用说明:
+							</p>
+							<p class="subproject_details">
+								芒果
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="alert"></div>
+
+		</div>
+
+	</body>
+</html>

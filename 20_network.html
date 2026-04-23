@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+		<!--H5页面窗口自动调整到设备宽度，并禁止用户缩放页面-->
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, userscalable=no" />
+
+		<title>星卡自助伴</title>
+		<link rel="stylesheet" type="text/css" href="css/css.css">
+		<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+		<style type="text/css">
+			.message_title {
+				color: #ffffff;
+				display: flex;
+				align-items: center;
+				width: 100%;
+				gap: 4px;
+				font-size: 16px;
+			}
+
+			.message_title img {
+				width: 28px;
+				border: 1px solid rgba(255, 255, 255, 0.6);
+				border-radius: 8px;
+			}
+
+			.verify_password {
+				background: linear-gradient(135deg, #AEB5FF, #72A0FF);
+				padding: 16px 8px 8px;
+				border-radius: 8px;
+				gap: 8px;
+			}
+
+
+			.button_large {
+				background: linear-gradient(90deg, #9679FF, #5D92FF);
+				border-radius: 22px;
+			}
+
+
+			.input_container {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				padding: 8px 16px;
+				gap: 8px;
+			}
+
+			.input_container input {
+				border-bottom: 1px solid #EEEEEE;
+				font-size: 16px;
+				color: #333333;
+				line-height: 44px;
+				width: 100%;
+				border-radius: 22px;
+				text-align: center;
+			}
+
+			.network_container {
+				background: #ffffff;
+				width: 100%;
+				padding:  8px;
+				border-radius: 8px;
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+			}
+
+			.local_container {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: #E1EAFE;
+				border: 1px solid #A4C0FA;
+				padding: 8px 0;
+				border-radius: 8px;
+				gap: 4px;
+
+			}
+
+			.local_container img {
+				width: 24px;
+			}
+
+			.local_container span {
+				background: linear-gradient(to right, #9679FF, #5D92FF);
+				-webkit-background-clip: text;
+				background-clip: text;
+				color: transparent;
+				font-weight: bold;
+				font-size: 16px;
+			}
+
+			.remote_container {
+				border-radius: 8px;
+				background: #EFF5FF;
+				border: 1px solid #A4C0FA;
+				overflow: hidden;
+			}
+
+			.remote_item {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				background: #E1EAFE;
+				padding: 8px 0;
+				gap: 4px;
+			}
+			.remote_item span {
+				background: linear-gradient(to right, #9679FF, #5D92FF);
+				-webkit-background-clip: text;
+				background-clip: text;
+				color: transparent;
+				font-weight: bold;
+				font-size: 16px;
+			}
+
+			.remote_item img {
+				width: 24px;
+			}
+			
+			.active{
+				color: #ffffff;
+				background: linear-gradient(to right, #9679FF, #5D92FF);
+			}
+			.active span{
+				color: #ffffff !important;
+			}
+			input:disabled{
+				background: #eeeeee;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="verify_password">
+			<p class="message_title">
+				<img src="image/ic_network.png" alt="" />
+				<span>上网功能开通/关闭办理</span>
+			</p>
+			<div class="network_container">
+				<p class="local_container">
+					<img src="image/ic_local_blue.png" alt="" />
+					<span>本机办理</span>
+
+				</p>
+
+				<div class="remote_container">
+					<p class="remote_item">
+						<img src="image/ic_remote_blue.png" alt="" />
+						<span>他机办理</span>
+					</p>
+					<div class="input_container">
+						<input type="text" maxlength="11" style="flex: 1;" placeholder="请输入办理号码" />
+
+						<button class="button_large right" >确定</button>
+					</div>
+
+				</div>
+			</div>
+			<div class="toast" id="toast"></div>
+
+		</div>
+	</body>
+	<script>
+	
+		// 点击本机办理
+		$('.local_container').on('click',function(){
+			$(this).addClass('active');
+			$('.local_container img').attr('src', 'image/ic_local_white.png');
+			$('.remote_item span').css('color','#BFBFBF')
+			$('.remote_item img').attr('src', 'image/ic_remote_grey.png');
+			$('input').attr('disabled',true)
+			$('.button_large').attr('disabled',true)
+		});
+		
+		// 他机办理-确定
+		$('.button_large').on('click',function(){
+			// 本机样式修改
+			$('.local_container').off('click')
+			$('.local_container span').css('color','#BFBFBF')
+			$('.local_container img').attr('src', 'image/ic_local_grey.png');
+			
+			// 他机样式修改
+			$('.button_large').attr('disabled',true)
+			$('input').css('color','#999999')
+			$('input').attr('disabled',true)
+
+			$('.remote_item').addClass('active');
+			$('.remote_item img').attr('src', 'image/ic_remote_white.png');
+			
+			// toast提示
+			const toast = document.getElementById("toast");
+			toast.innerText = '验证成功';
+			toast.style.display = 'block';
+			setTimeout(() => {
+				toast.style.display = 'none';
+			}, 1000);
+		})
+	</script>
+</html>

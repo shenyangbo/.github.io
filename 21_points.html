@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<title>电信积分页面</title>
+		<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+		<style>
+			/* --- 1. 统一设计规范 (同步 15_balance.html) --- */
+			:root {
+				--primary-color: #3473F4;
+				--primary-light: #F4F8FF;
+				--text-main: #1D1D1D;
+				--text-sub: #86868B;
+				--card-radius: 8px;
+				--ease-breathe: cubic-bezier(0.23, 1, 0.32, 1);
+			}
+
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: border-box;
+				-webkit-tap-highlight-color: transparent;
+			}
+
+			body {
+				background-color: #FFFFFF;
+				color: var(--text-main);
+				font-family: -apple-system, sans-serif;
+				padding-bottom: 16px;
+			}
+
+			/* --- 2. 顶部头部 --- */
+			.top-header {
+				background: url('image/points_bg.png') no-repeat center center;
+				background-size: 100% 100%;
+				color: #fff;
+				padding: 16px 0;
+				position: relative;
+			}
+
+			.header-top-row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 8px;
+				gap: 8px;
+				padding:0 16px ;
+			}
+
+			.username {
+				font-size: 18px;
+				font-weight: 700;
+			}
+
+			.user-info {
+				display: flex;
+				gap: 8px;
+			}
+
+			.vip-tag {
+				background: linear-gradient(90deg,#FFEFD2,#D8B16C);
+				color: #86611F;
+				font-size: 12px;
+				padding: 4px 4px;
+				border-radius: 20px;
+				border: 0.5px solid rgba(255, 255, 255, 0.3);
+				display: flex;
+				align-items: center;
+			}
+			.vip-tag  img{
+				width:16px ;
+				height:16px;
+			}
+			.rule-wrap {
+				display: flex;
+				align-items: center;
+				gap: 4px;
+				font-size: 14px;
+				cursor: pointer;
+				opacity: 0.9;
+			}
+
+			.info-icon {
+				width: 18px;
+				height: 18px;
+				fill: none;
+				stroke: #ffffff;
+				stroke-width: 2;
+				stroke-linecap: round;
+				stroke-linejoin: round;
+			}
+
+			.expire-text {
+				font-size: 14px;
+				margin-bottom: 8px;
+				opacity: 0.8;
+				padding:0 16px ;
+			}
+
+			.total-point-title {
+				font-size: 20px;
+				font-weight: 800;
+				padding:0 16px ;
+				border-top: 1px dashed rgba(255 ,255,255,0.2);
+			}
+
+			.header-bottom-tip {
+				display: none;
+			}
+
+			/* --- 3. Tab导航 (同步 balance 样式) --- */
+			.tab-nav {
+				display: flex;
+				background: rgba(255, 255, 255, 0.85);
+				backdrop-filter: blur(20px);
+				-webkit-backdrop-filter: blur(20px);
+				position: sticky;
+				top: 0;
+				z-index: 10;
+				border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+			}
+
+			.tab-item {
+				flex: 1;
+				text-align: center;
+				padding: 8px 0;
+				font-size: 14px;
+				color: var(--text-sub);
+				position: relative;
+				cursor: pointer;
+				transition: 0.3s;
+			}
+
+			.tab-item.active {
+				color: var(--primary-color);
+				font-weight: 600;
+			}
+
+			.tab-item::after {
+				content: "";
+				position: absolute;
+				bottom: 0;
+				left: 50%;
+				transform: translateX(-50%) scaleX(0);
+				width: 16px;
+				height: 3px;
+				background-color: var(--primary-color);
+				border-radius: 3px;
+				transition: 0.4s var(--ease-breathe);
+				opacity: 0;
+			}
+
+			.tab-item.active::after {
+				transform: translateX(-50%) scaleX(1);
+				opacity: 1;
+			}
+			/* 吸顶后：背景蓝、文字白、伪元素白 */
+			.tab-nav.sticky {
+			  background: #1677ff !important;
+			}
+			.tab-nav.sticky .tab-item {
+			  color: #fff !important;
+			}
+			.tab-nav.sticky .tab-item::after {
+			  background: #fff !important;
+			}
+
+			/* --- 4. 内容区域 & 呼吸感动画 --- */
+			.content-wrap {
+				padding: 8px;
+				display: none;
+			}
+
+			.content-wrap.active {
+				display: block;
+			}
+
+			@keyframes breatheIn {
+				0% {
+					opacity: 0;
+					transform: translateY(15px);
+				}
+
+				100% {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			.month-entry {
+				animation: breatheIn 0.6s var(--ease-breathe) forwards;
+			}
+
+			.month-title {
+				font-size: 13px;
+				color: var(--text-sub);
+				margin: 8px 0 10px 0;
+			}
+
+			.point-card {
+				background-color: #F5FAFE;
+				border-radius: var(--card-radius);
+				padding: 4px 8px;
+				border: 0.5px solid #F2F2F7;
+			}
+
+			.point-item {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				padding: 6px 0;
+			}
+
+			/* .point-item:not(:last-child) {
+				border-bottom: 0.5px solid #F2F2F7;
+			} */
+
+			.item-left {
+				display: flex;
+				align-items: center;
+				gap: 4px;
+				font-size: 14px;color: #333333;
+			}
+
+			.item-icon {
+				width: 32px;
+				height: 32px;
+				border-radius: 10px;
+				display: flex;        
+				align-items: center;
+				justify-content: center;
+			}
+
+			.icon-add {
+				background-color: var(--primary-light);
+			}
+
+			.icon-use {
+				background-color: #FFF9E6;
+			}
+
+			.num-add {
+				color: var(--primary-color);
+				font-size: 16px;
+			}
+
+			.num-sub {
+				color: var(--text-main);
+				font-size: 16px;
+			}
+
+			/* --- 5. 底部按钮微交互 --- */
+			.btn-container {
+				padding: 0 8px;
+				text-align: center;
+			}
+
+			.btn-wrap {
+				display: flex;
+				gap: 12px;
+				justify-content: center;
+			}
+
+			.btn {
+				/* flex: 1; */
+				padding: 4px 16px;
+				border-radius: 4px;
+				font-size: 14px;
+				cursor: pointer;
+				transition: all 0.3s var(--ease-breathe);
+				border: none;
+				position: relative;
+			}
+
+			#loadMore {
+				background-color: var(--primary-light);
+				color: var(--primary-color);
+			}
+
+			#loadAll {
+				background-color: var(--primary-light);
+				color: #86611F;
+			}
+
+			.btn:active {
+				transform: scale(0.95);
+				opacity: 0.8;
+			}
+
+			.btn.loading {
+				color: transparent !important;
+				pointer-events: none;
+			}
+
+			.btn.loading::after {
+				content: "加载中...";
+				position: absolute;
+				left: 0;
+				top: 0;
+				width: 100%;
+				height: 100%;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: inherit;
+				font-size: 14px;
+			}
+
+			.load-finish {
+				font-size: 14px;
+				color: #999999;
+				display: none;
+				padding: 8px 0;
+			}
+
+			/* --- 6. 弹窗样式 --- */
+			.popup-mask {
+				position: fixed;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background: rgba(0, 0, 0, 0.2);
+				backdrop-filter: blur(8px);
+				display: none;
+				justify-content: center;
+				align-items: center;
+				z-index: 999;
+			}
+
+			.popup-content {
+				width: 90%;
+				background: #fff;
+				border-radius: 8px;
+				padding:16px 8px;
+				box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				    max-height: 80%;
+				    overflow: scroll;
+			}
+
+			.popup-title {
+				font-size: 17px;
+				font-weight: 700;
+				/* margin-bottom: 12px; */
+				text-align: center;
+			}
+
+			.popup-title::after {
+				content: "";
+				display: block;
+				height: 4px;
+				width: 24px;
+				background: linear-gradient(90deg, #C0D8FD, #3473F4);
+				border-radius: 2px;
+				margin: 8px auto 0;
+			}
+
+			.popup-desc {
+				font-size: 14px;
+				color: #666;
+				line-height: 1.8;
+				margin-bottom: 8px;
+			}
+
+			.popup-close {
+				width: 100%;
+				padding: 12px;
+				background: var(--primary-color);
+				color: #fff;
+				border: none;
+				border-radius: 8px;
+				font-weight: 600;
+				cursor: pointer;
+			}
+
+			.svg-icon {
+				width: 18px;
+				height: 18px;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="top-header">
+			<div class="header-top-row">
+				<div class="user-info">
+					<div class="username">李*娟</div>
+					<div class="vip-tag"><img src="image/points_crown.png" alt="" />五星白金客户</div>
+				</div>
+				<div class="rule-wrap" id="ruleBtn">
+					积分规则
+					<svg class="info-icon" viewBox="0 0 24 24">
+						<circle cx="12" cy="12" r="10"></circle>
+						<line x1="12" y1="7" x2="12" y2="13"></line>
+						<line x1="12" y1="16" x2="12" y2="17"></line>
+					</svg>
+					
+				</div>
+			</div>
+			<div class="expire-text">年底到期积分：260</div>
+			<div class="total-point-title"><span class="count-up">2039</span></div>
+			<div class="header-bottom-tip"></div>
+		</div>
+
+		<div class="tab-nav">
+			<div class="tab-item active" data-tab="all">全部明细</div>
+			<div class="tab-item" data-tab="income">积分收入</div>
+			<div class="tab-item" data-tab="expense">积分支出</div>
+		</div>
+
+		<div class="content-wrap active" id="allTab"></div>
+		<div class="content-wrap" id="incomeTab"></div>
+		<div class="content-wrap" id="expenseTab"></div>
+
+		<div class="btn-container">
+			<div class="btn-wrap" id="btnWrap">
+				<div class="btn" id="loadMore">查看更多</div>
+				<div class="btn" id="loadAll">查看全部</div>
+			</div>
+			<div class="load-finish" id="loadFinish">—— 已加载近三年的数据 ——</div>
+		</div>
+
+		<div class="popup-mask" id="popupMask">
+			<div class="popup-content">
+				<div class="popup-title">积分规则说明</div>
+				<div class="popup-desc">
+					积分规则：
+<br>
+					1、电信积分是中国电信基于客户对电信主营业务的消费累积而回馈客户的消费积分，可用于兑换电信自有业务(话费、流量、天翼高清等)或者第三方实物/虚拟类礼品。积分回馈对象为中国电信后付费星级客户。
+<br>
+					2、电信积分计算规则：
+<br>（1）电信积分=消费积分*星级对应积分倍数（消费积分以实收电信业务消费金额为基础，每消费金额1元的电信业务积1分，不足1元不积分）。客户星级与积分倍数对应关系为:1星1倍、2星1.5倍、3星-4星2倍、5星3倍、6星4倍、7星5倍。
+<br>（2）客户有效期内的消费积分累计值超过15万分后暂停计算积分，客户抵扣账单的赠金不计算积分。
+<br>3、电信积分有效期：以自然年为计算单位，三年为一个有效期，实行滚动清零。
+例如：客户2013年1至12月产生的可兑换积分有效期将到2015年12月31日为止。
+<br>4、电信积分使用
+<br>（1）同一客户名下手机号码积分可共享使用。
+<br>（2）客户号码未实名制或入网不足6个月，不支持积分兑换。
+<br>（3）积分兑换礼品是中国电信对客户的消费回馈，不支持开具发票。
+<br>5、电信积分特殊情节处理
+<br>（1）客户所有终端业务设备离网：停止计算该客户所有积分，原有积分自该客户离网后全部失效。
+<br>（2）客户名下某一终端设备离网：停止计算该终端设备所关联销售品的积分，原有积分继续有效。
+<br>（3）客户名下某一业务产品欠费，则停止计算该业务产品所关联销售品的积分，客户全额缴纳欠费后，次月恢复计算积分，逾期缴费账期不计算积分；客户名下任一业务产品连续欠费超过三个账期，且经催缴仍不缴纳的，冻结客户积分账户，停止该客户积分账户积分计算和兑换，客户全额缴纳欠费后，客户积分账户解冻。
+<br>积分规则如有调整，将在第一时间公布，敬请留意。如有其他疑问，请联系 <span style="color: #3473F4;">人工客服</span>咨询。
+				</div>
+				<button class="popup-close" id="closePopup">我知道了</button>
+			</div>
+		</div>
+
+		<script>
+			$(document).ready(function() {
+				const tabNav = document.querySelector('.tab-nav');
+				window.addEventListener('scroll', () => {
+				  tabNav.classList.toggle('sticky', tabNav.getBoundingClientRect().top <= 0);
+				});
+				// 1. 数字跳动动画
+				function runCounter() {
+					$('.count-up').each(function() {
+						var $this = $(this),
+							target = parseFloat($this.text());
+						$({
+							n: 0
+						}).animate({
+							n: target
+						}, {
+							duration: 1000,
+							step: function() {
+								$this.text(Math.floor(this.n));
+							},
+							complete: function() {
+								$this.text(target);
+							}
+						});
+					});
+				}
+				runCounter();
+
+				// 2. Tab 切换逻辑
+				$('.tab-item').on('click', function() {
+					if ($(this).hasClass('active')) return;
+					$('.tab-item').removeClass('active');
+					$(this).addClass('active');
+					$('.content-wrap').removeClass('active');
+					const $target = $('#' + $(this).data('tab') + 'Tab');
+					$target.addClass('active');
+
+					// 触发内部元素的 breatheIn 动画
+					$target.find('.month-entry').css('animation', 'none');
+					setTimeout(() => {
+						$target.find('.month-entry').css('animation', '');
+					}, 10);
+				});
+
+				// 3. 弹窗控制
+				$('#ruleBtn').on('click', function() {
+					$('#popupMask').fadeIn(200).css('display', 'flex');
+				});
+				$('#closePopup, #popupMask').on('click', function(e) {
+					if (e.target === this || e.target.id === 'closePopup') $('#popupMask').fadeOut(200);
+				});
+
+				// 4. 数据生成与分类逻辑
+				const iconAddSvg =
+					`<svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="#3473F4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>`;
+				const iconUseSvg =
+					`<svg class="svg-icon" viewBox="0 0 24 24" fill="none" stroke="#F1BC31" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H4"></path></svg>`;
+
+				const now = new Date();
+				let currentYear = now.getFullYear();
+				let currentMonth = now.getMonth() + 1;
+				let loadedMonths = 0;
+				const totalNeed = 36;
+				const perLoad = 6;
+
+				function getPrevMonth() {
+					currentMonth--;
+					if (currentMonth < 1) {
+						currentYear--;
+						currentMonth = 12;
+					}
+					return {
+						year: currentYear,
+						month: currentMonth
+					};
+				}
+
+				// 核心：生成 HTML，根据 tabType 决定显示哪些条目
+				function generateMonthHtml(year, month, tabType) {
+					const incomeItem = `
+                    <div class="point-item">
+                        <div class="item-left"><img src="image/points_add.png" alt="" width="22px"/>新增积分</div>
+                        <div class="num-add">+258</div>
+                    </div>`;
+					const expenseItem = `
+                    <div class="point-item">
+                        <div class="item-left"><img src="image/points_minus.png" alt="" width="22px"/>已用积分</div>
+                        <div class="num-sub">-0</div>
+                    </div>`;
+
+					let content = "";
+					if (tabType === 'all') content = incomeItem + expenseItem;
+					else if (tabType === 'income') content = incomeItem;
+					else if (tabType === 'expense') content = expenseItem;
+
+					return `
+                <div class="month-entry">
+                    <div class="month-title">${year}年${month}月</div>
+                    <div class="point-card">${content}</div>
+                </div>`;
+				}
+
+				function renderData(y, m) {
+					$('#allTab').append(generateMonthHtml(y, m, 'all'));
+					$('#incomeTab').append(generateMonthHtml(y, m, 'income'));
+					$('#expenseTab').append(generateMonthHtml(y, m, 'expense'));
+					loadedMonths++;
+				}
+
+				// 初始加载
+				renderData(currentYear, currentMonth);
+				let prev = getPrevMonth();
+				renderData(prev.year, prev.month);
+
+				// 5. 加载按钮微交互
+				function handleLoading(btnId, func) {
+					$(btnId).addClass('loading');
+					setTimeout(() => {
+						$(btnId).removeClass('loading');
+						func();
+						if (loadedMonths >= totalNeed) {
+							$('#btnWrap').hide();
+							$('#loadFinish').fadeIn();
+						}
+					}, 400);
+				}
+
+				$('#loadMore').on('click', function() {
+					handleLoading('#loadMore', () => {
+						const count = Math.min(perLoad, totalNeed - loadedMonths);
+						for (let i = 0; i < count; i++) {
+							let {
+								year,
+								month
+							} = getPrevMonth();
+							renderData(year, month);
+						}
+					});
+				});
+
+				$('#loadAll').on('click', function() {
+					handleLoading('#loadAll', () => {
+						while (loadedMonths < totalNeed) {
+							let {
+								year,
+								month
+							} = getPrevMonth();
+							renderData(year, month);
+						}
+					});
+				});
+			});
+		</script>
+	</body>
+</html>

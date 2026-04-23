@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		
+		<!--H5页面窗口自动调整到设备宽度，并禁止用户缩放页面-->
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, userscalable=no" />
+		
+		<title>星卡自助伴</title>
+		<link rel="stylesheet" type="text/css" href="css/css.css">
+		<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+		<style type="text/css">
+			input{
+				    /* -webkit-appearance: auto !important; */
+			}
+		</style>
+	</head>
+	<body>
+		<div class="verify_password">
+			<p class="password_title">
+				<img src="image/ic_verify.png" alt="" />
+				<span>用户验证</span>
+			</p>
+			<div class="password_content" style="margin-bottom:-16px">
+				<span>验证方式</span>
+				<div id="" style="display: flex;">
+					<label><input type="radio" name="verifyType" value="password" checked> 密码验证</label>
+					<label><input type="radio" name="verifyType" value="sms"> 短信验证码验证</label>	
+				</div>
+			</div>
+			<p class="password_content checkbox">
+				<span>客户密码</span>
+				<input type="password" style="flex: 1;" placeholder="请输入客户密码"/>
+				<button type="button" class="verify_code" >忘记密码</button>
+			</p>
+			<p class="password_content checkbox2" style="display:none">
+				<span>短信验证码</span>
+				<input type="text"  style="flex: 1;" placeholder="请输入短信验证码"/>
+				<button type="button" class="verify_code" id="verify_code">获取验证码</button>
+			</p>
+			<p class="verfy_error">请输入正确短信验证码</p>
+			<button class="button_small">立即查询</button>
+		</div>
+	</body>
+	<script>
+		let baseHeight = $(document).height();
+		let isErrorMessageShown = false;
+		
+		function sendHeight() {
+		  let h = baseHeight;
+		  if (isErrorMessageShown) {
+		    h += 20;
+		  }
+		  console.log('发送高度:', h);
+		  window.parent.postMessage({ type: 'resize', height: h }, '*');
+		}
+		
+		$('.button_small').on('click', function(){
+		  $('.verfy_error').show();
+		  isErrorMessageShown = true;
+		  sendHeight();
+		});
+		
+		$(sendHeight); // 初始发送
+		
+		$('.password_content').on('input', function() {
+			$('.verfy_error').hide();
+			isErrorMessageShown = false;
+			sendHeight();
+		});
+		
+		
+		$(document).on('click','#verify_code',function(){
+			$('#verify_code').attr('disabled','disabled');
+			var box = document.getElementById('verify_code');
+			var num = 6;
+			var T = setInterval(function(){
+			    box.innerHTML = --num + 's';
+			    if(num <= 0  ){
+			        clearInterval(T);
+					$('#verify_code').removeAttr('disabled')  //60秒后去除disabled样式
+					$('#verify_code').text('重新发送')
+			    }
+			}, 1000);
+			
+		})
+		$('input[name="verifyType"]').on('change', function() {
+		  if ($(this).val() === 'password') {
+		    $('.checkbox').show();
+		    $('.checkbox2').hide();
+		  } else {
+		    $('.checkbox').hide();
+		    $('.checkbox2').show();
+		  }
+		});
+		
+	</script>
+</html>

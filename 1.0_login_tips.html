@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+		<title>登录页面</title>
+		<link rel="stylesheet" type="text/css" href="css/css.css">
+		<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
+		<style>
+			body {
+				background: linear-gradient(#B4D7FF, #ffffff) no-repeat;
+			}
+
+			.login-container {
+				padding: 24px 16px;
+			}
+
+			.login-number {
+				font-size: 32px;
+				text-align: center;
+				line-height: 3;
+				font-weight: bold;
+				color: rgba(0, 0, 0, 0.9);
+			}
+
+			.tabs {
+				list-style-type: none;
+				padding-left: 0;
+				display: flex;
+				justify-content: space-around;
+				background-color: #f8f9fa;
+				border-radius: 24px;
+				overflow: hidden;
+				padding: 4px;
+			}
+
+			.tabs li {
+				text-align: center;
+				cursor: pointer;
+				padding: 10px;
+				flex: 1;
+				border-radius: 24px;
+				font-size: 16px;
+			}
+
+			.tabs li.log_active {
+				background: linear-gradient(#619DF9, #3473F4);
+				color: #ffffff;
+			}
+
+			.tab-content {
+				display: none;
+				padding: 24px 0;
+			}
+
+			.tab-content.log_active {
+				display: block;
+			}
+
+			input[type="tel"],
+			input[type="text"],
+			input[type="password"] {
+				width: 100%;
+				margin-bottom: 10px;
+				box-sizing: border-box;
+				font-size: 16px;
+				line-height: 2;
+			}
+
+			button {
+				width: 100%;
+				line-height: 48px;
+				border-radius: 8px;
+				font-size: 16px;
+				background-color: #007bff;
+				color: white;
+				border: none;
+				cursor: pointer;
+				margin-top: 16px;
+				box-shadow: 0 4px 8px rgba(52, 115, 244, 0.45);
+			}
+
+			.btn-get-code {
+				width: auto;
+				background: none;
+				line-height: 48px;
+				border-radius: 8px;
+				font-size: 16px;
+				color: #007bff;
+				border: none;
+				cursor: pointer;
+			}
+
+			button:active {
+				background-color: #0056b3;
+			}
+
+			button:disabled {
+				background: #e9ecef;
+				box-shadow: none;
+			}
+
+			.custom-select {
+				position: relative;
+				display: inline-block;
+			}
+
+			.selected {
+				width: 100%;
+				margin-bottom: 10px;
+				box-sizing: border-box;
+				font-size: 16px;
+				line-height: 2;
+				cursor: pointer;
+			}
+
+			.options {
+				list-style-type: none;
+				margin: 0;
+				padding: 0;
+				background-color: white;
+				border-radius: 5px;
+				box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+				overflow: hidden;
+				transition: max-height 0.3s ease-in-out;
+				display: none;
+			}
+
+			.options li {
+				padding: 5px 10px;
+				cursor: pointer;
+			}
+
+			.options li:hover {
+				background-color: #f2f2f2;
+			}
+
+			.checkbox_container {
+				margin-top: 16px;
+				font-size: 14px;
+				line-height: 1.4;
+			}
+
+			.log_agreement {
+				color: #2A4777;
+			}
+
+			.log_input {
+				border-bottom: 1px solid rgba(6, 40, 96, 0.16);
+				margin-top: 16px;
+				display: flex;
+			}
+
+			.log_input input {
+				background: none;
+				flex: 1;
+			}
+			.error{
+				color: #F54141;
+				margin-top: 4px;
+				display: block;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="login-container">
+			<ul class="tabs">
+				<li data-tab="phone-login" class="log_active">本机登录</li>
+				<li data-tab="sms-login">短信登录</li>
+				<li data-tab="password-login">密码登录</li>
+			</ul>
+
+			<!-- 本机登录表单 -->
+			<form id="phone-login-form" class="tab-content log_active">
+				<p class="login-number">180****3626</p>
+				<button type="submit" id="submit-phone" disabled>确认登录</button>
+				<div class="checkbox_container">
+					<input type="checkbox" id="agree-terms-phone">
+					<label for="agree-terms-phone">我已阅读并同意<a href="http://10.121.66.30:8000/" class="log_agreement">《个人信息保护政策》</a>、<a href="#"
+							class="log_agreement">《用户服务协议》</a>和<a href="#"
+							class="log_agreement">《天翼数字生活账号服务条款》</a></label>
+				</div>
+			</form>
+
+			<!-- 短信登录表单 -->
+			<form id="sms-login-form" class="tab-content">
+				<div class="log_input">
+					<input type="tel" id="sms-phone-number" placeholder="请输入您的手机号码" required autocomplete="off">
+				</div>
+				<span class="error">请输入正确的手机号码</span>
+				<div class="log_input">
+					<input type="text" id="sms-code" placeholder="请输入验证码" required autocomplete="off">
+					<p type="button" id="get-sms-code" class="btn-get-code">获取短信验证码</p>
+				</div>
+				<button type="submit" id="submit-sms" disabled>确认登录</button>
+				<div class="checkbox_container">
+					<input type="checkbox" id="agree-terms-sms" required>
+					<label for="agree-terms-sms">我已阅读并同意<a href="#" class="log_agreement">《个人信息保护政策》</a>、<a href="#"
+							class="log_agreement">《用户服务协议》</a>和<a href="#"
+							class="log_agreement">《天翼数字生活账号服务条款》</a></label>
+				</div>
+			</form>
+
+			<!-- 假设这是你的密码登录表单的部分 -->
+			<form id="password-login-form" class="tab-content">
+				<!-- 自定义选择控件 -->
+				<div class="custom-select log_input">
+					<span class="selected">请选择号码类型</span>
+					<i class="fa fa-caret-down"></i>
+					<ul class="options">
+						<li>手机号</li>
+						<li>宽带账号</li>
+						<li>固话</li>
+						<li>IPTV</li>
+						<li>政企客户编码</li>
+					</ul>
+				</div>
+				<div class="log_input">
+					<input type="text" id="username" placeholder="请输入用户名或邮箱" required>
+				</div>
+				<div class="log_input">
+					<input type="password" id="password" placeholder="请输入密码" required>
+				</div>
+
+				<button type="submit" id="submit-password" disabled>确认登录</button>
+				<div class="checkbox_container">
+					<input type="checkbox" id="agree-terms-password" required>
+					<label for="agree-terms-password">我已阅读并同意<a href="#" class="log_agreement">《个人信息保护政策》</a>、<a
+							href="#" class="log_agreement">《用户服务协议》</a>和<a href="#"
+							class="log_agreement">《天翼数字生活账号服务条款》</a></label>
+				</div>
+			</form>
+		</div>
+
+		<script>
+			$(document).ready(function() {
+				const tabs = $('.tabs li');
+				const tabContents = $('.tab-content');
+				const smsButton = $('#get-sms-code');
+
+				// 切换标签页
+				tabs.click(function() {
+					const index = $(this).index();
+					tabs.removeClass('log_active').eq(index).addClass('log_active');
+					tabContents.removeClass('log_active').eq(index).addClass('log_active');
+				});
+
+				// 发送验证码并启动倒计时
+				function sendVerificationCode() {
+					const countdown = 60;
+					let timeLeft = countdown;
+
+					// 启动倒计时
+					const timer = setInterval(() => {
+						if (timeLeft > 0) {
+							timeLeft--;
+							smsButton.text(`重新发送(${timeLeft}s)`);
+							smsButton.prop('disabled', true);
+						} else {
+							clearInterval(timer);
+							smsButton.text('获取短信验证码');
+							smsButton.prop('disabled', false);
+						}
+					}, 1000);
+
+				}
+
+				// 绑定事件监听器
+				smsButton.click(sendVerificationCode);
+
+				// 控制按钮的可用性
+				function controlSubmitButtons() {
+					$('#agree-terms-phone').change(function() {
+						$('#submit-phone').prop('disabled', !$(this).is(':checked'));
+					});
+
+					$('#agree-terms-sms').change(function() {
+						$('#submit-sms').prop('disabled', !$(this).is(':checked'));
+					});
+
+					$('#agree-terms-password').change(function() {
+						$('#submit-password').prop('disabled', !$(this).is(':checked'));
+					});
+				}
+
+				// 初始化按钮的可用性
+				controlSubmitButtons();
+
+				// 确保在切换标签页时也检查按钮的可用性
+				tabs.click(controlSubmitButtons);
+
+				$('.custom-select .selected').on('click', function() {
+					var optionsList = $('.custom-select ul.options');
+					if (optionsList.is(":hidden")) {
+						optionsList.slideDown();
+					} else {
+						optionsList.slideUp();
+					}
+				});
+
+				$('.custom-select ul.options li').on('click', function() {
+					var selectedText = $(this).text();
+					$('.custom-select span.selected').text(selectedText);
+					$('.custom-select ul.options').slideUp();
+				});
+			});
+			
+			// $(window).on('beforeunload', function() {
+			//     // 返回一个字符串，浏览器会将它作为对话框的消息显示给用户
+			//     return '您确定要离开吗？未保存的数据将会丢失。';
+			// });
+		</script>
+	</body>
+</html>

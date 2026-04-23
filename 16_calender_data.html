@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+		<title>流量日历</title>
+		<link rel="stylesheet" href="css/css.css" />
+		<script src="js/jquery-2.1.1.min.js"></script>
+		<style>
+			body {
+				font-family: "Microsoft Yahei", sans-serif;
+				margin: 0;
+				/* background: #F5F5F5 linear-gradient(to bottom, #3473F4, #F5F5F5) no-repeat; */
+				box-sizing: border-box;
+			}
+
+			* {
+				margin: 0;
+				padding: 0;
+				box-sizing: inherit;
+			}
+
+			.verify_password {
+				background: #ffffff;
+				border-radius: 8px;
+				padding: 16px;
+			}
+
+			.btn_loading {
+				width: 16px;
+				animation: loading 3s linear infinite;
+				margin-right: 4px;
+				display: none;
+			}
+
+			.button_small {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				line-height: 40px;
+				font-size: 14px;
+			}
+
+			.password_content {
+				font-size: 16px;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+
+			.password_content input {
+				flex: 1;
+				height: 36px;
+				padding: 0 8px;
+				border: 1px solid #eee;
+				border-radius: 4px;
+				margin: 0;
+			}
+
+			.verify_code {
+				font-size: 14px;
+				padding: 4px 8px;
+				cursor: pointer;
+				border-bottom: none !important;
+			}
+
+			.verfy_error {
+				color: red;
+				font-size: 14px;
+				display: none;
+				padding-left: 72px;
+			}
+
+			/* 日历容器：整体固定，内部自适应 */
+			.calendar-container {
+				-webkit-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+				position: relative;
+				width: 100%;
+				max-width: 800px;
+				margin: 0 auto;
+				background: #fff;
+				padding: 8px 4px 16px;
+				border-radius: 8px;
+				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+			}
+
+			/* 月份导航：固定不动 */
+			.month-nav {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 8px;
+			}
+
+			.month-nav button {
+				padding: 6px 12px;
+				border: 1px solid #eee;
+				border-radius: 4px;
+				cursor: pointer;
+				background: #f8f8f8;
+			}
+
+			.month-nav button:disabled {
+				cursor: not-allowed;
+				opacity: 0.5;
+			}
+
+			.month-title {
+				font-size: 18px;
+				font-weight: 600;
+			}
+
+			/* 星期栏：固定不动，宽度与日期区域严格对齐 */
+			.weekdays {
+				display: flex;
+				justify-content: space-between;
+				background: #f5f5f5;
+				border-radius: 4px;
+				margin-bottom: 8px;
+				width: 100%;
+			}
+
+			.weekday {
+				width: calc(100% / 7 - 2px);
+				/* 与日期格子宽度完全一致 */
+				text-align: center;
+				padding: 8px 0;
+				font-size: 14px;
+			}
+
+			/* 仅日期区域可滑动：核心修改★★★ 移除固定高度，改为内容自适应 */
+			.swipeable-area {
+				-webkit-user-select: none;
+				-moz-user-select: none;
+				-ms-user-select: none;
+				user-select: none;
+				touch-action: pan-y;
+				overflow: hidden;
+				width: 100%;
+				position: relative;
+				/* 关键：移除固定高度，由子元素撑开，保证日期完全显示 */
+				min-height: auto;
+				margin-bottom: 16px;
+				/* 与底部统计保持间距 */
+			}
+
+			/* 日期滑动容器：宽度100%，高度由日期内容自适应 */
+			.dates-slider {
+				position: absolute;
+				top: 0;
+				left: 0;
+				display: flex;
+				width: 100%;
+				/* 关键：高度随子元素变化，自适应日期行数 */
+				height: 100%;
+				transition: transform 0.3s ease-out;
+			}
+
+			/* 单月日期卡片：宽度100%，高度自适应内部日期网格 */
+			.date-card {
+				flex: 0 0 100%;
+				width: 100%;
+				/* 关键：让卡片高度由日期容器撑开 */
+				height: auto;
+				min-height: 100%;
+			}
+
+			/* 日期网格：核心自适应，保证所有日期行完整显示 */
+			.dates-container {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 2px;
+				/* 与日期格子间距一致 */
+				width: 100%;
+				/* 关键：自动换行，由日期数量撑开高度，无溢出遮挡 */
+			}
+
+			/* 日期格子：等宽等高，自适应屏幕，无变形 */
+			.date-cell {
+				width: calc(100% / 7 - 2px);
+				aspect-ratio: 1/1;
+				/* 关键：保持正方形，适配所有屏幕 */
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+				border: 1px solid #eee;
+				border-radius: 4px;
+				font-size: 16px;
+				position: relative;
+				/* 防止文字溢出 */
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			.date-cell.today {
+				background: #e6f7ff;
+				border-color: #1890ff;
+				color: #1890ff;
+			}
+
+			.date-cell.future {
+				opacity: 0.5;
+				cursor: not-allowed;
+			}
+
+			.date-cell .flow-data {
+				font-size: 9px;
+				margin-top: 2px;
+			}
+
+			.date-cell.empty {
+				border: none;
+				/* 空白格子无边框，不占视觉空间 */
+			}
+
+			/* 底部统计：固定不动，与滑动区域分离 */
+			.stats_title {
+				text-align: center;
+				margin: 16px 0 0 0;
+				color: #666;
+				font-size: 14px;
+				font-weight: bold;
+			}
+
+			.stats {
+				display: flex;
+				justify-content: space-around;
+				gap: 8px;
+				flex-wrap: wrap;
+				padding-top: 0px;
+			}
+
+			.stat-item {
+				text-align: center;
+				flex: 1;
+				min-width: 120px;
+			}
+
+			.stat-value {
+				font-size: 16px;
+				font-weight: 600;
+				color: #333;
+			}
+
+			.stat-label {
+				font-size: 12px;
+				color: #666;
+				margin-top: 2px;
+			}
+
+			.loading {
+				text-align: center;
+				padding: 20px 0;
+				color: #666;
+				font-size: 14px;
+				width: 100%;
+			}
+
+			/* 加载弹窗样式 */
+			.loading-mask {
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background: rgba(0, 0, 0, 0.3);
+				display: none;
+				align-items: center;
+				justify-content: center;
+				z-index: 1000;
+			}
+
+			.loading-popup {
+				background: #fff;
+				padding: 20px 30px;
+				border-radius: 8px;
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				font-size: 14px;
+				color: #333;
+			}
+
+			.loading-icon {
+				width: 20px;
+				height: 20px;
+				border: 2px solid #eee;
+				border-top-color: #1890ff;
+				border-radius: 50%;
+				animation: spin 1s linear infinite;
+			}
+
+			@keyframes spin {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+
+			.num-container {
+				max-width: 800px;
+				margin: 0 auto 8px;
+				padding: 0;
+				background: none;
+				border-radius: 0;
+			}
+
+			.query-bar {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				background: #fff;
+				border-radius: 0;
+				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+				cursor: pointer;
+				font-size: 16px;
+			}
+
+			.query-bar input {
+				text-align: right;
+			}
+
+			.calendar-mask {
+				position: fixed;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background: rgba(0, 0, 0, 0.5);
+				display: none;
+				align-items: center;
+				justify-content: center;
+				z-index: 999;
+			}
+
+			.password_close {
+				cursor: pointer;
+				margin-left: auto;
+			}
+
+			#toggle {
+				position: fixed;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background: rgba(0, 0, 0, 0.5);
+				display: none;
+				align-items: center;
+				justify-content: center;
+				z-index: 999;
+			}
+
+			.calendar-popup {
+				background: #fff;
+				padding: 16px;
+				border-radius: 8px;
+				width: 90%;
+				max-width: 400px;
+			}
+
+			.calendar-popup-title {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 16px;
+				font-weight: 600;
+			}
+
+			.num-toggel {
+				padding: 12px;
+				border: 1px solid #eee;
+				border-radius: 4px;
+				margin-bottom: 8px;
+				cursor: pointer;
+			}
+
+			.num-toggel.selected {
+				border-color: #1890ff;
+				background: #e6f7ff;
+			}
+
+			.btn_container {
+				display: flex;
+				gap: 8px;
+				margin-top: 16px;
+			}
+
+			.btn_plain,
+			.btn_solid {
+				flex: 1;
+				padding: 8px 0;
+				border-radius: 4px;
+				border: 1px solid #eee;
+				cursor: pointer;
+			}
+
+			.btn_solid {
+				background: #1890ff;
+				color: #fff;
+				border-color: #1890ff;
+			}
+
+			.date-cell.empty {
+				background: none !important;
+			}
+
+			.tishi-mask {
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				align-items: center;
+				justify-content: center;
+				z-index: 999;
+				display: none;
+			}
+
+			.tishi-popup {
+				background: rgba(0, 0, 0, 0.4);
+				padding: 20px 30px;
+				border-radius: 8px;
+				display: flex;
+				align-items: center;
+				gap: 10px;
+				font-size: 14px;
+				color: #333;
+				display: flex;
+				flex-direction: column;
+				width: 30ch;
+				color: #ffffff;
+
+			}
+
+			.tishi-icon {
+				width: 24px;
+				animation: move 1s linear infinite;
+			}
+
+			@keyframes move {
+				0% {
+					transform: translateX(-20px);
+				}
+
+
+
+				100% {
+					transform: translateX(20px);
+				}
+			}
+
+			.tishi-text {
+				margin-top: 8px;
+				font-size: 14px;
+				color: #666;
+				line-height: 1.6;
+			}
+
+			.tishi-text span {
+				color: #333;
+				font-size: 14px;
+				font-weight: bold;
+			}
+
+			.password_title span {
+				overflow: hidden;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+			}
+			.text_blue{
+				color: #3473F4;
+				text-decoration:underline;
+				font-size: 16px;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- 号码查询栏 -->
+		<div class="num-container">
+			<div class="query-bar" onclick="showPopup()">当前查询号码：
+				<input type="text" placeholder="查询号码" value="180****6666" readonly />
+				<img src="image/ic_arrow_down.png" alt="下拉" />
+			</div>
+		</div>
+
+		<!-- 日历容器：整体固定 -->
+		<div class="calendar-container">
+			<!-- 月份导航：固定不动 -->
+			<div class="month-nav">
+				<button id="prevMonth">上一月</button>
+				<div class="month-title" id="currentMonthText">2025年12</div>
+				<button id="nextMonth">下一月</button>
+			</div>
+			<!-- 星期栏：固定不动 -->
+			<div class="weekdays">
+				<div class="weekday">日</div>
+				<div class="weekday">一</div>
+				<div class="weekday">二</div>
+				<div class="weekday">三</div>
+				<div class="weekday">四</div>
+				<div class="weekday">五</div>
+				<div class="weekday">六</div>
+			</div>
+			<!-- 仅日期区域可滑动：高度自适应 -->
+			<div class="swipeable-area" id="swipeableArea">
+				<!-- 日期滑动容器：核心滑动区域 -->
+				<div class="dates-slider" id="datesSlider">
+					<!-- 单月日期卡片：高度自适应 -->
+					<div class="date-card" id="currentDateCard">
+						<div class="dates-container" id="datesContainer">
+							<div class="loading">加载数据中...</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- 底部统计：固定不动，与滑动区域分离 -->
+			<p class="stats_title">-- 流量日历 --</p>
+			<div class="stats">
+				<div class="stat-item">
+					<div class="stat-value" id="totalUsage">0.00GB</div>
+					<div class="stat-label">已用总流量</div>
+				</div>
+				<div class="stat-item">
+					<div class="stat-value" id="extraFee">0.00元</div>
+					<div class="stat-label">套餐外流量费</div>
+				</div>
+			</div>
+			<div class="tishi-text">
+				<p style="font-size: 14px;display: inline;font-weight: bold;">温馨提示</p>：<span>每日流量=
+					该号码套餐内已用流量</span>(通用流量+专用流量+国际及港澳台漫游) <span>+该号码套餐外已用流量</span>(通用流量+国际及港澳台漫游)。
+					如需查询流量使用详情，请点击 <span onclick="SendRdMsgToMainPage('详单查询')" class="text_blue" >详单</span>，为您提供最近12个月（含当月）的清单查询服务。
+			</div>
+			<!-- 滑动提示弹窗 -->
+			<div class="tishi-mask">
+				<div class="tishi-popup">
+					<img src="image/Frame-right.png" style="width: 48px;" alt="" />
+					<img src="image/finger.png" class="tishi-icon alt="" />
+				    滑动查看上月流量日历
+			    </div>
+			</div>
+			
+			<!-- 加载弹窗 -->
+			<div class=" loading-mask" id="loadingMask">
+					<div class="loading-popup">
+						<div class="loading-icon"></div>
+						查询中...
+					</div>
+				</div>
+			</div>
+
+
+
+
+
+
+
+			<!-- 验证密码弹层 -->
+			<div class="calendar-mask" id="password">
+				<div class="verify_password">
+					<p class="password_title">
+						<img src="image/ic_password.png" alt="密码" />
+						<span>密码验证</span>
+						<img src="image/ic_x.png" alt="关闭" onclick="hidepassword()" class="password_close" />
+					</p>
+					<div class="password_content">
+						<span>客户密码</span>
+						<div style="flex: 1;">
+							<input type="password" maxlength="6" placeholder="请输入6位数客户密码" style="width: 100%;" />
+						</div>
+						<button type="button" class="verify_code" id="verify_code">重置密码</button>
+					</div>
+					<p class="verfy_error">您输入的密码不正确，请重新输入6位数客户密码</p>
+					<button class="button_small shibai">验证</button>
+					<button class="button_small chenggong">
+						<img src="image/loading.png" class="btn_loading" alt="加载" />
+						验证
+					</button>
+				</div>
+			</div>
+
+			<!-- 切换号码弹层 -->
+			<div id="toggle">
+				<div class="calendar-popup">
+					<div class="calendar-popup-title">
+						<span>选择号码</span>
+						<img src="image/ic_x.png" alt="关闭" onclick="hidePopup()" />
+					</div>
+					<!-- 号码列表 -->
+					<div style="max-height: 40vh;overflow-y: auto;">
+						<div class="num-toggel selected">
+							<span>199****3370</span>
+							<p>当前登录</p>
+						</div>
+						<div class="num-toggel">
+							<span>199****3371</span>
+							<p>副卡1</p>
+						</div>
+						<div class="num-toggel">
+							<span>199****3372</span>
+							<p>副卡2</p>
+						</div>
+						<div class="num-toggel">
+							<span>199****3373</span>
+							<p>副卡3</p>
+						</div>
+					</div>
+					<div class="btn_container">
+						<button class="btn_plain" onclick="hidePopup()">取消</button>
+						<button class="btn_solid" onclick="hidePopup()">确认</button>
+					</div>
+				</div>
+			</div>
+
+			<script>
+				$('.tishi-mask').css('display', 'flex');
+
+
+				let baseHeight = $(document).height();
+				let isErrorMessageShown = false;
+				let clickCount = 0;
+
+				function sendHeight() {
+					let h = baseHeight;
+					if (isErrorMessageShown) h += 20;
+					window.parent.postMessage({
+						type: 'resize',
+						height: h
+					}, '*');
+				}
+				$(sendHeight);
+
+				setTimeout(function() {
+					$('.tishi-mask').hide()
+				}, 3000)
+
+				// 密码验证逻辑
+				$('.shibai').on('click', function() {
+					clickCount++;
+					const $errorEl = $('.verfy_error');
+					if (clickCount === 3) {
+						$errorEl.text('您3次输入密码不正确，请重置密码后重新输入“流量日历”查询流量详情。');
+						$(this).attr('disabled', true);
+						$('.password_close').hide();
+						$('input[type="password"]').attr('disabled', true)
+					} else {
+						$errorEl.text('您输入的密码不正确，请重新输入6位数客户密码');
+					}
+					$('.verfy_error').show();
+					isErrorMessageShown = true;
+					sendHeight();
+				});
+
+				$('.chenggong').on('click', function() {
+					const $btn = $(this);
+					$('.btn_loading').show();
+					setTimeout(() => $btn.text('验证成功'), 2000);
+					setTimeout(() => {
+						$('#password').fadeOut();
+						$('#toggle').fadeIn();
+						$('#toggle').css('display', 'flex');
+					}, 3000);
+				});
+
+				$('.password_content input').on('input', function() {
+					$('.verfy_error').hide();
+					isErrorMessageShown = false;
+					sendHeight();
+				});
+
+				// 号码切换逻辑
+				$(document).on('click', '.num-toggel', function() {
+					$('.num-toggel').removeClass('selected');
+					$(this).addClass('selected');
+				});
+
+				function showPopup() {
+					document.getElementById('password').style.display = 'flex';
+				}
+
+				function hidePopup() {
+					document.getElementById('toggle').style.display = 'none';
+				}
+
+				function hidepassword() {
+					document.getElementById('password').style.display = 'none';
+				}
+
+				// 加载弹窗控制
+				function showLoading() {
+					document.getElementById('loadingMask').style.display = 'flex';
+				}
+
+				function hideLoading() {
+					document.getElementById('loadingMask').style.display = 'none';
+				}
+
+				// ========== 日历核心变量 ==========
+				const today = new Date();
+				let currentYear = today.getFullYear();
+				let currentMonth = today.getMonth() + 1;
+				// 最早可查看前12个月
+				const earliestDate = new Date(today);
+				earliestDate.setMonth(today.getMonth() - 12);
+				const earliestYear = earliestDate.getFullYear();
+				const earliestMonth = earliestDate.getMonth() + 1;
+
+				// 滑动核心变量（仅控制日期区域）
+				const swipeableArea = document.getElementById('swipeableArea');
+				const datesSlider = document.getElementById('datesSlider');
+				let cardWidth = swipeableArea.offsetWidth; // 滑动区域宽度（自适应更新）
+				let startX = 0;
+				let endX = 0;
+				const swipeThreshold = 50; // 滑动触发阈值
+				let isProcessing = false; // 操作锁：防止重复触发
+
+				// 窗口大小变化时，更新滑动宽度+重绘日历（保证自适应）
+				window.addEventListener('resize', () => {
+					if (!isProcessing) {
+						cardWidth = swipeableArea.offsetWidth;
+						generatePlaceholderCalendar(currentYear, currentMonth);
+					}
+				});
+
+				// 初始化日历
+				initCalendar(currentYear, currentMonth);
+
+				// 上/下一月按钮事件
+				document.getElementById('prevMonth').addEventListener('click', () => {
+					if (isEarliestMonth() || isProcessing) return;
+					switchMonth('prev');
+				});
+
+				document.getElementById('nextMonth').addEventListener('click', () => {
+					if (isCurrentMonth() || isProcessing) return;
+					switchMonth('next');
+				});
+
+				// ========== 滑动事件绑定（仅日期区域） ==========
+				// 触摸/鼠标按下
+				swipeableArea.addEventListener('touchstart', startSwipe);
+				swipeableArea.addEventListener('mousedown', (e) => {
+					e.preventDefault(); // 阻止选中文本
+					startSwipe(e);
+				});
+
+				// 触摸/鼠标移动
+				swipeableArea.addEventListener('touchmove', moveSwipe);
+				swipeableArea.addEventListener('mousemove', moveSwipe);
+
+				// 触摸/鼠标松开/离开
+				swipeableArea.addEventListener('touchend', endSwipe);
+				swipeableArea.addEventListener('mouseup', endSwipe);
+				swipeableArea.addEventListener('mouseleave', endSwipe);
+
+				// 开始滑动
+				function startSwipe(e) {
+					if (isProcessing) return;
+					startX = e.touches ? e.touches[0].clientX : e.clientX;
+					datesSlider.style.transition = 'none'; // 关闭过渡，实时跟随
+				}
+
+				// 滑动中
+				function moveSwipe(e) {
+					if (isProcessing || startX === 0) return;
+					// 仅鼠标按下时触发移动
+					if (e.type === 'mousemove' && e.buttons !== 1) return;
+
+					endX = e.touches ? e.touches[0].clientX : e.clientX;
+					let moveX = endX - startX;
+
+					// 边界阻力：到最早/当前月时，滑动阻力增大
+					const isEarliest = isEarliestMonth();
+					const isCurrent = isCurrentMonth();
+					if (isEarliest && moveX > 0) moveX *= 0.3;
+					if (isCurrent && moveX < 0) moveX *= 0.3;
+
+					// 仅移动日期滑动容器，其他元素完全不动
+					datesSlider.style.transform = `translateX(${moveX}px)`;
+				}
+
+				// 结束滑动
+				function endSwipe() {
+					if (isProcessing || startX === 0) {
+						resetSwipe();
+						return;
+					}
+
+					const moveX = endX - startX;
+					const isEarliest = isEarliestMonth();
+					const isCurrent = isCurrentMonth();
+					const triggerPrev = moveX > swipeThreshold && !isEarliest; // 右滑=上一月
+					const triggerNext = moveX < -swipeThreshold && !isCurrent; // 左滑=下一月
+
+					if (triggerPrev) {
+						switchMonth('prev', true); // 滑动触发
+					} else if (triggerNext) {
+						switchMonth('next', true); // 滑动触发
+					} else {
+						resetSwipe(); // 未达阈值，回弹原位
+					}
+
+					// 重置滑动坐标
+					startX = 0;
+					endX = 0;
+				}
+
+				// 重置滑动（回弹原位）
+				function resetSwipe() {
+					datesSlider.style.transition = 'transform 0.2s ease-out';
+					datesSlider.style.transform = 'translateX(0px)';
+					startX = 0;
+					endX = 0;
+				}
+
+				// ========== 核心逻辑：切换月份（按钮/滑动统一调用） ==========
+				/**
+				 * 切换月份
+				 * @param {string} dir - prev/next 切换方向
+				 * @param {boolean} isSwipe - 是否滑动触发（区分动画逻辑）
+				 */
+				function switchMonth(dir, isSwipe = false) {
+					isProcessing = true; // 加锁，防止重复触发
+					showLoading(); // 显示加载弹窗
+
+					// 1. 更新月份（处理跨年/跨月）
+					if (dir === 'prev') {
+						currentMonth--;
+						if (currentMonth < 1) {
+							currentMonth = 12;
+							currentYear--;
+						}
+					} else {
+						currentMonth++;
+						if (currentMonth > 12) {
+							currentMonth = 1;
+							currentYear++;
+						}
+					}
+
+					// 2. 即时更新月份标题和按钮禁用状态
+					document.getElementById('currentMonthText').textContent = `${currentYear}年${currentMonth}月`;
+					updateButtonsState();
+
+					// 3. 生成占位符日历（flow-data显示-，让用户看到月份切换，无空白）
+					generatePlaceholderCalendar(currentYear, currentMonth);
+
+					// 4. 滑动触发时，执行回弹动画（仅视觉反馈，无偏移）
+					if (isSwipe) {
+						resetSwipe();
+					}
+
+					// 5. 1秒后隐藏加载弹窗，加载真实流量数据
+					setTimeout(() => {
+						hideLoading();
+						fetchFlowData(currentYear, currentMonth)
+							.then(data => {
+								// 渲染真实数据日历
+								generateCalendar(currentYear, currentMonth, data);
+								// 更新底部统计信息
+								updateStatistics(data);
+								// 解锁，允许后续操作
+								isProcessing = false;
+							})
+							.catch(error => {
+								document.getElementById('datesContainer').innerHTML =
+									'<div class="loading">数据加载失败，请重试</div>';
+								isProcessing = false; // 异常也解锁
+							});
+					}, 1000);
+				}
+
+				// 初始化日历（首次加载真实数据）
+				function initCalendar(year, month) {
+					
+					document.getElementById('currentMonthText').textContent = `${year}年${month}月`;
+					
+					fetchFlowData(year, month)
+						.then(data => {
+							generateCalendar(year, month, data);
+							updateButtonsState();
+							updateStatistics(data);
+						})
+						.catch(error => {
+							document.getElementById('datesContainer').innerHTML =
+								'<div class="loading">数据加载失败，请重试</div>';
+						});
+				}
+
+				// ========== 日历工具函数 ==========
+				// 判断是否为最早可查看月份（前6个月）
+				function isEarliestMonth() {
+					return currentYear < earliestYear || (currentYear === earliestYear && currentMonth <=
+						earliestMonth);
+				}
+
+				// 判断是否为当前月份（最新，不可往后切）
+				function isCurrentMonth() {
+					return currentYear === today.getFullYear() && currentMonth === today.getMonth() + 1;
+				}
+
+				// 更新上/下一月按钮禁用状态
+				function updateButtonsState() {
+					document.getElementById('prevMonth').disabled = isEarliestMonth();
+					document.getElementById('nextMonth').disabled = isCurrentMonth();
+				}
+
+				// 生成占位符日历（所有flow-data显示-，快速渲染，无加载空白）
+				function generatePlaceholderCalendar(year, month) {
+					const container = document.getElementById('datesContainer');
+					container.innerHTML = '';
+					// 当月第一天是周几（0=日，6=六）
+					const firstDay = new Date(year, month - 1, 1).getDay();
+					// 当月总天数
+					const totalDays = new Date(year, month, 0).getDate();
+					// 是否为当前真实月份（用于标记今日/未来日期）
+					const isRealCurrent = isCurrentMonth();
+					const todayDay = today.getDate();
+
+					let date = 1;
+					// 循环生成日期（最多6行，覆盖所有月份的日期行数）
+					for (let i = 0; i < 6; i++) {
+						// 每行容器：flex布局，与日期格子对齐
+						const row = document.createElement('div');
+						row.style.display = 'flex';
+						row.style.width = '100%';
+						row.style.gap = '2px';
+						let hasValidDate = false; // 标记该行是否有有效日期
+
+						// 7列（周日到周六）
+						for (let j = 0; j < 7; j++) {
+							const cell = document.createElement('div');
+							cell.className = 'date-cell';
+
+							// 第一行：前面补空白格子
+							if (i === 0 && j < firstDay) {
+								cell.classList.add('empty');
+							} else if (date <= totalDays) {
+								hasValidDate = true;
+								cell.textContent = date;
+								// 标记今日
+								if (isRealCurrent && date === todayDay) cell.classList.add('today');
+								// 标记未来日期（当前月未到的日期，置灰）
+								if (isRealCurrent && date > todayDay) cell.classList.add('future');
+								// 流量占位符：-
+								const flowSpan = document.createElement('span');
+								flowSpan.className = 'flow-data';
+								flowSpan.textContent = '-';
+								cell.appendChild(flowSpan);
+								date++;
+							} else {
+								cell.classList.add('empty'); // 超出总天数，补空白格子
+							}
+							row.appendChild(cell);
+						}
+
+						// 只有包含有效日期的行才添加（避免多余空白行）
+						if (hasValidDate) {
+							container.appendChild(row);
+						} else {
+							break; // 无有效日期，停止循环
+						}
+					}
+					// 自适应更新滑动容器高度（关键：让滑动区域高度与日期内容匹配）
+					datesSlider.style.height = `${container.offsetHeight}px`;
+				}
+
+				// 模拟获取流量数据（实际项目替换为接口请求）
+				function fetchFlowData(year, month) {
+					return new Promise((resolve) => {
+						setTimeout(() => {
+							const days = new Date(year, month, 0).getDate();
+							const flowData = {};
+							// 是否为当前真实月份
+							const isRealCurrent = year === today.getFullYear() && month === today
+								.getMonth() + 1;
+							const todayDay = today.getDate();
+
+							// 生成每日流量数据
+							for (let d = 1; d <= days; d++) {
+								// 历史月/当前月今日及之前：生成随机流量数据
+								if (!isRealCurrent || d <= todayDay) {
+									const r = Math.random();
+									if (r < 0.3) {
+										flowData[d] = {
+											amount: '0.00MB',
+											isOverLimit: false
+										};
+									} else if (r < 0.8) {
+										flowData[d] = {
+											amount: `${(Math.random() * 50).toFixed(2)}MB`,
+											isOverLimit: false
+										};
+									} else {
+										flowData[d] = {
+											amount: `${(Math.random() * 2 + 0.5).toFixed(2)}GB`,
+											isOverLimit: true
+										};
+									}
+								} else {
+									// 当前月未来日期：数据为-
+									flowData[d] = {
+										amount: '-',
+										isOverLimit: false
+									};
+								}
+							}
+							resolve(flowData);
+						}, 200);
+					});
+				}
+
+				// 生成真实数据日历（带流量统计，日期完全显示）
+				function generateCalendar(year, month, flowData) {
+					const container = document.getElementById('datesContainer');
+					container.innerHTML = '';
+					// 当月第一天是周几（0=日，6=六）
+					const firstDay = new Date(year, month - 1, 1).getDay();
+					// 当月总天数
+					const totalDays = new Date(year, month, 0).getDate();
+					// 是否为当前真实月份
+					const isRealCurrent = isCurrentMonth();
+					const todayDay = today.getDate();
+
+					let date = 1;
+					// 循环生成日期（最多6行，保证所有日期都显示）
+					for (let i = 0; i < 6; i++) {
+						const row = document.createElement('div');
+						row.style.display = 'flex';
+						row.style.width = '100%';
+						row.style.gap = '2px';
+						let hasValidDate = false;
+
+						for (let j = 0; j < 7; j++) {
+							const cell = document.createElement('div');
+							cell.className = 'date-cell';
+
+							if (i === 0 && j < firstDay) {
+								cell.classList.add('empty');
+							} else if (date <= totalDays) {
+								hasValidDate = true;
+								cell.textContent = date;
+								// 标记今日
+								if (isRealCurrent && date === todayDay) cell.classList.add('today');
+								// 标记未来日期
+								if (isRealCurrent && date > todayDay) cell.classList.add('future');
+								// 渲染流量数据
+								const flow = flowData[date] || {
+									amount: '-',
+									isOverLimit: false
+								};
+								const flowSpan = document.createElement('span');
+								flowSpan.className = 'flow-data';
+								flowSpan.textContent = flow.amount;
+								cell.appendChild(flowSpan);
+								// 超限标红，正常标蓝（未来日期不标色）
+								if (flow.amount !== '-') {
+									cell.classList.add(flow.isOverLimit ? 'red' : 'blue');
+								}
+								date++;
+							} else {
+								cell.classList.add('empty');
+							}
+							row.appendChild(cell);
+						}
+
+						if (hasValidDate) {
+							container.appendChild(row);
+						} else {
+							break;
+						}
+					}
+					// 关键：更新滑动容器高度为日期容器实际高度，保证自适应
+					datesSlider.style.height = `${container.offsetHeight}px`;
+					// 同步更新父容器高度，防止遮挡
+					swipeableArea.style.height = `${container.offsetHeight}px`;
+				}
+
+				// 更新底部流量统计信息
+				function updateStatistics(flowData) {
+					let totalGB = 0;
+					let extraFee = 0;
+					const isRealCurrent = isCurrentMonth();
+					const todayDay = today.getDate();
+
+					// 遍历所有日期数据，计算总量和套餐外费用
+					Object.entries(flowData).forEach(([d, flow]) => {
+						const day = parseInt(d);
+						// 跳过当前月未来日期
+						if (isRealCurrent && day > todayDay) return;
+						// 跳过多余数据
+						if (flow.amount === '-') return;
+						// 拆分数值和单位（MB/GB）
+						const [num, unit] = flow.amount.split(/([A-Za-z]+)/);
+						const value = parseFloat(num);
+						// 统一转换为GB计算总量
+						if (unit === 'MB') {
+							totalGB += value / 1024;
+						} else {
+							totalGB += value;
+							// 套餐外费用：超1GB部分按30元/GB计算
+							if (value > 1) extraFee += (value - 1) * 30;
+						}
+					});
+
+					// 保留2位小数，更新页面
+					document.getElementById('totalUsage').textContent = totalGB.toFixed(2) + 'GB';
+					document.getElementById('extraFee').textContent = extraFee.toFixed(2) + '元';
+				}
+			</script>
+	</body>
+</html>

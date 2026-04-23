@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta http-equiv="content-type" content="text/html;charset=utf-8" />
+
+		<!--H5页面窗口自动调整到设备宽度，并禁止用户缩放页面-->
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, userscalable=no" />
+
+		<title>流量日历</title>
+		<link rel="stylesheet" href="css/css.css" />
+		<script src="js/jquery-2.1.1.min.js"></script>
+		<style>
+			body {
+				font-family: "Microsoft Yahei", sans-serif;
+				margin: 0;
+				background: #F5F5F5 linear-gradient(to bottom, #3473F4, #F5F5F5) no-repeat;
+				padding: 8px;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- 号码查询栏 -->
+		<div class="num-container">
+			<div class="query-bar" onclick="showPopup()">
+				<input type="text" placeholder="查询号码" value="180****6666" readonly />
+				<img src="image/ic_arrow_down.png" alt="" />
+			</div>
+		</div>
+		<div class="calendar-container">
+
+			<!-- 月份切换 + 标题 -->
+			<div class="month-nav">
+				<button id="prevMonth">上一月</button>
+				<div class="month-title" id="currentMonth">2025年10月</div>
+				<button id="nextMonth">下一月</button>
+			</div>
+			<!-- 星期表头 -->
+			<div class="weekdays">
+				<div class="weekday">日</div>
+				<div class="weekday">一</div>
+				<div class="weekday">二</div>
+				<div class="weekday">三</div>
+				<div class="weekday">四</div>
+				<div class="weekday">五</div>
+				<div class="weekday">六</div>
+			</div>
+			<!-- 日期网格（动态生成） -->
+			<div class="dates-container" id="datesContainer">
+				<div class="loading">加载数据中...</div>
+			</div>
+			<!-- 底部统计 -->
+			<p class="stats_title">
+				-- 国内流量日历 --
+			</p>
+			<div class="stats">
+				<div class="stat-item">
+					<div class="stat-value" id="totalUsage">0.00GB</div>
+					<div class="stat-label">已用国内上网总量</div>
+				</div>
+				<div class="stat-item">
+					<div class="stat-value" id="extraFee">0.00元</div>
+					<div class="stat-label">套餐外国内上网费</div>
+				</div>
+			</div>
+		</div>
+		<!-- 输入客户密码 -->
+		<div class="calendar-mask" id="mask" style="display: none;">
+			<div class="calendar-popup">
+				<div class="calendar-popup-title">
+					温馨提示
+					<img src="image/ic_x.png" alt="" onclick="hidePopup()" />
+				</div>
+				<div class="calendar-popup-content">查询到您名下其他号码需验证客户密码</div>
+				<div class="input-box">
+					<input type="password" placeholder="请输入客户密码">
+				</div>
+				<button class="btn_solid" style="width: 100%;" onclick="hidePopup()">确认</button>
+				<div class="forget-pwd">忘记密码？</div>
+			</div>
+		</div>
+		<!-- 切换号码 -->
+		<div class="calendar-mask" id="toggle" style="display: none;">
+			<div class="calendar-popup">
+				<div class="calendar-popup-title">
+					选择号码
+					<img src="image/ic_x.png" alt="" onclick="hidePopup()" />
+				</div>
+				<div class="num-toggel num-selected" style="margin-bottom: 16px;">
+					<span>199****3370</span>
+					<p>
+						当前登录号码
+						<img src="image/num_selected.png" alt="">
+					</p>
+				</div>
+				<div class="num-toggel ">
+					<span>199****3370</span>
+				</div>
+				<div class="btn_container">
+					<button class="btn_plain" onclick="hidePopup()">取消</button>
+					<button class="btn_solid" onclick="hidePopup()">确认</button>
+				</div>
+			</div>
+		</div>
+
+		<script>
+			$(document).on('click', '.num-toggel', function() {
+				var i = $(this).index();
+				$('.num-toggel').removeClass('num-selected');
+				$(this).addClass('num-selected');
+			});
+			
+			function showPopup() {
+				document.getElementById('toggle').style.display = 'flex';
+			};
+
+			function hidePopup() {
+				document.getElementById('toggle').style.display = 'none';
+			}
+
+			// 获取当前日期
+			const today = new Date();
+			// 全局变量：当前显示的年、月
+			let currentYear = today.getFullYear();
+			let currentMonth = today.getMonth() + 1; // 月份从 1 开始
+
+			// 计算最早可查看的月份（当前月往前推6个月）
+			const earliestDate = new Date(today);
+			earliestDate.setMonth(today.getMonth() - 6);
+			const earliestYear = earliestDate.getFullYear();
+			const earliestMonth = earliestDate.getMonth() + 1;
+
+			// 初始化日历（默认显示当前月）
+			fetchFlowData(currentYear, currentMonth)
+			    .then(data => {
+			        generateCalendar(currentYear, currentMonth, data);
+			        updateButtonsState();
+			        updateStatistics(data);
+			    })
+			    .catch(error => {
+			        console.error('获取数据失败:', error);
+			        document.getElementById('datesContainer').innerHTML =
+			            '<div class="loading">数据加载失败，请重试</div>';
+			    });
+
+			// 上一月按钮事件
+			document.getElementById('prevMonth').addEventListener('click', () => {
+				currentMonth--;
+				if (currentMonth < 1) {
+					currentMonth = 12;
+					currentYear--;
+				}
+				updateCalendar();
+			});
+
+			// 下一月按钮事件
+			document.getElementById('nextMonth').addEventListener('click', () => {
+				currentMonth++;
+				if (currentMonth > 12) {
+					currentMonth = 1;
+					currentYear++;
+				}
+				updateCalendar();
+			});
+
+			// 更新日历（切换月份时调用）
+			function updateCalendar() {
+			    // 不再清空容器显示加载中，而是保留原有内容
+			    // 可以给按钮添加加载状态，提示用户正在加载
+			    const prevBtn = document.getElementById('prevMonth');
+			    const nextBtn = document.getElementById('nextMonth');
+			    // 禁用按钮防止重复点击
+			    prevBtn.disabled = true;
+			    nextBtn.disabled = true;
+			
+			    fetchFlowData(currentYear, currentMonth)
+			        .then(data => {
+			            generateCalendar(currentYear, currentMonth, data);
+			            updateButtonsState(); // 恢复按钮状态
+			            updateStatistics(data);
+			        })
+			        .catch(error => {
+			            console.error('获取数据失败:', error);
+			            // 数据加载失败时才提示
+			            document.getElementById('datesContainer').innerHTML =
+			                '<div class="loading">数据加载失败，请重试</div>';
+			            updateButtonsState(); // 恢复按钮状态
+			        });
+			}
+
+			// 模拟从后台获取流量数据
+			function fetchFlowData(year, month) {
+				// 返回Promise模拟异步请求
+				return new Promise((resolve) => {
+					// 模拟网络延迟
+					setTimeout(() => {
+						// 生成当月的日期数据
+						const daysInMonth = new Date(year, month, 0).getDate();
+						const flowData = {};
+
+						// 这里模拟从后台获取的数据
+						// 实际应用中，这里应该是真实的API请求
+						for (let day = 1; day <= daysInMonth; day++) {
+							// 生成更真实的流量数据
+							const randomValue = Math.random();
+
+							if (randomValue < 0.3) {
+								// 30%的概率没有使用流量
+								flowData[day] = {
+									amount: '0.00MB',
+									isOverLimit: false
+								};
+							} else if (randomValue < 0.8) {
+								// 50%的概率使用少量流量
+								const mb = (Math.random() * 50).toFixed(2);
+								flowData[day] = {
+									amount: `${mb}MB`,
+									isOverLimit: false
+								};
+							} else {
+								// 20%的概率使用较多流量（超过限制）
+								const gb = (Math.random() * 2 + 0.5).toFixed(2);
+								flowData[day] = {
+									amount: `${gb}GB`,
+									isOverLimit: true
+								};
+							}
+						}
+
+						resolve(flowData);
+					}, 500); // 500ms延迟，模拟网络请求
+				});
+			}
+
+			// 生成日历核心函数
+			function generateCalendar(year, month, flowData) {
+				const container = document.getElementById('datesContainer');
+				container.innerHTML = ''; // 清空原有内容
+
+				// 更新月份标题
+				document.getElementById('currentMonth').textContent = `${year}年${month}月`;
+
+				// 获取当月第一天是星期几（0 = 周日，1 = 周一...）
+				const firstDay = new Date(year, month - 1, 1).getDay();
+				// 获取当月总天数
+				const daysInMonth = new Date(year, month, 0).getDate();
+
+				// 判断当前显示的月份是否是当前月
+				const isCurrentMonth = year === today.getFullYear() && month === today.getMonth() + 1;
+				// 获取今天的日期
+				const todayDate = today.getDate();
+
+				let date = 1; // 从 1 号开始生成
+				const rows = []; // 存储所有行
+
+				// 生成所有日期行
+				for (let i = 0; i < 6; i++) { // 最多 6 行（覆盖所有可能的月份布局）
+					const row = document.createElement('div');
+					row.classList.add('date-row');
+					let hasValidDate = false; // 标记当前行是否有有效日期
+
+					for (let j = 0; j < 7; j++) { // 每行 7 列（对应星期）
+						const cell = document.createElement('div');
+						cell.classList.add('date-cell');
+
+						// 标记当前日期
+						if (date === todayDate && year === today.getFullYear() && month === today.getMonth() + 1) {
+							cell.classList.add('today');
+						}
+
+						if (i === 0 && j < firstDay) {
+							// 第一行，前置空白格（当月 1 号之前）
+							cell.classList.add('empty');
+						} else if (date <= daysInMonth) {
+							// 生成当月日期：日期数字 + 独立流量标签
+							cell.textContent = date; // 日期数字
+							hasValidDate = true; // 标记当前行有有效日期
+
+							// 检查是否是当前月的未来日期（今天之后的日期）
+							const isFutureDate = isCurrentMonth && date > todayDate;
+
+							if (isFutureDate) {
+								// 未来日期：灰色背景，--MB流量
+								cell.classList.add('future');
+
+								// 创建流量数据标签
+								const flowSpan = document.createElement('span');
+								flowSpan.classList.add('flow-data');
+								flowSpan.textContent = '--MB';
+								cell.appendChild(flowSpan);
+							} else {
+								// 过去或当前日期：使用实际流量数据
+								const flowInfo = flowData[date] || {
+									amount: '0.00MB',
+									isOverLimit: false
+								};
+
+								// 创建独立的流量数据标签
+								const flowSpan = document.createElement('span');
+								flowSpan.classList.add('flow-data');
+								flowSpan.textContent = flowInfo.amount;
+
+								// 根据是否超限设置颜色
+								if (flowInfo.isOverLimit) {
+									cell.classList.add('red');
+								} else {
+									cell.classList.add('blue');
+								}
+
+								cell.appendChild(flowSpan); // 将流量标签加入日期单元格
+							}
+
+							date++;
+						} else {
+							// 当月日期生成完毕，剩余格子留空
+							cell.classList.add('empty');
+						}
+
+						row.appendChild(cell);
+					}
+
+					// 只添加有有效日期的行
+					if (hasValidDate) {
+						rows.push(row);
+					} else {
+						// 如果没有有效日期且不是最后一行，也添加（可能包含后续月份的空白）
+						// 但最后一行如果没有有效日期则不添加
+						if (i < 5) {
+							rows.push(row);
+						}
+					}
+				}
+
+				// 添加所有行到容器
+				rows.forEach(row => {
+					container.appendChild(row);
+				});
+			}
+
+			// 更新统计信息
+			function updateStatistics(flowData) {
+				let totalGB = 0;
+				let extraFee = 0;
+
+				// 判断当前显示的月份是否是当前月
+				const isCurrentMonth = currentYear === today.getFullYear() && currentMonth === today.getMonth() + 1;
+				// 获取今天的日期
+				const todayDate = today.getDate();
+
+				// 计算总量和额外费用（只计算今天及之前的日期）
+				Object.entries(flowData).forEach(([dayStr, flow]) => {
+					const day = parseInt(dayStr);
+
+					// 如果是当前月，只统计今天及之前的日期
+					if (isCurrentMonth && day > todayDate) {
+						return; // 跳过未来日期
+					}
+
+					const amount = flow.amount;
+					let value;
+
+					if (amount.includes('GB')) {
+						value = parseFloat(amount);
+						totalGB += value;
+
+						// 超过1GB的部分按每GB30元计算额外费用
+						if (value > 1) {
+							extraFee += (value - 1) * 30;
+						}
+					} else if (amount.includes('MB')) {
+						value = parseFloat(amount) / 1024; // 转换为GB
+						totalGB += value;
+					}
+				});
+
+				// 更新统计显示
+				document.getElementById('totalUsage').textContent = totalGB.toFixed(2) + 'GB';
+				document.getElementById('extraFee').textContent = extraFee.toFixed(2) + '元';
+			}
+
+			// 更新按钮状态（是否可点击）
+			function updateButtonsState() {
+				const prevBtn = document.getElementById('prevMonth');
+				const nextBtn = document.getElementById('nextMonth');
+
+				// 判断是否达到最早月份限制
+				const isEarliestMonth = currentYear < earliestYear ||
+					(currentYear === earliestYear && currentMonth <= earliestMonth);
+
+				// 判断是否达到当前月份限制
+				const isCurrentMonth = currentYear === today.getFullYear() &&
+					currentMonth === today.getMonth() + 1;
+
+				// 设置按钮状态
+				prevBtn.disabled = isEarliestMonth;
+				nextBtn.disabled = isCurrentMonth;
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>实现在网页上录音</title>
+    <style>
+        #toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            display: none;
+        }
+        .blackBoxSpeak, .blackBoxPause {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <button id="bt_recoding" class="blackBoxSpeak">Record</button>
+        <button id="bt_pause" class="blackBoxPause" style="display:none;">Pause</button>
+        <audio controls id="audio-player"></audio>
+        <div id="toast"></div>
+    </div>
+
+    <script>
+        // =============== 全局变量 ===============
+        var bt_recoding = document.getElementById("bt_recoding");
+        var bt_pause = document.getElementById("bt_pause");
+        var audioPlayer = document.getElementById("audio-player");
+        const toast = document.getElementById("toast");
+
+        let audioContext = null;
+        let mediaStreamSource = null;
+        let scriptProcessorNode = null;
+        let mergedBuffer = new Float32Array(0);
+        let bufferLength = 0;
+        let currentStream = null;
+        let isRecording = false;
+
+        // =============== Toast 提示 ===============
+        function showToast(message) {
+            toast.innerText = message;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 1000);
+        }
+
+        // =============== AudioContext 初始化与激活 ===============
+        function resumeAudioContext() {
+            if (audioContext && audioContext.state === 'suspended') {
+                audioContext.resume().then(() => {
+                    console.log("AudioContext 已激活.");
+                }).catch(error => {
+                    console.error("激活 AudioContext 失败:", error);
+                });
+            } else if (!audioContext) {
+                try {
+                    audioContext = new(window.AudioContext || window.webkitAudioContext)();
+                    console.log("实际采样率:", audioContext.sampleRate);
+                } catch (err) {
+                    console.error("创建 AudioContext 失败", err);
+                }
+            }
+        }
+
+        function initAudioIfNeeded() {
+            if (!audioContext || audioContext.state === 'closed') {
+                try {
+                    audioContext = new(window.AudioContext || window.webkitAudioContext)();
+                    console.log("实际采样率:", audioContext.sampleRate);
+                } catch (err) {
+                    console.error("无法创建 AudioContext", err);
+                }
+            }
+        }
+
+        // =============== 录音开始 ===============
+        async function startRecording() {
+            if (isRecording) return;
+
+            // 初始化或恢复 AudioContext
+            initAudioIfNeeded();
+            resumeAudioContext();
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: true
+                });
+
+                if (currentStream) {
+                    currentStream.getTracks().forEach(track => track.stop());
+                }
+                currentStream = stream;
+
+                mediaStreamSource = audioContext.createMediaStreamSource(stream);
+                scriptProcessorNode = audioContext.createScriptProcessor(4096, 1, 1); // Increase bufferSize to reduce latency
+                scriptProcessorNode.onaudioprocess = onAudioProcess;
+
+                mediaStreamSource.connect(scriptProcessorNode);
+                scriptProcessorNode.connect(audioContext.destination);
+
+                isRecording = true;
+                bt_recoding.style.display = 'none';
+                bt_pause.style.display = 'inline-block';
+
+                showToast("录音已开始");
+
+            } catch (err) {
+                console.error('无法访问麦克风:', err);
+                alert(`麦克风访问失败: ${err.message}`);
+            }
+        }
+
+        // =============== 音频处理 ===============
+        function onAudioProcess(event) {
+            if (!isRecording) return;
+
+            const inputBuffer = event.inputBuffer.getChannelData(0);
+            const newBuffer = new Float32Array(bufferLength + inputBuffer.length);
+            newBuffer.set(mergedBuffer);
+            newBuffer.set(inputBuffer, bufferLength);
+            mergedBuffer = newBuffer;
+            bufferLength += inputBuffer.length;
+        }
+
+        // =============== 停止录音 ===============
+        function stopRecording() {
+            if (!isRecording) return;
+            isRecording = false;
+
+            if (scriptProcessorNode) {
+                scriptProcessorNode.disconnect();
+                scriptProcessorNode = null;
+            }
+            if (mediaStreamSource) {
+                mediaStreamSource.disconnect();
+                mediaStreamSource = null;
+            }
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+
+            processAudioData();
+        }
+
+        // =============== 暂停录音 ===============
+        function pauseRecording() {
+            if (!isRecording) return;
+            isRecording = false;
+
+            if (scriptProcessorNode) {
+                scriptProcessorNode.disconnect();
+                scriptProcessorNode = null;
+            }
+            if (mediaStreamSource) {
+                mediaStreamSource.disconnect();
+                mediaStreamSource = null;
+            }
+            if (currentStream) {
+                currentStream.getTracks().forEach(track => track.stop());
+                currentStream = null;
+            }
+
+            processAudioData();
+        }
+
+        // =============== WAV 编码函数 ===============
+        function encodeWAV(samples, sampleRate) {
+            const bytesPerSample = 2;
+            const numChannels = 1;
+            const blockAlign = numChannels * bytesPerSample;
+            const byteRate = sampleRate * blockAlign;
+            const dataSize = samples.length * bytesPerSample;
+
+            const view = new DataView(new ArrayBuffer(44 + dataSize));
+
+            function writeString(view, offset, string) {
+                for (let i = 0; i < string.length; ++i) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            }
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + dataSize, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, numChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, byteRate, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, bytesPerSample * 8, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, dataSize, true);
+
+            for (let i = 0; i < samples.length; i++) {
+                const s = Math.max(-1, Math.min(1, samples[i]));
+                view.setInt16(44 + i * 2, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+            }
+
+            return new Blob([view], {
+                type: 'audio/wav'
+            });
+        }
+
+        // =============== 处理音频数据并输出 Base64 ===============
+        function processAudioData() {
+            if (bufferLength === 0) {
+                console.warn("没有录制到音频数据");
+                return;
+            }
+
+            const wavBlob = encodeWAV(mergedBuffer, audioContext.sampleRate);
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                const base64String = reader.result.split(',')[1];
+                updateBase64Output(base64String);
+            };
+            reader.readAsDataURL(wavBlob);
+
+            mergedBuffer = new Float32Array(0);
+            bufferLength = 0;
+        }
+
+        // 更新音频播放器
+        function updateBase64Output(base64String) {
+            const blob = new Blob([base64String], { type: 'audio/wav' });
+            const url = URL.createObjectURL(blob);
+            audioPlayer.src = url;
+            audioPlayer.controls = true;
+            audioPlayer.load();
+            audioPlayer.play();
+            showToast("录音已完成");
+        }
+
+        // 按钮事件监听
+        bt_recoding.addEventListener('click', startRecording);
+        bt_pause.addEventListener('click', pauseRecording);
+    </script>
+</body>
+</html>
+
+
+
