@@ -1287,6 +1287,7 @@ body {
 	flex-shrink: 0;
 	font-size: 13px;
 }
+
 .bottom_presuppose>p:active {
 	opacity: 0.8;
 }
@@ -4509,10 +4510,57 @@ tr:not(:last-child) th {
 	border-bottom: 1px solid #e8e8e8;
 }
 
-.div_listUl .box_title{
-				    border: 1px solid #ffffff;
-					    background: rgba(225, 230, 245, 0.75);
-					    backdrop-filter: blur(20px);
-					    -webkit-backdrop-filter: blur(20px);
-						border-radius: 8px 8px 0 0;
-			}
+.div_listUl .box_title {
+	border: 1px solid #ffffff;
+	background: rgba(52, 115, 244, 0.9);
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
+	border-radius: 8px 8px 0 0;
+	padding: 4px 0;
+}
+
+
+.background {
+	color: #ffffff;
+	font-size: 14px !important;
+	font-weight: normal;
+}
+
+.radiostyle1 {
+	color: #ffffff;
+	font-size: 14px;
+	font-weight: normal;
+}
+
+.bill_month_container {
+	padding-top: 48px;
+}
+
+.swiper-slide {
+	padding-top: 8px !important;
+}
+
+.swiper-slide>div {
+	padding-top: 40px !important;
+}
+
+.package_title {
+	margin-top: 8px;
+}
+
+.orderd_tab_container>.background {
+	background: rgba(52, 115, 244, 0.9);
+}
+
+.background>p>span {
+	color: #3473F4;
+}
+
+.recharge_item_container>.background {
+	color: #3473F4;
+	font-size: 16px !important;
+}
+
+.balance_top {
+	background: #3473F4;
+}
