@@ -1,7 +1,8 @@
-$(document).ready(function() {
-    
-    // =============== 全局变量 ===============
+$(document).ready(function() {		
+// =============== 全局变量 ===============
     const bt_recoding = document.getElementById("bt_recoding");
+	const bt_background = document.getElementsByClassName('voice_input');
+	const input_state = document.getElementsByClassName('input_state');
     const blackBoxSpeak = document.querySelector(".blackBoxSpeak");
     const blackBoxPause = document.querySelector(".blackBoxPause");
     const toast = document.getElementById("toast");
@@ -26,7 +27,13 @@ $(document).ready(function() {
     function initStatus() {
         bt_recoding.value = '按住说话';
         showBlackBoxNone();
-        $(bt_recoding).css({'color': '#333333', 'background': 'white'});
+		  $(bt_background).css('background', '#ffffff');
+        $(bt_recoding).css({'background': 'white'});
+		$(bt_recoding).css({'color': '#333333'});
+		$(input_state).removeClass('input_state_red');
+		$(input_state).css('display','none');
+		 $('.bottom_input').css('background','#b4d0ff');
+		 $(bt_background).removeClass('bottom_input_active');
     }
 
     function showBlackBoxNone() {
@@ -80,7 +87,7 @@ $(document).ready(function() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)({
                     latencyHint: 'interactive',
-                    sampleRate: 48000 // 固定采样率，避免iOS不同设备采样率不一致
+                    sampleRate: 8000 // 固定采样率，避免iOS不同设备采样率不一致
                 });
             }
             if (audioCtx.state === 'suspended') {
@@ -118,7 +125,7 @@ $(document).ready(function() {
                         echoCancellation: false, 
                         noiseSuppression: false,
                         autoGainControl: true,
-                        sampleRate: 48000
+                        sampleRate: 8000
                     }
                 });
                 console.log("麦克风流已持久化预热");
@@ -236,16 +243,7 @@ $(document).ready(function() {
         reader.readAsDataURL(blob);
     }
 
-    function updateBase64Output(base64, mimeType) {
-        const audioContainer = document.getElementById('audioContainer');
-        if (audioContainer) {
-            const audioElement = document.createElement('audio');
-            audioElement.controls = true;
-            audioElement.src = `data:${mimeType};base64,${base64}`;
-            audioContainer.innerHTML = '';
-            audioContainer.appendChild(audioElement);
-        }
-    }
+    
 
     // =============== 事件绑定（100%保留你原有的交互逻辑） ===============
     function initEvent() {
@@ -335,16 +333,62 @@ $(document).ready(function() {
         bt_recoding.value = '松开 结束';
         blackBoxSpeak.style.display = "block";
         blackBoxPause.style.display = "none";
-        $(bt_recoding).css({'background': '#3473F4', 'color': '#ffffff'});
+       $(bt_background).css({'background': '#3473F4', 'color': '#ffffff'});
+       $(bt_background).addClass('bottom_input_active');
+       $(bt_recoding).css({ 'color': '#ffffff'});
+       $(input_state).css({ 'display': 'flex'});
+       $(input_state).removeClass('input_state_red');
+       $('.bottom_input').css('background','none')
     }
 
     function showBlackBoxPause() {
         bt_recoding.value = '松开手指，取消发送';
         blackBoxSpeak.style.display = "none";
         blackBoxPause.style.display = "block";
-        $(bt_recoding).css('background', '#f44336');
+        $(bt_background).css('background', '#f44336');
+        $(bt_background).removeClass('bottom_input_active');
+         $(input_state).addClass('input_state_red');
+         $('.bottom_input').css('background','none')
     }
 
     // 初始化事件
     initEvent();
-});
+	// 更新Base64输出
+	function updateBase64Output(base64, mimeType) {
+		const base64Output = document.getElementById('base64Output');
+		base64Output.innerHTML = `${base64}`; // 更新Base64输出
+		var openid=document.getElementById("openid").value;
+        var voiceList={
+		  "base64voice": base64,
+		  "openid": openid
+		}
+		//测试输出base64转语音
+		// 创建音频元素
+		 const audioElement = document.createElement('audio');
+		 audioElement.controls = true; // 添加控制条
+		 audioElement.src = `data:audio/wav;base64,${base64}`; // 设置音频源
+
+		 // 插入音频元素到页面
+		 const audioContainer = document.getElementById('audioContainer');
+		 audioContainer.innerHTML = ''; // 清空之前的音频元素
+		 audioContainer.appendChild(audioElement);
+		//if(hasMoved){
+		//	hasMoved=false;  //重置状态
+		//	return;
+		//}
+		sendVoice();
+		//hasMoved=false;  //重置状态
+
+         //测试输出base64转语音
+		// 创建音频元素
+		// const audioElement = document.createElement('audio');
+		// audioElement.controls = true; // 添加控制条
+		// audioElement.src = `data:audio/wav;base64,${base64}`; // 设置音频源
+
+		// // 插入音频元素到页面
+		// const audioContainer = document.getElementById('audioContainer');
+		// audioContainer.innerHTML = ''; // 清空之前的音频元素
+		// audioContainer.appendChild(audioElement);	
+		// console.log(base64);//控制台显示base64	
+	}
+	});
