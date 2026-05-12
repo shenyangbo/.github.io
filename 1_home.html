@@ -6,7 +6,7 @@
 		<!--H5页面窗口自动调整到设备宽度，并禁止用户缩放页面-->
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0" />
 
-		<link rel="stylesheet" href="css/css.css">
+		<link rel="stylesheet" href="css/home.css">
 		<script type="text/javascript" src="js/jquery-2.1.1.min.js"></script>
 		<script src="js/js2.js"></script>
 		<script src="js/record2.js"></script>
@@ -14,48 +14,20 @@
 		<script src="js/swiper-bundle.min.js"></script>
 
 		<title>10000助理</title>
-		<style>
-			body {
-				background: #EFF5FF;
-			}
-
-			.top_package_details li p {
-				display: flex;
-				align-items: center;
-			}
-			
-		</style>
 	</head>
 	<body>
 		<!-- 号码信息 -->
 		<div class="num_container">
 			<div class="number btn-list">
-				当前登录号码45
+				当前登录号码
 				<p>133****1526</p>
 				<button class="btn" type="button" data-action="navigateBack">
-					<img src="images/ic_log_out.png" alt="">
+					<img src="image/ic_log_out.png" alt="">
 				</button>
-
 			</div>
 		</div>
+			<img class="content_bg" src="image/pic_bg_colorai.jpg" alt="" />
 		<div class="dialog_container">
-			<div class="service_content2">
-				<p class="service_time">10:50</p>
-				<div class="message_left">
-					<img src="image/service_dialog.png" alt="">
-					<p>尊敬的用户，欢迎您从10000号热线切换至星
-						卡助理，下面由小助继续为您服务!</p>
-				</div>
-				<div class="message_left">
-					<img src="image/service_dialog.png" alt="">
-					<p>
-						小助提醒您您的号码133****5678当前欠费19
-						元需要缴费后自动复通使用，如需缴费请点击
-						【充值缴费】充值成功后3小时内复机。
-					</p>
-				</div>
-			</div>
-
 			<div class="home_top">
 				<div class="home_top_data">
 					<div class="home_top_package">
@@ -82,41 +54,39 @@
 					</div>
 				</div>
 			</div>
-			<div class="home_question_container">
-				<div class="home_question">
-					<p class="home_question_tab background">
-						<img src="image/question.png" alt="">
-					</p>
 
-					<p class="home_question_tab">
-						<span>热点问题</span>
-						<span class="bg_active"></span>
-					</p>
-					<p class="home_question_refresh">
-						<img src="image/refresh.png" alt="" class="img_refresh">刷新
+			<div class="service_content2">
+				<p class="service_time">10:50</p>
+				<div class="message_left">
+					<img src="image/service_dialog.png" alt="">
+					<p>尊敬的用户，欢迎您从10000号热线切换至星
+						卡助理，下面由小助继续为您服务!</p>
+				</div>
+				<div class="message_left">
+					<img src="image/service_dialog.png" alt="">
+					<p>
+						小助提醒您您的号码133****5678当前欠费19
+						元需要缴费后自动复通使用，如需缴费请点击
+						【充值缴费】充值成功后3小时内复机。
 					</p>
 				</div>
-				<div class="swiper mySwiper2" style="margin-top: 0px;">
-					<div class="swiper-wrapper">
-						<!-- 流量 -->
-						<div class="swiper-slide">
-							<ul class="home_question_ul">
-								<li>我有余额为什么还停机? <img src="image/ic_arrow_right.png" alt=""></li>
-								<li>消费是怎么产生的?<img src="image/ic_arrow_right.png" alt=""></li>
-								<li>怎么查往月欠费明细?<img src="image/ic_arrow_right.png" alt=""></li>
-								<li>我要充值多少钱?<img src="image/ic_arrow_right.png" alt=""></li>
-							</ul>
-						</div>
+			</div>
 
-						<!-- 语音 -->
-						<div class="swiper-slide" style="">
-							<ul class="home_question_ul">
-								<li>我有余额为什么还停机? <img src="image/ic_arrow_right.png" alt=""></li>
-								<li>消费是怎么产生的?<img src="image/ic_arrow_right.png" alt=""></li>
-								<li>怎么查往月欠费明细?<img src="image/ic_arrow_right.png" alt=""></li>
-								<li>我要充值多少钱?<img src="image/ic_arrow_right.png" alt=""></li>
-							</ul>
-						</div>
+
+			<div class="home_question_container">
+				<div class="home_question_content">
+					<div class="home_question">
+						<p class="home_question_tab ">
+							<img src="image/question.png" alt="">
+						</p>
+					</div>
+					<div class="swiper">
+						<ul class="home_question_ul">
+							<li>我有余额为什么还停机? <img src="image/ic_arrow_right.png" alt=""></li>
+							<li>消费是怎么产生的?<img src="image/ic_arrow_right.png" alt=""></li>
+							<li>怎么查往月欠费明细?<img src="image/ic_arrow_right.png" alt=""></li>
+							<li>我要充值多少钱?<img src="image/ic_arrow_right.png" alt=""></li>
+						</ul>
 					</div>
 				</div>
 			</div>
@@ -161,17 +131,6 @@
 					<p>
 						<img src="image/poorly_grey.png" alt="" class="poorly" />
 						<img src="image/praise_grey.png" alt="" class="praise" />
-					</p>
-				</div>
-				<p class="service_time">10:50</p>
-				<div class="message_left">
-					<img src="image/service_dialog.png" alt="">
-					<p>
-						asd
-						sdf
-						465
-						456
-
 					</p>
 				</div>
 
@@ -251,37 +210,6 @@
 					</p>
 
 				</div>
-
-				<!-- <div class="message_left">
-					<img src="image/service_dialog.png" alt="">
-					<p>
-						<span class="spinner">
-							<span class="bg_white"></span>
-							<span class="circle large"></span>
-							  <span class="circle small"></span>
-						</span>
-					</p>
-				</div>
-
-				<div class="message_left">
-					<img src="image/service_dialog.png" alt="">
-					<p>
-					  <img src="image/testing.png" class="icon_right2 loading" alt="">
-					</p>
-				</div>
-				
-				
-				<div class="message_left">
-					<img src="image/service_dialog.png" alt="">
-					<p>
-					  <span class="container animation-6">
-					  	<span class="shape shape-1"></span>
-					  	<span class="shape shape-2"></span>
-					  	<span class="shape shape-3"></span>
-					  	<span class="shape shape-4"></span>
-					  </span>
-					</p>
-				</div> -->
 			</div>
 
 			<div class="feedback">
@@ -361,14 +289,32 @@
 						<img src="image/ic_keybord_circle.png" alt="" class="input_text_switch">
 						<input type="button" id="bt_recoding" class="input_content noselect bg_blue" value="按住说话">
 					</div>
-					<section class="z_file">
-						<img src="image/ic_plus_circle.png" class="add-img">
-						<input type="file" class="file" accept="image/*" />
-					</section>
+				</div>
+				<!-- 录音波形 -->
+				<div class="input_state" >
+					<span class="wave-bar wave-1"></span>
+					<span class="wave-bar wave-2"></span>
+					<span class="wave-bar wave-3"></span>
+					<span class="wave-bar wave-4"></span>
+					<span class="wave-bar wave-5"></span>
+					<span class="wave-bar wave-6"></span>
+					<span class="wave-bar wave-7"></span>
+					<span class="wave-bar wave-8"></span>
+					<span class="wave-bar wave-9"></span>
+					<span class="wave-bar wave-10"></span>
+					<span class="wave-bar wave-11"></span>
+					<span class="wave-bar wave-12"></span>
+					<span class="wave-bar wave-13"></span>
+					<span class="wave-bar wave-14"></span>
+					<span class="wave-bar wave-15"></span>
+					<span class="wave-bar wave-16"></span>
+					<span class="wave-bar wave-17"></span>
+					<span class="wave-bar wave-18"></span>
 				</div>
 			</div>
 		</div>
 	</body>
+
 	<!-- 录音状态 -->
 	<div class="blackBoxSpeak">
 		<!-- <p class="blackBoxSpeakConent">手指上划，取消发送</p> -->
@@ -410,10 +356,10 @@
 	</div>
 
 	<!-- 新消息提醒 -->
-	<!-- <p class="message_new">
+	<p class="message_new" style="display: none;">
 		<img src="image/ic_arrow_left_white.png" alt="">
 		有新的消息
-	</p> -->
+	</p>
 
 	<!-- 加载动画 -->
 	<div class="loading_container" style="display: none;">
@@ -654,7 +600,7 @@
 						src: '16_calender_data.html',
 						class: 'iframe'
 					});
-				}else if (userInput === '手机指引') {
+				} else if (userInput === '手机指引') {
 					// 插入index.html
 					var serviceInputValue = '小助为您查询到实时费用的相关内容';
 
@@ -662,7 +608,7 @@
 						src: '18_guidance.html',
 						class: 'iframe'
 					});
-				}else if (userInput === '19') {
+				} else if (userInput === '19') {
 					// 插入index.html
 					var serviceInputValue = '小助为您查询到实时费用的相关内容';
 
@@ -670,7 +616,7 @@
 						src: '19_message_code.html',
 						class: 'iframe'
 					});
-				}else if (userInput === '20') {
+				} else if (userInput === '20') {
 					// 插入index.html
 					var serviceInputValue = '小助为您查询到实时费用的相关内容';
 
