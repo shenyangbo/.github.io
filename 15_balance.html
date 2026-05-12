@@ -30,7 +30,7 @@
 		.balance_active { width: 16px; height: 3px; border-radius: 3px; background:#ffffff; margin-top: 5px; opacity: 0; transform: scaleX(0); transition: 0.4s var(--ease-breathe); }
 		.balance_tab_active .balance_active { opacity: 1; transform: scaleX(1); }
 
-		.balance_tabs { min-height: 100vh; padding-top: 48px; }
+		.balance_tabs { padding-top: 48px; }
 		.tab { display: none; animation: breatheIn 0.6s var(--ease-breathe) forwards; }
 		.tab.active { display: block; }
 		@keyframes breatheIn { 0% { opacity: 0; transform: translateY(10px); } 100% { opacity: 1; transform: translateY(0); } }
@@ -263,6 +263,7 @@
 
 <script>
 	$(document).ready(function() {
+		
 		// 数字跳动动画
 		function runCounter() {
 			$('.tab.active .count-up').each(function() {
@@ -277,22 +278,56 @@
 		runCounter();
 
 		// Tab 切换
-		$('.balance_tab-links li').on('click', function() {
-			if ($(this).hasClass('balance_tab_active')) return;
-			$('.balance_tab-links li').removeClass('balance_tab_active');
-			$(this).addClass('balance_tab_active');
-			$('.tab.active').hide().removeClass('active');
-			$($(this).data('target')).show().addClass('active');
-			runCounter();
-		});
+		// $('.balance_tab-links li').on('click', function() {
+		// 	if ($(this).hasClass('balance_tab_active')) return;
+		// 	$('.balance_tab-links li').removeClass('balance_tab_active');
+		// 	$(this).addClass('balance_tab_active');
+		// 	$('.tab.active').hide().removeClass('active');
+		// 	$($(this).data('target')).show().addClass('active');
+		// 	runCounter();
+		// });
+			// Tab 切换
+					$('.balance_tab-links li').on('click', function() {
+					    runCounter();
+						if ($(this).hasClass('balance_tab_active')) return;
+						$('.balance_tab-links li').removeClass('balance_tab_active');
+						$(this).addClass('balance_tab_active');
+						$('.tab.active').hide().removeClass('active');
+						$($(this).data('target')).show().addClass('active');
+						
+					});
 
-		// 折叠逻辑与箭头翻转
+		// 修改折叠逻辑
 		$('.toggle-trigger').on('click', function() {
-			var $trigger = $(this);
-			var $container = $trigger.next('.balance_details_container');
-			$container.stop().slideToggle(300);
-			$trigger.toggleClass('open');
+		    var $trigger = $(this);
+		    var $container = $trigger.next('.balance_details_container');
+		    $trigger.toggleClass('open');
+		    
+		    // 关键点：在动画进行中不断更新，或在完成后强制更新一次
+		    $container.stop().slideToggle({
+		        duration: 300,
+		        step: function() {
+		            // 动画每一步都通知父页面，这样会有平滑增长的效果
+		            notifyParentHeight();
+		        },
+		        complete: function() {
+		            // 动画完成后确保高度最终准确
+		            notifyParentHeight();
+		        }
+		    });
 		});
+		
+		// 统一高度通知函数（删掉重复定义的那个）
+		function notifyParentHeight() {
+		    if (window.parent !== window) {
+		        // 建议使用 offsetHeight 获取包含 padding 的内容高度
+		        var height = document.documentElement.offsetHeight || document.body.offsetHeight;
+		        window.parent.postMessage({
+		            type: 'resize',
+		            height: height
+		        }, '*');
+		    }
+		}
 
 		// 父元素 + 图标 都触发弹窗
 		$('.popup-parent').on('click', function(e) {
@@ -325,6 +360,8 @@
 				$('.popup_container').removeClass('show');
 			}
 		});
+		
+		notifyParentHeight();
 	});
 </script>
 </body>
