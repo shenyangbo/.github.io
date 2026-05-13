@@ -140,6 +140,17 @@ $(document).ready(function() {
         if (isRecording) return;
         isCancelled = false;
         audioChunks = [];
+		
+		function switchToVoiceAndRecord() {
+		    $('.text_input').hide();
+		    $('.voice_input').css('display', 'flex');
+		    resumeAudioContext();
+		    window.startVoiceRecording();
+		    
+		    // 🔥 录音开始时锁定页面，禁止上下滑动
+		    $('body').css('overflow', 'hidden');
+		    $('body').css('touch-action', 'none');
+		}
 
         try {
             // 先确保预热完成、Worklet就绪、音频上下文激活
@@ -245,67 +256,109 @@ $(document).ready(function() {
 
     
 
-    // =============== 事件绑定（100%保留你原有的交互逻辑） ===============
-    function initEvent() {
-        // 1. 切换按钮提前预热麦克风和Worklet
-        $(document).on('click', '.input_voice_switch', function() {
-            prepareMic(); 
-        });
-
-        // 2. 触摸开始（按住说话）
-        bt_recoding.addEventListener("touchstart", async function(event) {
-            event.preventDefault();
-            posStart = event.touches[0].pageY;
-            showBlackBoxSpeak();
-            if (navigator.vibrate) navigator.vibrate(40);
-            
-            // 直接启动录音，预热逻辑已在startRecording内处理
-            await startRecording();
-        });
-
-        // 3. 触摸移动（上滑取消）
-        bt_recoding.addEventListener("touchmove", function(event) {
-            event.preventDefault();
-            const posMove = event.targetTouches[0].pageY;
-            if (posStart - posMove < 50) {
-                showBlackBoxSpeak();
-            } else {
-                showBlackBoxPause();
-            }
-        });
-
-        // 4. 触摸结束（松开结束/取消）
-        bt_recoding.addEventListener("touchend", function(event) {
-            event.preventDefault();
-            const posEnd = event.changedTouches[0].pageY;
-            if (posStart - posEnd >= 50) {
-                stopRecording(true);
-                showToast("取消发送");
-            } else {
-                stopRecording(false);
-            }
-            initStatus();
-        });
-
-        // 5. 鼠标兼容（PC端调试用）
-        bt_recoding.addEventListener("mousedown", async (e) => {
-            showBlackBoxSpeak();
-            await startRecording();
-        });
-        
-        bt_recoding.addEventListener("mouseup", () => {
-            stopRecording(false);
-            initStatus();
-        });
-
-        bt_recoding.addEventListener("mouseleave", () => {
-            if (isRecording) {
-                stopRecording(true);
-                showToast("取消发送");
-                initStatus();
-            }
-        });
-    }
+  // =============== 事件绑定（修复焦点版） ===============
+  function initEvent() {
+      let pressTimer = null;
+      const LONG_PRESS_TIME = 250; // 长按阈值
+  
+      // 统一的滑动位移判定逻辑
+      function handleMoveLogic(currentY) {
+          if (posStart - currentY < 50) {
+              showBlackBoxSpeak(); 
+          } else {
+              showBlackBoxPause(); 
+          }
+      }
+  
+      // --- 1. 语音按钮 (#bt_recoding) 处理 ---
+      bt_recoding.addEventListener("touchstart", function(event) {
+          event.preventDefault(); // 语音按钮禁止默认行为
+          posStart = event.touches[0].pageY;
+  
+          pressTimer = setTimeout(async () => {
+              pressTimer = null;
+              showBlackBoxSpeak();
+              if (navigator.vibrate) navigator.vibrate(40);
+              await startRecording();
+          }, LONG_PRESS_TIME);
+      });
+  
+      bt_recoding.addEventListener("touchmove", function(event) {
+          if (pressTimer) {
+              clearTimeout(pressTimer);
+              pressTimer = null;
+              return;
+          }
+          handleMoveLogic(event.touches[0].pageY);
+      });
+  
+      bt_recoding.addEventListener("touchend", function(event) {
+          if (pressTimer) {
+              clearTimeout(pressTimer);
+              pressTimer = null;
+              // 短按：切换回文字模式并聚焦
+              $('.voice_input').hide();
+              $('.text_input').css('display', 'flex');
+              setTimeout(() => { document.getElementById('userInput').focus(); }, 100); 
+              return;
+          }
+          
+          const posEnd = event.changedTouches[0].pageY;
+          const isCancel = (posStart - posEnd >= 50);
+          
+          if (isCancel) { showToast("取消发送"); } else { showToast("已发送"); }
+          stopRecording(isCancel);
+          initStatus();
+      });
+  
+      // --- 2. 输入框 (#userInput) 处理 ---
+      const userInput = document.getElementById('userInput');
+  
+      userInput.addEventListener("touchstart", function(event) {
+          // 注意：这里不要写 event.preventDefault()，否则键盘弹不出来
+          posStart = event.touches[0].pageY;
+          
+          pressTimer = setTimeout(async () => {
+              pressTimer = null;
+              // 触发长按：切换 UI 
+              $('.text_input').hide();
+              $('.voice_input').css('display', 'flex');
+              
+              await prepareMic();
+              if (navigator.vibrate) navigator.vibrate(40);
+              showBlackBoxSpeak();
+              await startRecording();
+          }, LONG_PRESS_TIME);
+      });
+  
+      userInput.addEventListener("touchmove", function(event) {
+          if (pressTimer) {
+              clearTimeout(pressTimer);
+              pressTimer = null;
+          } else {
+              handleMoveLogic(event.touches[0].pageY); 
+          }
+      });
+  
+      userInput.addEventListener("touchend", function(event) {
+          if (pressTimer) {
+              // 【关键修改】：如果 pressTimer 还在，说明是点击而不是长按
+              clearTimeout(pressTimer);
+              pressTimer = null;
+              // 让输入框正常获取焦点
+              userInput.focus(); 
+          } else {
+              // 长按后的释放逻辑
+              const posEnd = event.changedTouches[0].pageY;
+              const isCancel = (posStart - posEnd >= 50);
+              
+              if (isCancel) { showToast("取消发送"); } else { showToast("已发送"); }
+              
+              stopRecording(isCancel);
+              initStatus();
+          }
+      });
+  }
 
     // 页面隐藏时清理资源（仅在这里彻底关闭麦克风，避免iOS休眠问题）
     document.addEventListener('visibilitychange', function() {
