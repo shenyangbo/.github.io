@@ -17,6 +17,10 @@ $(document).ready(function() {
 	let workletNode = null; // 替代ScriptProcessor的AudioWorklet节点
 	let isWorkletReady = false; // Worklet加载状态标记
 
+	$('#inputMode,#bt_recoding').on('touchstart touchmove touchend', function(e) {
+	    e.preventDefault();
+	});
+
 	// =============== 工具函数 ===============
 	function showToast(message) {
 		toast.innerText = message;
