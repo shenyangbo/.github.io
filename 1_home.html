@@ -216,8 +216,16 @@
 					</div>
 				</div>
 				<div class="bottom_input">
+					<!-- 选择输入 -->
+					<div class="mode_input" style="flex: 1;display: flex;align-items: center;">
+						<img src="image/ic_voice_circle.png" alt="" class="input_voice_switch">
+						<div id="inputMode" class="input_content">
+							发消息或按住说话
+							<!-- <input type="text" placeholder="发消息或按住说话" id="inputMode"> -->
+						</div>
+					</div>
 					<!-- 文字输入 -->
-					<div class="text_input" style="flex: 1;display: flex;align-items: center;">
+					<div class="text_input" style="flex: 1;display: none;align-items: center;">
 						<img src="image/ic_voice_circle.png" alt="" class="input_voice_switch">
 						<div id="" class="input_content">
 							<input type="text" placeholder="请输入..." id="userInput">
@@ -647,13 +655,49 @@
 
 
 			$('.input_voice_switch').click(function() {
-				$('.text_input').hide();
-				$('.voice_input').css('display', 'flex');
-				resumeAudioContext();
+			
+			    // 新增：申请麦克风权限
+			    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+			        navigator.mediaDevices.getUserMedia({ audio: true })
+			            .then(function(stream) {
+			                // 保存流，后续录音可能会用到
+			                window._micStream = stream;
+			                console.log('麦克风权限已获取');
+			            })
+			            .catch(function(err) {
+			                console.log('麦克风权限获取失败：', err);
+			            });
+			    } else {
+			        console.log('当前浏览器不支持 getUserMedia');
+			    }
+			
+			    // 标记：这是主动切换
+			    isManualSwitch = true;
+			
+			    // 主动取消焦点
+			    $('#userInput').blur();
+			
+			    $('.text_input , .mode_input').hide();
+			    $('.voice_input').css('display', 'flex');
+			
+			    resumeAudioContext();
 			});
-			$('.input_text_switch').click(function() {
-				$('.voice_input').hide();
-				$('.text_input').css('display', 'flex')
+			
+			$('.input_text_switch').on('touchend', function(e) {
+			
+			    e.preventDefault();
+			
+			    $('.voice_input ,.mode_input').hide();
+			    $('.text_input').css('display', 'flex');
+			
+			    // iOS 必须同步 focus
+			    const input = document.getElementById('userInput');
+			
+			    input.removeAttribute('readonly');
+			
+			    input.focus();
+			
+			    input.click();
 			});
 
 			// 点击新消息滚动到最底部
@@ -672,31 +716,6 @@
 				$('.message_new').show();
 			};
 			
-			// -------- 【输入框：长按直接录音，行为完全和按钮一致】 --------
-			$('#userInput')
-			    .on('touchstart mousedown', function(e) {
-			        e.preventDefault();
-			        clearTimeout(longPressTimer);
-			        longPressTimer = setTimeout(() => {
-			            switchToVoiceAndRecord(); // 完全一样的录音方法
-			        }, LONG_PRESS_DELAY);
-			    })
-			    .on('touchend mouseup touchcancel mouseleave', function(e) {
-			        clearTimeout(longPressTimer);
-			        if (window.isRecording) {
-			            window.stopVoiceRecording();
-			        }
-			        // 修复：松开后恢复页面滚动
-			        $('body').css('overflow', '');
-			        $('body').css('touch-action', '');
-			    })
-			    // 🔥 关键修复：上滑时禁止页面滚动，只执行取消逻辑
-			    .on('touchmove', function(e) {
-			        e.preventDefault(); // 禁止页面默认滚动（核心修复）
-			        if (window.isRecording && window.onVoiceTouchMove) {
-			            window.onVoiceTouchMove(e);
-			        }
-			    });
 		});
 	</script>
 
