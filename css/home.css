@@ -185,7 +185,7 @@ body {
 }
 
 .service_content {
-	padding: 8px 16px;
+	padding: 0 16px;
 	z-index: 9;
 	position: relative;
 }
@@ -211,7 +211,7 @@ body {
 	width: 100%;
 	/* padding: 0 12px; */
 	box-sizing: border-box;
-	margin-bottom: 16px;
+	margin-bottom: 8px;
 }
 
 .message_left img {
@@ -394,6 +394,8 @@ body {
 	justify-content: center;
 	margin-left: 12px;
 	background: none !important;
+	color: #666666;
+	font-size: 14px;
 }
 
 .input_content>input {
@@ -473,7 +475,7 @@ body {
 /* 首页 */
 .home_top {
 	position: relative;
-	padding: 12px;
+	padding:8px 12px;
 }
 
 .service_content2 {
@@ -483,7 +485,7 @@ body {
 }
 
 .home_question_container {
-	padding: 12px;
+	padding:8px 12px;
 }
 
 .dialog_container {
@@ -516,6 +518,7 @@ body {
 .home_question_content {
 	background: linear-gradient(45deg, #B8D4FF, #B8D8FF, #C9BCFF, #A8CAFF);
 	border-radius: 12px;
+	border: 1px solid #ffffff;
 }
 
 .home_question {
@@ -554,7 +557,7 @@ body {
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
-	padding: 12px;
+	padding:8px 12px;
 
 }
 
@@ -598,7 +601,7 @@ body {
 	align-items: center;
 	justify-content: space-around;
 	padding: 16px 0;
-	background: #ffffff;
+	background: rgba(255, 255, 255, 0.8);
 	border-radius: 8px;
 }
 
@@ -1209,7 +1212,7 @@ textarea {
 }
 
 .tishi_ai {
-	margin: -8px 0 16px 48px;
+	margin: 0px 0 8px 48px;
 	color: #7f7f7f;
 	font-size: 12px;
 	border-radius: 2px;
@@ -1498,7 +1501,11 @@ tr:not(:last-child) td,
 tr:not(:last-child) th {
 	border-bottom: 1px solid #e8e8e8;
 }
-
+.mode_input{
+	background: #ffffff;
+	border-radius: 22px;
+	padding: 0 12px;
+}
 .text_input {
 	background: #ffffff;
 	border-radius: 22px;
