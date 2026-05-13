@@ -338,7 +338,8 @@ body {
 	position: relative;
 	z-index: 9;
 }
-.bottom_input_active{
+
+.bottom_input_active {
 	background: linear-gradient(90deg, #C3AFFF, #A6A3FF, #94A3FF, #92B6FF) !important;
 }
 
@@ -396,6 +397,9 @@ body {
 	background: none !important;
 	color: #666666;
 	font-size: 14px;
+	-webkit-user-select: none;
+	user-select: none;
+	-webkit-touch-callout: none;
 }
 
 .input_content>input {
@@ -475,7 +479,7 @@ body {
 /* 首页 */
 .home_top {
 	position: relative;
-	padding:8px 12px;
+	padding: 8px 12px;
 }
 
 .service_content2 {
@@ -485,7 +489,7 @@ body {
 }
 
 .home_question_container {
-	padding:8px 12px;
+	padding: 8px 12px;
 }
 
 .dialog_container {
@@ -557,7 +561,7 @@ body {
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
-	padding:8px 12px;
+	padding: 8px 12px;
 
 }
 
@@ -1052,6 +1056,7 @@ textarea {
 	/* Internet Explorer/Edge */
 	user-select: none;
 	/* 标准语法 */
+	font-size: 18px !important;
 }
 
 
@@ -1501,11 +1506,13 @@ tr:not(:last-child) td,
 tr:not(:last-child) th {
 	border-bottom: 1px solid #e8e8e8;
 }
-.mode_input{
+
+.mode_input {
 	background: #ffffff;
 	border-radius: 22px;
 	padding: 0 12px;
 }
+
 .text_input {
 	background: #ffffff;
 	border-radius: 22px;
@@ -1529,137 +1536,138 @@ tr:not(:last-child) th {
 }
 
 .input_state {
-		background: linear-gradient(0deg, #427DE7 30%, rgba(255, 255, 255, 0));
-		position: fixed;
-		height: 30%;
-		width: 100%;
-		bottom: 0;
-		left: 0;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		gap: 6px;
-		pointer-events: none;
-		display: none;
+	background: linear-gradient(0deg, #427DE7 30%, rgba(255, 255, 255, 0));
+	position: fixed;
+	height: 30%;
+	width: 100%;
+	bottom: 0;
+	left: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 6px;
+	pointer-events: none;
+	display: none;
+}
+
+.input_state_red {
+	background: linear-gradient(0deg, #FFB5B7 30%, rgba(255, 255, 255, 0));
+}
+
+.input_state_red .wave-bar {
+	background: #FF0004 !important;
+}
+
+.wave-bar {
+	display: block;
+	width: 4px;
+	border-radius: 2px;
+	background: #fff;
+	height: 12px;
+	animation: waveAnimation 0.8s ease-in-out infinite;
+
+}
+
+@keyframes waveAnimation {
+	0% {
+		height: 6px;
 	}
 
-	.input_state_red {
-		background: linear-gradient(0deg, #FFB5B7 30%, rgba(255, 255, 255, 0));
+	50% {
+		height: 18px;
 	}
 
-	.input_state_red .wave-bar {
-		background: #FF0004 !important;
+	100% {
+		height: 6px;
 	}
+}
 
-	.wave-bar {
-		display: block;
-		width: 4px;
-		border-radius: 2px;
-		background: #fff;
-		height: 12px;
-		animation: waveAnimation 0.8s ease-in-out infinite;
-		
-	}
-	@keyframes waveAnimation {
-		0% {
-			height: 6px;
-		}
+.wave-1 {
+	animation-delay: 0s;
+	animation-duration: 0.6s;
+}
 
-		50% {
-			height: 18px;
-		}
+.wave-2 {
+	animation-delay: 0.1s;
+	animation-duration: 0.8s;
+}
 
-		100% {
-			height: 6px;
-		}
-	}
+.wave-3 {
+	animation-delay: 0.2s;
+	animation-duration: 0.7s;
+}
 
-	.wave-1 {
-		animation-delay: 0s;
-		animation-duration: 0.6s;
-	}
+.wave-4 {
+	animation-delay: 0.3s;
+	animation-duration: 0.9s;
+}
 
-	.wave-2 {
-		animation-delay: 0.1s;
-		animation-duration: 0.8s;
-	}
+.wave-5 {
+	animation-delay: 0.4s;
+	animation-duration: 0.65s;
+}
 
-	.wave-3 {
-		animation-delay: 0.2s;
-		animation-duration: 0.7s;
-	}
+.wave-6 {
+	animation-delay: 0.5s;
+	animation-duration: 0.85s;
+}
 
-	.wave-4 {
-		animation-delay: 0.3s;
-		animation-duration: 0.9s;
-	}
+.wave-7 {
+	animation-delay: 0.6s;
+	animation-duration: 0.75s;
+}
 
-	.wave-5 {
-		animation-delay: 0.4s;
-		animation-duration: 0.65s;
-	}
+.wave-8 {
+	animation-delay: 0.7s;
+	animation-duration: 0.95s;
+}
 
-	.wave-6 {
-		animation-delay: 0.5s;
-		animation-duration: 0.85s;
-	}
+.wave-9 {
+	animation-delay: 0.15s;
+	animation-duration: 0.7s;
+}
 
-	.wave-7 {
-		animation-delay: 0.6s;
-		animation-duration: 0.75s;
-	}
+.wave-10 {
+	animation-delay: 0.25s;
+	animation-duration: 0.8s;
+}
 
-	.wave-8 {
-		animation-delay: 0.7s;
-		animation-duration: 0.95s;
-	}
+.wave-11 {
+	animation-delay: 0.35s;
+	animation-duration: 0.6s;
+}
 
-	.wave-9 {
-		animation-delay: 0.15s;
-		animation-duration: 0.7s;
-	}
+.wave-12 {
+	animation-delay: 0.45s;
+	animation-duration: 0.9s;
+}
 
-	.wave-10 {
-		animation-delay: 0.25s;
-		animation-duration: 0.8s;
-	}
+.wave-13 {
+	animation-delay: 0.55s;
+	animation-duration: 0.75s;
+}
 
-	.wave-11 {
-		animation-delay: 0.35s;
-		animation-duration: 0.6s;
-	}
+.wave-14 {
+	animation-delay: 0.65s;
+	animation-duration: 0.85s;
+}
 
-	.wave-12 {
-		animation-delay: 0.45s;
-		animation-duration: 0.9s;
-	}
+.wave-15 {
+	animation-delay: 0.05s;
+	animation-duration: 0.65s;
+}
 
-	.wave-13 {
-		animation-delay: 0.55s;
-		animation-duration: 0.75s;
-	}
+.wave-16 {
+	animation-delay: 0.2s;
+	animation-duration: 0.95s;
+}
 
-	.wave-14 {
-		animation-delay: 0.65s;
-		animation-duration: 0.85s;
-	}
+.wave-17 {
+	animation-delay: 0.4s;
+	animation-duration: 0.7s;
+}
 
-	.wave-15 {
-		animation-delay: 0.05s;
-		animation-duration: 0.65s;
-	}
-
-	.wave-16 {
-		animation-delay: 0.2s;
-		animation-duration: 0.95s;
-	}
-
-	.wave-17 {
-		animation-delay: 0.4s;
-		animation-duration: 0.7s;
-	}
-
-	.wave-18 {
-		animation-delay: 0.6s;
-		animation-duration: 0.8s;
-	}
+.wave-18 {
+	animation-delay: 0.6s;
+	animation-duration: 0.8s;
+}
