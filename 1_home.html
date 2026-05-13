@@ -670,7 +670,33 @@
 			// 显示新消息
 			function showmessage() {
 				$('.message_new').show();
-			}
+			};
+			
+			// -------- 【输入框：长按直接录音，行为完全和按钮一致】 --------
+			$('#userInput')
+			    .on('touchstart mousedown', function(e) {
+			        e.preventDefault();
+			        clearTimeout(longPressTimer);
+			        longPressTimer = setTimeout(() => {
+			            switchToVoiceAndRecord(); // 完全一样的录音方法
+			        }, LONG_PRESS_DELAY);
+			    })
+			    .on('touchend mouseup touchcancel mouseleave', function(e) {
+			        clearTimeout(longPressTimer);
+			        if (window.isRecording) {
+			            window.stopVoiceRecording();
+			        }
+			        // 修复：松开后恢复页面滚动
+			        $('body').css('overflow', '');
+			        $('body').css('touch-action', '');
+			    })
+			    // 🔥 关键修复：上滑时禁止页面滚动，只执行取消逻辑
+			    .on('touchmove', function(e) {
+			        e.preventDefault(); // 禁止页面默认滚动（核心修复）
+			        if (window.isRecording && window.onVoiceTouchMove) {
+			            window.onVoiceTouchMove(e);
+			        }
+			    });
 		});
 	</script>
 
