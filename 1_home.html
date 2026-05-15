@@ -1,5 +1,5 @@
 <!DOCTYPE>
-<html>
+<html  lang="zh-CN">
 	<head>
 		<meta http-equiv="content-type" content="text/html;charset=utf-8" />
 
@@ -221,7 +221,6 @@
 						<img src="image/ic_voice_circle.png" alt="" class="input_voice_switch">
 						<div id="inputMode" class="input_content">
 							发消息或按住说话
-							<!-- <input type="text" placeholder="发消息或按住说话" id="inputMode"> -->
 						</div>
 					</div>
 					<!-- 文字输入 -->
@@ -235,7 +234,7 @@
 					<!-- 语音输入 -->
 					<div class="voice_input" style="flex: 1;display: none;align-items: center;">
 						<img src="image/ic_keybord_circle.png" alt="" class="input_text_switch">
-						<input type="button" id="bt_recoding" class="input_content noselect bg_blue" value="按住说话">
+						<input type="button" id="bt_recoding" class="input_content noselect bg_blue" value="s按住说话">
 					</div>
 				</div>
 				<!-- 录音波形 -->
@@ -274,7 +273,7 @@
 	</div>
 
 	<!-- Base64 编码输出容器 -->
-	<!-- <div class="base64Container" id="base64Output"></div> -->
+	<div class="base64Container" id="base64Output"></div>
 	<!-- <div id="audioContainer" style="margin-bottom: 620px;"></div> -->
 
 	<div class="toast" id="toast"></div>
@@ -629,9 +628,9 @@
 
 
 				// 如果 iframe 内容是动态加载的，可以定时检查高度
-				setInterval(function() {
-					resizeIframe(newIframe[0]);
-				}, 100);
+				// setInterval(function() {
+				// 	resizeIframe(newIframe[0]);
+				// }, 100);
 
 				//11.26新增
 
@@ -677,11 +676,12 @@
 			    // 主动取消焦点
 			    $('#userInput').blur();
 			
-			    $('.text_input , .mode_input').hide();
+			    $('.text_input,.mode_input ').hide();
 			    $('.voice_input').css('display', 'flex');
 			
 			    resumeAudioContext();
 			});
+			
 			
 			$('.input_text_switch').on('touchend', function(e) {
 			
