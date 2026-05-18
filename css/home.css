@@ -783,9 +783,9 @@ img {
 }
 
 .bg_linear {
-	background: linear-gradient(90deg, #DBE8FE, #ffffff) !important;
+	background: linear-gradient(90deg, #DBE8FE, #d4dcff) !important;
 	padding: 2px 4px;
-	border-radius: 2px;
+	border-radius: 4px;
 }
 
 .bg_linear:active {
@@ -1042,7 +1042,7 @@ textarea {
 	left: 0;
 	height: 80px;
 	width: 100%;
-	background: red;
+	/* background: red; */
 	z-index: 999999;
 	margin-bottom: 0 !important;
 }
