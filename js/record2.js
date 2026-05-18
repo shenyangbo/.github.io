@@ -582,22 +582,55 @@ $(document).ready(function() {
 	initEvent();
 
 	// 更新Base64输出并发送
+	// function updateBase64Output(base64, mimeType) {
+	// 	const base64Output = document.getElementById('base64Output');
+	// 	base64Output.innerHTML = `${base64}`;
+	// 	var openid = document.getElementById("openid").value;
+	// 	var voiceList = {
+	// 		"base64voice": base64,
+	// 		"openid": openid
+	// 	}
+	// 	// 测试输出base64转语音
+	// 	const audioElement = document.createElement('audio');
+	// 	audioElement.controls = true;
+	// 	audioElement.src = `data:audio/wav;base64,${base64}`;
+	// 	const audioContainer = document.getElementById('audioContainer');
+	// 	audioContainer.innerHTML = '';
+	// 	audioContainer.appendChild(audioElement);
+	// 	// 发送语音到后端
+	// 	sendVoice();
+	// }
 	function updateBase64Output(base64, mimeType) {
-		const base64Output = document.getElementById('base64Output');
-		base64Output.innerHTML = `${base64}`;
-		var openid = document.getElementById("openid").value;
-		var voiceList = {
-			"base64voice": base64,
-			"openid": openid
-		}
-		// 测试输出base64转语音
-		const audioElement = document.createElement('audio');
-		audioElement.controls = true;
-		audioElement.src = `data:audio/wav;base64,${base64}`;
-		const audioContainer = document.getElementById('audioContainer');
-		audioContainer.innerHTML = '';
-		audioContainer.appendChild(audioElement);
-		// 发送语音到后端
-		sendVoice();
+	    // 1. 安全更新base64输出（先检查元素是否存在）
+	    const base64Output = document.getElementById('base64Output');
+	    if (base64Output) {
+	        base64Output.innerHTML = base64;
+	    }
+		
+		$('#audioContainer').css('display','block')
+	
+	    // 清空之前的内容
+	    audioContainer.innerHTML = '';
+	
+	
+	    // 【关键修复1】兼容安卓MIME类型
+	    const compatibleMime = mimeType === 'audio/wav' ? 'audio/x-wav' : mimeType;
+	    const audioSrc = `data:${compatibleMime};base64,${base64}`;
+	
+	    // 创建audio元素
+	    const audioElement = document.createElement('audio');
+	    audioElement.controls = true;
+	    audioElement.preload = 'auto';
+ 
+	
+	    // 添加错误处理
+	    audioElement.onerror = function() {
+	        audioContainer.innerHTML = '<p style="color: red; padding: 10px;">音频格式不兼容</p>';
+	    };
+	
+	    // 插入DOM后再设置src（兼容所有浏览器）
+	    audioContainer.appendChild(audioElement);
+	    audioElement.src = audioSrc;
+	
 	}
 });
