@@ -1,5 +1,5 @@
 <!DOCTYPE>
-<html  lang="zh-CN">
+<html lang="zh-CN">
 	<head>
 		<meta http-equiv="content-type" content="text/html;charset=utf-8" />
 
@@ -56,18 +56,13 @@
 			</div>
 
 			<div class="service_content2">
-				<p class="service_time">10:50</p>
-				<div class="message_left">
-					<img src="image/service_dialog.png" alt="">
-					<p>尊敬的用户，欢迎您从10000号热线切换至星
-						卡助理，下面由小助继续为您服务!</p>
-				</div>
+				<!-- <p class="service_time">10:50</p> -->
 				<div class="message_left">
 					<img src="image/service_dialog.png" alt="">
 					<p>
-						小助提醒您您的号码133****5678当前欠费19
-						元需要缴费后自动复通使用，如需缴费请点击
-						【充值缴费】充值成功后3小时内复机。
+						您的号码国内通用语音剩余0分钟，国内专用语音剩余0分钟，套餐外共产生语音通话<span style="color: #ff0000;">9分钟</span>，产生套餐外语音费用<span style="color: #ff0000;">0.90元</span>。点击【加语音包】获得更多语音优惠推荐。
+						注：实时数据一般会有6小时左右的延时，具体以出账为准。
+
 					</p>
 				</div>
 			</div>
@@ -90,37 +85,9 @@
 					</div>
 				</div>
 			</div>
-			<!-- 2024.11.01隐藏不显示 -->
-			<div class="home_content" style="display: none;">
-				<ul class="ic_function_container">
-					<li>
-						<img src="image/cyfw_ic_zdcx.png" alt="">账单查询
-					</li>
-					<li>
-						<img src="image/cyfw_ic_llcx.png" alt="">流量查询
-					</li>
-					<li>
-						<img src="image/cyfw_ic_tcyl.png" alt="">套餐用量
-					</li>
-					<li>
-						<img src="image/cyfw_ic_yecx.png" alt="">余额查询
-					</li>
-					<li>
-						<img src="image/cyfw_ic_czjfjl.png" alt="">充值交费记录
-					</li>
-					<li>
-						<img src="image/cyfw_ic_hfycfh.png" alt="">话费预存返还
-					</li>
-					<li>
-						<img src="image/cyfw_ic_ydywcx.png" alt="">已订业务
-					</li>
-					<li>
-						<img src="image/cyfw_ic_gzkx.png" alt="">故障快修
-					</li>
-				</ul>
-			</div>
+
 			<div class="service_content">
-				<p class="service_time">10:50</p>
+				<!-- <p class="service_time">10:50</p> -->
 				<div class="message_left">
 					<img src="image/service_dialog.png" alt="">
 					<p>尊敬的用户，欢迎您从10000号热线切换至星
@@ -135,7 +102,7 @@
 				</div>
 
 				<div class="message_left">
-					<img src="image/service_dialog.png" alt="">
+					<img src="image/service_dialog_live.png" alt="">
 
 					<div class="waiting_container">
 						<span>
@@ -216,15 +183,8 @@
 					</div>
 				</div>
 				<div class="bottom_input">
-					<!-- 选择输入 -->
-					<div class="mode_input" style="flex: 1;display: flex;align-items: center;">
-						<img src="image/ic_voice_circle.png" alt="" class="input_voice_switch">
-						<div id="inputMode" class="input_content">
-							发消息或按住说话
-						</div>
-					</div>
 					<!-- 文字输入 -->
-					<div class="text_input" style="flex: 1;display: none;align-items: center;">
+					<div class="text_input" style="flex: 1;display: flex;align-items: center;">
 						<img src="image/ic_voice_circle.png" alt="" class="input_voice_switch">
 						<div id="" class="input_content">
 							<input type="text" placeholder="请输入..." id="userInput">
@@ -234,9 +194,10 @@
 					<!-- 语音输入 -->
 					<div class="voice_input" style="flex: 1;display: none;align-items: center;">
 						<img src="image/ic_keybord_circle.png" alt="" class="input_text_switch">
-						<input type="button" id="bt_recoding" class="input_content noselect bg_blue" value="s按住说话">
+						<input type="button" id="bt_recoding" class="input_content noselect bg_blue" value="按住说话">
 					</div>
 				</div>
+
 				<!-- 录音波形 -->
 				<div class="input_state">
 					<span class="wave-bar wave-1"></span>
@@ -652,53 +613,16 @@
 				}, 1000); // 1000是动画持续时间（毫秒）
 			});
 
-
 			$('.input_voice_switch').click(function() {
-			
-			    // 新增：申请麦克风权限
-			    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-			        navigator.mediaDevices.getUserMedia({ audio: true })
-			            .then(function(stream) {
-			                // 保存流，后续录音可能会用到
-			                window._micStream = stream;
-			                console.log('麦克风权限已获取');
-			            })
-			            .catch(function(err) {
-			                console.log('麦克风权限获取失败：', err);
-			            });
-			    } else {
-			        console.log('当前浏览器不支持 getUserMedia');
-			    }
-			
-			    // 标记：这是主动切换
-			    isManualSwitch = true;
-			
-			    // 主动取消焦点
-			    $('#userInput').blur();
-			
-			    $('.text_input,.mode_input ').hide();
-			    $('.voice_input').css('display', 'flex');
-			
-			    resumeAudioContext();
+				$('.text_input').hide();
+				$('.voice_input').css('display', 'flex');
+				resumeAudioContext();
+			});
+			$('.input_text_switch').click(function() {
+				$('.voice_input').hide();
+				$('.text_input').css('display', 'flex')
 			});
 			
-			
-			$('.input_text_switch').on('touchend', function(e) {
-			
-			    e.preventDefault();
-			
-			    $('.voice_input ,.mode_input').hide();
-			    $('.text_input').css('display', 'flex');
-			
-			    // iOS 必须同步 focus
-			    const input = document.getElementById('userInput');
-			
-			    input.removeAttribute('readonly');
-			
-			    input.focus();
-			
-			    input.click();
-			});
 
 			// 点击新消息滚动到最底部
 			$('.message_new').click(function() {
@@ -715,7 +639,7 @@
 			function showmessage() {
 				$('.message_new').show();
 			};
-			
+
 		});
 	</script>
 
