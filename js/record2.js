@@ -38,7 +38,7 @@ $(document).ready(function() {
 		});
 		$(input_state).removeClass('input_state_red');
 		$(input_state).css('display', 'none');
-		$('.bottom_input').css('background', '#b4d0ff');
+		$('.bottom_input').css('background', '#EFF5FF');
 		$(bt_background).removeClass('bottom_input_active');
 	}
 
