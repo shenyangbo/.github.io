@@ -501,7 +501,7 @@ body {
 	border-top: 1px solid rgba(0, 0, 0, 0);
 	border-radius: 16px 16px 0 0;
 	background: #EFF5FF;
-	overflow: hidden;
+	overflow: scroll;
 	height: 100%;
 }
 
