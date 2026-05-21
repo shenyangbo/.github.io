@@ -513,7 +513,7 @@ body {
 }
 
 .num_container {
-	/* background: linear-gradient(#3473F4,#EFF5FF); */
+	background: #3473F4;
 	height: 40px;
 	display: flex;
 	align-items: center;
