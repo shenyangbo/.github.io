@@ -94,7 +94,7 @@ body {
 	font-family: Microsoft YaHei, SimSun, Arial;
 	font-size: 0.8rem;
 	line-height: 1.2rem;
-	background-color: #3473F4;
+	background: linear-gradient(#3473F4 20%,#EFF5FF 40%);
 	position: relative;
 	padding-top: 40px;
 }
@@ -502,7 +502,7 @@ body {
 	border-radius: 16px 16px 0 0;
 	background: #EFF5FF;
 	overflow: scroll;
-	height: 100%;
+	/* height: 100%; */
 }
 
 .home_top_data {
@@ -513,7 +513,7 @@ body {
 }
 
 .num_container {
-	background: #3473F4;
+	/* background: linear-gradient(#3473F4,#EFF5FF); */
 	height: 40px;
 	display: flex;
 	align-items: center;
