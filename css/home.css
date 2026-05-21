@@ -589,12 +589,13 @@ body {
 .home_top_package {
 	overflow: hidden;
 	font-size: 14px;
-	padding:0 8px 8px;
+	padding:0 ;
 }
 
 .home_top_package>p {
 	line-height: 32px;
 	color: #3473F4;
+	padding: 0 12px;
 }
 
 .home_top_package>p>span {
