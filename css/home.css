@@ -1212,7 +1212,7 @@ textarea {
 }
 
 .tishi_ai {
-	margin: -6px 0 8px 48px;
+	margin: -6px 0 2px 48px;
 	color: #7f7f7f;
 	font-size: 12px;
 	border-radius: 2px;
@@ -1511,7 +1511,7 @@ tr:not(:last-child) th {
 .text_input {
 	background: #ffffff;
 	border-radius: 22px;
-	padding: 0 12px;
+	padding: 0 0 0 12px;
 }
 
 .voice_input {
