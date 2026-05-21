@@ -341,6 +341,7 @@
 					event.preventDefault();
 					$('#submitButton').trigger('click')
 					$(this).val('');
+					$(this).blur();
 				}
 			});
 
@@ -353,6 +354,7 @@
 			$('#submitButton').click(function() {
 				$('.disable_mask').show();
 				$('.disable_mask').hide();
+				$('#userInput').blur();
 				// 获取输入框中的值
 				var userInput = $('#userInput').val();
 
