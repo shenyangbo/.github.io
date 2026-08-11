@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+		<!--H5页面窗口自动调整到设备宽度，并禁止用户缩放页面-->
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+		<title>星卡自助伴</title>
+		<style type="text/css">
+			*{
+							margin: 0;
+							padding:0;
+						}
+			body {
+				background: transparent;
+			}
+
+			/* 整体容器：淡蓝底 + 白色描边 */
+			.ur_wrap {
+				width: 100%;
+				background: #B7CFFF;
+				border-radius: 8px;
+				outline: 1px solid #ffffff;
+				outline-offset: -1px;
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+				position: relative;
+			}
+
+			/* 标题行 */
+			.ur_title {
+				display: flex;
+				align-items: center;
+				padding: 8px 12px;
+				gap: 4px;
+			}
+
+			.ur_title_icon {
+				width: 18px;
+				height: 19px;
+				flex-shrink: 0;
+				overflow: hidden;
+			}
+
+			.ur_title_icon img {
+				width: 100%;
+				height: 100%;
+				display: block;
+			}
+
+			.ur_title_text {
+				color: #3473F4;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 400;
+				line-height: 22px;
+			}
+
+			/* 内容卡片：渐变底 + 白边 */
+			.ur_content {
+				background: linear-gradient(180deg, #DBE8FE 0%, #F5F9FF 25%);
+				border-radius: 8px;
+				border-left: 1px solid #ffffff;
+				border-right: 1px solid #ffffff;
+				border-bottom: 1px solid #ffffff;
+				padding: 8px 8px 12px;
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+				position: relative;
+				overflow: hidden;
+			}
+
+			/* 表单字段行 */
+			.ur_field {
+				position: relative;
+				z-index: 1;
+				height: 40px;
+				padding: 0 8px;
+				background: #ffffff;
+				border-radius: 8px;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+			}
+
+			/* 必填红星 */
+			.ur_star {
+				color: #FF0000;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				flex-shrink: 0;
+			}
+
+			/* 字段标签 */
+			.ur_label {
+				width: 70px;
+				flex-shrink: 0;
+				color: #333333;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				white-space: nowrap;
+			}
+
+			/* 文本输入 */
+			.ur_input {
+				flex: 1;
+				min-width: 0;
+				height: 100%;
+				background: transparent;
+				border: none;
+				outline: none;
+				color: #333333;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+			}
+
+			.ur_input::-webkit-input-placeholder {
+				color: #98A2B3;
+			}
+
+			/* 输入错误：红色描边（参考密码重置页） */
+			.ur_field_error {
+				outline: 1px solid #FF0000;
+				outline-offset: -1px;
+			}
+
+			/* 输入错误提示文字 */
+			.ur_phone_error {
+				display: none;
+				color: #D92D20;
+				font-size: 12px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				line-height: 18px;
+			}
+
+			/* 只读占位（下拉字段未选择时） */
+			.ur_placeholder {
+				flex: 1;
+				min-width: 0;
+				color: #98A2B3;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				overflow: hidden;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+			}
+
+			/* 下拉箭头 */
+			.ur_arrow {
+				width: 16px;
+				height: 16px;
+				position: relative;
+				flex-shrink: 0;
+			}
+
+			.ur_arrow::after {
+				content: '';
+				position: absolute;
+				left: 3px;
+				top: 4px;
+				width: 8px;
+				height: 8px;
+				border-left: 1.5px solid #AAB6C8;
+				border-bottom: 1.5px solid #AAB6C8;
+				transform: rotate(-45deg);
+			}
+
+			/* 催修说明（选填） */
+			.ur_note_wrap {
+				position: relative;
+				z-index: 1;
+				padding-top: 8px;
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+			}
+
+			.ur_note_title {
+				align-self: flex-start;
+				height: 12px;
+				padding: 0 4px;
+				border-left: 2px solid #3C78FF;
+				color: #666666;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				line-height: 20px;
+				display: flex;
+				align-items: center;
+			}
+
+			.ur_textarea {
+				width: 100%;
+				height: 70px;
+				padding: 8px;
+				box-sizing: border-box;
+				background: #ffffff;
+				border-radius: 8px;
+				border: none;
+				outline: none;
+				resize: none;
+				color: #333333;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				line-height: 20px;
+			}
+
+			.ur_textarea::-webkit-input-placeholder {
+				color: #98A2B3;
+			}
+
+			/* 催修按钮 */
+			.ur_submit {
+				position: relative;
+				z-index: 1;
+				width: 100%;
+				height: 40px;
+				background: #3C78FF;
+				border-radius: 24px;
+				border: none;
+				outline: none;
+				color: #ffffff;
+				font-size: 16px;
+				font-weight: 500;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				line-height: 40px;
+				text-align: center;
+				cursor: pointer;
+			}
+
+			.ur_submit:active {
+				opacity: 0.85;
+			}
+
+			/* 预约时间选择弹层遮罩（覆盖整卡） */
+			.ur_sheet_mask {
+				display: none;
+				position: absolute;
+				left: 0;
+				top: 0;
+				right: 0;
+				bottom: 0;
+				background: rgba(0, 0, 0, 0.50);
+				border-radius: 8px;
+				z-index: 10;
+			}
+
+			/* 预约时间选择底部弹层（与宽带报修提交页一致） */
+			.ur_sheet {
+				display: none;
+				position: absolute;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				background: #ffffff;
+				border-top-left-radius: 16px;
+				border-top-right-radius: 16px;
+				flex-direction: column;
+				align-items: center;
+				overflow: hidden;
+				z-index: 11;
+			}
+
+			.ur_sheet_title {
+				align-self: stretch;
+				height: 41px;
+				line-height: 41px;
+				text-align: center;
+				color: #000000;
+				font-size: 16px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+			}
+
+			.ur_sheet_body {
+				align-self: stretch;
+				background: #ffffff;
+				overflow: hidden;
+				border-top-left-radius: 8px;
+				border-top-right-radius: 8px;
+				display: flex;
+			}
+
+			/* 左侧日期栏 */
+			.ur_date_col {
+				width: 120px;
+				flex-shrink: 0;
+				background: #F5F9FF;
+				overflow: hidden;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+			}
+
+			.ur_date_item {
+				align-self: stretch;
+				height: 48px;
+				line-height: 48px;
+				text-align: center;
+				color: #666666;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				cursor: pointer;
+			}
+
+			.ur_date_item.active {
+				background: #ffffff;
+				color: #333333;
+			}
+
+			/* 右侧时间段栏 */
+			.ur_time_col {
+				flex: 1;
+				padding: 14px 16px;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				gap: 16px;
+			}
+
+			.ur_time_item {
+				align-self: stretch;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				color: #666666;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				cursor: pointer;
+			}
+
+			.ur_time_item.active {
+				color: #3C78FF;
+				font-weight: 500;
+				background: none; /* 覆盖全局 .active 的蓝底 */
+			}
+
+			/* 选中时间段右侧的蓝色勾选图标 */
+			.ur_time_check {
+				display: none;
+				width: 16px;
+				height: 16px;
+				flex-shrink: 0;
+			}
+
+			.ur_time_item.active .ur_time_check {
+				display: block;
+			}
+
+			.ur_time_check img {
+				width: 100%;
+				height: 100%;
+				display: block;
+			}
+
+			/* 确定按钮 */
+			.ur_sheet_confirm {
+				align-self: stretch;
+				margin: 8px 16px;
+				height: 40px;
+				background: #3C78FF;
+				border-radius: 24px;
+				border: none;
+				outline: none;
+				color: #ffffff;
+				font-size: 16px;
+				font-weight: 500;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				line-height: 40px;
+				text-align: center;
+				cursor: pointer;
+			}
+
+			.ur_sheet_confirm:active {
+				opacity: 0.85;
+			}
+
+			/* 表单 / 成功视图置于装饰光斑之上，避免光斑覆盖文字 */
+			#formView,
+			#successView {
+				position: relative;
+				z-index: 1;
+			}
+
+			/* 表单视图补回纵向间距（字段包进 formView 后，容器的 gap 不再作用于其内部） */
+			#formView {
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+			}
+
+			/* 催修成功视图（与宽带报修提交页一致的模式） */
+			.sc_success {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 4px;
+			}
+
+			.sc_success img {
+				width: 60px;
+				height: 60px;
+				display: block;
+			}
+
+			.sc_success_text {
+				color: #666666;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 400;
+				line-height: 24px;
+				text-align: center;
+			}
+
+			/* 催修详情 */
+			.sc_order {
+				align-self: stretch;
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+			}
+
+			.sc_order_title {
+				align-self: stretch;
+				height: 16px;
+				padding-left: 8px;
+				padding-right: 16px;
+				border-left: 2px solid #3473F4;
+				display: flex;
+				align-items: center;
+				color: #333333;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 400;
+				line-height: 24px;
+				overflow: hidden;
+				white-space: nowrap;
+			}
+
+			/* 详情表格 */
+			.sc_table {
+				width: 100%;
+				border-collapse: collapse;
+				table-layout: fixed;
+				background: #ffffff;
+				border-radius: 8px;
+				overflow: hidden;
+			}
+
+			.sc_table th {
+				width: 88px;
+				height: 32px;
+				padding: 0 8px;
+				text-align: left;
+				background: #ffffff;
+				color: #667085;
+				font-size: 12px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 400;
+				border-right: 0.5px solid #EAF0FA;
+				border-bottom: 0.5px solid #EAF0FA;
+			}
+
+			.sc_table td {
+				height: 32px;
+				padding: 0 8px;
+				text-align: left;
+				color: #666666;
+				font-size: 12px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 400;
+				border-bottom: 0.5px solid #EAF0FA;
+			}
+
+			.sc_table tr:last-child th,
+			.sc_table tr:last-child td {
+				border-bottom: none;
+			}
+
+			.toast {
+				position: fixed;
+				bottom: 120px;
+				left: 50%;
+				transform: translateX(-50%);
+				background-color: rgba(0, 0, 0, 0.7);
+				color: white;
+				padding: 10px 20px;
+				border-radius: 4px;
+				z-index: 9999;
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="ur_wrap">
+			<div class="ur_title">
+				<div class="ur_title_icon">
+					<img src="image/frame_2165.png" alt="" />
+				</div>
+				<div class="ur_title_text">故障催修</div>
+			</div>
+
+			<div class="ur_content">
+				<!-- 表单视图 -->
+				<div id="formView">
+				<!-- 联系电话 -->
+				<div class="ur_field" id="phoneRow">
+					<span class="ur_star">*</span>
+					<span class="ur_label">联系电话:</span>
+					<input class="ur_input" id="phone" type="tel" placeholder="请修改联系电话" maxlength="11" />
+				</div>
+				<!-- 联系电话输入错误提示 -->
+				<div class="ur_phone_error" id="phoneError">请输入正确的手机号码</div>
+
+				<!-- 预约时间 -->
+				<div class="ur_field ur_select">
+					<span class="ur_star">*</span>
+					<span class="ur_label">预约时间:</span>
+					<span class="ur_placeholder" id="timeText">请选择预约时间</span>
+					<div class="ur_arrow"></div>
+				</div>
+
+				<!-- 催修说明（选填） -->
+				<div class="ur_note_wrap">
+					<div class="ur_note_title">催修说明(选填)</div>
+					<textarea class="ur_textarea" id="remark" placeholder="请填写催修需求" maxlength="200"></textarea>
+				</div>
+
+				<!-- 催修按钮 -->
+				<button class="ur_submit" id="submitBtn">催修</button>
+				</div>
+
+				<!-- 催修成功视图（提交后显示） -->
+				<div id="successView" style="display: none; flex-direction: column; gap: 16px; align-items: center;">
+					<div class="sc_success">
+						<img src="image/pic_success_email.png" alt="" />
+						<div class="sc_success_text">催修成功</div>
+					</div>
+
+					<div class="sc_order">
+						<div class="sc_order_title">催修详情</div>
+						<table class="sc_table">
+							<tr>
+								<th>报修产品</th>
+								<td id="scProduct">19985623654@iptv.gd</td>
+							</tr>
+							<tr>
+								<th>联系人</th>
+								<td id="scContact">朱晓明</td>
+							</tr>
+							<tr>
+								<th>联系号码</th>
+								<td id="scPhone">-</td>
+							</tr>
+							<tr>
+								<th>预约时间</th>
+								<td id="scTime">-</td>
+							</tr>
+							<tr>
+								<th>故障现象</th>
+								<td id="scFault">没网络</td>
+							</tr>
+							<tr id="scRemarkRow" style="display: none;">
+								<th>催修说明</th>
+								<td id="scRemark"></td>
+							</tr>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<!-- 预约时间选择底部弹层 -->
+			<div class="ur_sheet_mask" id="sheetMask"></div>
+			<div class="ur_sheet" id="sheet">
+				<div class="ur_sheet_title">选择预约时间</div>
+				<div class="ur_sheet_body">
+					<div class="ur_date_col" id="dateCol"></div>
+					<div class="ur_time_col" id="timeCol"></div>
+				</div>
+				<button class="ur_sheet_confirm" id="sheetConfirm">确定</button>
+			</div>
+		</div>
+
+		<div class="toast" id="toast"></div>
+	</body>
+
+	<script>
+		(function() {
+
+			// 事件委托辅助函数：向上查找指定类名的元素
+			function closestByClass(el, cls) {
+				while (el && el !== document) {
+					if (el.classList && el.classList.contains(cls)) return el;
+					el = el.parentNode;
+				}
+				return null;
+			}
+
+			// ========== 预约时间（底部弹层） ==========
+			var timeSlots = ['09：00--11：00', '11：00--13：00', '13：00--15：00', '15：00--17：00', '17：00--19：00'];
+			var currentDate = '';
+			var currentTime = '';
+
+			// 生成最近三天日期（今天/明天/后天 + 星期）
+			function getDateOptions() {
+				var week = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+				var list = [];
+				var today = new Date();
+				for (var i = 0; i < 3; i++) {
+					var d = new Date(today.getFullYear(), today.getMonth(), today.getDate() + i);
+					var prefix = i === 0 ? '今天' : (i === 1 ? '明天' : '后天');
+					list.push(prefix + ' ' + week[d.getDay()]);
+				}
+				return list;
+			}
+
+			// 打开预约时间底部弹层（回显上次选中的日期和时间段）
+			function openTimeSheet() {
+				var dates = getDateOptions();
+
+				// 上次选中的日期/时间段仍在列表中则保留，否则回退到第一项
+				if (dates.indexOf(currentDate) === -1) {
+					currentDate = dates[0];
+				}
+				if (timeSlots.indexOf(currentTime) === -1) {
+					currentTime = timeSlots[0];
+				}
+
+				var dateHtml = '';
+				for (var i = 0; i < dates.length; i++) {
+					dateHtml += '<div class="ur_date_item' + (dates[i] === currentDate ? ' active' : '') + '">' + dates[i] + '</div>';
+				}
+				document.getElementById('dateCol').innerHTML = dateHtml;
+
+				var timeHtml = '';
+				for (var j = 0; j < timeSlots.length; j++) {
+					timeHtml += '<div class="ur_time_item' + (timeSlots[j] === currentTime ? ' active' : '') + '">' + timeSlots[j] +
+						'<span class="ur_time_check"><img src="image/finished.png" alt="" /></span></div>';
+				}
+				document.getElementById('timeCol').innerHTML = timeHtml;
+
+				document.getElementById('sheetMask').style.display = 'block';
+				document.getElementById('sheet').style.display = 'flex'; // 弹层需为 flex 布局，flex 属性才生效
+			}
+
+			// 点击预约时间字段
+			var selectFields = document.querySelectorAll('.ur_select');
+			for (var k = 0; k < selectFields.length; k++) {
+				selectFields[k].addEventListener('click', function() {
+					openTimeSheet();
+				});
+			}
+
+			// 选择日期（事件委托）
+			document.addEventListener('click', function(e) {
+				var target = closestByClass(e.target, 'ur_date_item');
+				if (!target) return;
+				var items = document.querySelectorAll('#dateCol .ur_date_item');
+				for (var j = 0; j < items.length; j++) {
+					items[j].classList.remove('active');
+				}
+				target.classList.add('active');
+				currentDate = target.textContent;
+			});
+
+			// 选择时间段（事件委托）
+			document.addEventListener('click', function(e) {
+				var target = closestByClass(e.target, 'ur_time_item');
+				if (!target) return;
+				var items = document.querySelectorAll('#timeCol .ur_time_item');
+				for (var j = 0; j < items.length; j++) {
+					items[j].classList.remove('active');
+				}
+				target.classList.add('active');
+				currentTime = target.textContent;
+			});
+
+			// 点击遮罩关闭底部弹层
+			document.getElementById('sheetMask').addEventListener('click', function() {
+				document.getElementById('sheetMask').style.display = 'none';
+				document.getElementById('sheet').style.display = 'none';
+			});
+
+			// 确定：带回选中结果
+			document.getElementById('sheetConfirm').addEventListener('click', function() {
+				if (currentDate && currentTime) {
+					document.getElementById('timeText').textContent = currentDate + ' ' + currentTime;
+					document.getElementById('timeText').style.color = '#333333';
+				}
+				document.getElementById('sheetMask').style.display = 'none';
+				document.getElementById('sheet').style.display = 'none';
+			});
+
+			// ========== 联系电话错误提示（样式参考密码重置页） ==========
+			function showPhoneError() {
+				document.getElementById('phoneRow').classList.add('ur_field_error');
+				document.getElementById('phoneError').style.display = 'block';
+				sendHeight();
+			}
+
+			function hidePhoneError() {
+				document.getElementById('phoneRow').classList.remove('ur_field_error');
+				document.getElementById('phoneError').style.display = 'none';
+				sendHeight();
+			}
+
+			// 输入时清除错误状态
+			document.getElementById('phone').addEventListener('input', hidePhoneError);
+
+			// 失去焦点时校验：非空且不是正确的十一位手机号则提示
+			document.getElementById('phone').addEventListener('blur', function() {
+				var phone = this.value.trim();
+				if (phone && !/^1\d{10}$/.test(phone)) {
+					showPhoneError();
+				}
+			});
+
+			// ========== 催修 ==========
+			document.getElementById('submitBtn').addEventListener('click', function() {
+				var phone = document.getElementById('phone').value.trim();
+				var time = document.getElementById('timeText').textContent;
+
+				if (!phone) {
+					showToast('请输入联系电话');
+					return;
+				}
+				if (!/^1\d{10}$/.test(phone)) {
+					showPhoneError();
+					return;
+				}
+				hidePhoneError();
+				if (time === '请选择预约时间') {
+					showToast('请选择预约时间');
+					return;
+				}
+
+				// 接入后端后在此提交表单数据
+				// 提交成功：原地切换到催修成功视图并带入信息
+				var remark = document.getElementById('remark').value.trim();
+				document.getElementById('scPhone').textContent = phone;
+				document.getElementById('scTime').textContent = time;
+				if (remark) {
+					document.getElementById('scRemark').textContent = remark;
+					document.getElementById('scRemarkRow').style.display = '';
+				}
+				document.getElementById('formView').style.display = 'none';
+				var successView = document.getElementById('successView');
+				successView.style.display = 'flex';
+				sendHeight();
+			});
+
+			// ========== iframe 高度同步 ==========
+			function sendHeight() {
+				var h = document.documentElement.offsetHeight || document.body.offsetHeight;
+				if (window.parent !== window) {
+					window.parent.postMessage({ type: 'resize', height: h }, '*');
+				}
+			}
+			window.addEventListener('load', sendHeight);
+			sendHeight();
+
+			// ========== toast 提示 ==========
+			function showToast(msg) {
+				var toast = document.getElementById('toast');
+				toast.innerText = msg;
+				toast.style.display = 'block';
+				setTimeout(function() {
+					toast.style.display = 'none';
+				}, 1500);
+			}
+		})();
+	</script>
+</html>

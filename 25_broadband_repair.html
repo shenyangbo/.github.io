@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+		<!--H5页面窗口自动调整到设备宽度，并禁止用户缩放页面-->
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+		<title>星卡自助伴</title>
+		<style type="text/css">
+			*{
+				margin: 0;
+				padding:0;
+			}
+			body {
+				background: transparent;
+			}
+
+			/* 整体容器：淡蓝渐变底 + 白色描边 */
+			.br_wrap {
+				width: 100%;
+				background: linear-gradient(180deg, #B7CFFF 0%, #BBD5FF 100%);
+				border-radius: 8px;
+				outline: 1px solid #ffffff;
+				outline-offset: -1px;
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+			}
+
+			/* 标题行 */
+			.br_title {
+				display: flex;
+				align-items: center;
+				padding: 8px 12px;
+				gap: 4px;
+			}
+
+			.br_title_icon {
+				width: 18px;
+				height: 19px;
+				flex-shrink: 0;
+				overflow: hidden;
+			}
+
+			.br_title_icon img {
+				width: 100%;
+				height: 100%;
+				display: block;
+			}
+
+			.br_title_text {
+				color: #3473F4;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 400;
+				line-height: 22px;
+			}
+
+			/* 内容卡片：渐变底 + 白边 */
+			.br_content {
+				background: linear-gradient(180deg, #DBE8FE 0%, #F5F9FF 25%);
+				border-radius: 8px;
+				border-left: 1px solid #ffffff;
+				border-right: 1px solid #ffffff;
+				border-bottom: 1px solid #ffffff;
+				padding: 8px;
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+				position: relative;
+				overflow: hidden;
+			}
+
+			/* 柔和装饰光斑（还原设计稿） */
+			.br_glow {
+				position: absolute;
+				left: 50px;
+				top: 138px;
+				width: 253px;
+				height: 60px;
+				background: #FFF5EB;
+				border-radius: 9999px;
+				filter: blur(27.3px);
+				pointer-events: none;
+				z-index: 0;
+			}
+
+			/* 产品卡片 */
+			.br_item {
+				position: relative;
+				z-index: 1;
+				background: #ffffff;
+				border-radius: 4px;
+				padding: 8px 6px;
+				display: flex;
+				align-items: center;
+				justify-content: flex-end;
+				gap: 8px;
+				cursor: pointer;
+				transition: box-shadow 0.15s ease;
+			}
+
+			/* 选中态：蓝色描边 */
+			.br_item.selected {
+				outline: 1px solid #3C78FF;
+				outline-offset: -1px;
+			}
+
+			/* 置灰禁用态：点击任意一项后，其余卡片/标签不可再点 */
+			.br_item.disabled,
+			.br_tag.disabled {
+				opacity: 0.5;
+				pointer-events: none;
+				cursor: not-allowed;
+			}
+
+			/* 标签选中态 */
+			.br_tag.selected {
+				outline: 1px solid #3C78FF;
+				outline-offset: -1px;
+			}
+
+			.br_item_body {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+				min-width: 0;
+			}
+
+			.br_item_top {
+				display: flex;
+				align-items: flex-start;
+				gap: 4px;
+			}
+
+			.br_item_name {
+				color: #333333;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 500;
+				line-height: 14px;
+				white-space: nowrap;
+			}
+
+			.br_item_tag {
+				padding: 0 12px;
+				background: rgba(0, 104, 255, 0.06);
+				border-radius: 47px;
+				color: #0068FF;
+				font-size: 12px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 400;
+				line-height: 20px;
+				flex-shrink: 0;
+			}
+
+			.br_item_addr {
+				color: #666666;
+				font-size: 12px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 400;
+				line-height: 22px;
+				word-break: break-all;
+			}
+
+			/* 产品卡片右侧箭头按钮 */
+			.br_item_arrow {
+				width: 16px;
+				height: 16px;
+				flex-shrink: 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.br_item_arrow img {
+				width: 100%;
+				height: 100%;
+				display: block;
+			}
+
+			/* 底部标签行（悬空在容器下方） */
+			.br_tags {
+				display: flex;
+				gap: 4px;
+				flex-wrap: wrap;
+				padding:  8px;
+			}
+
+			.br_tag {
+				display: flex;
+				align-items: center;
+				gap: 4px;
+				max-width: 350px;
+				padding: 6px 8px;
+				background: #ffffff;
+				border-radius: 8px;
+				outline: 1px solid #F5F9FF;
+				outline-offset: -1px;
+				cursor: pointer;
+				color: #212B45;
+				font-size: 12px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 400;
+				white-space: nowrap;
+			}
+
+			.br_tag img {
+				width: 12px;
+				height: 12px;
+				flex-shrink: 0;
+				display: block;
+			}
+
+			/* 提示条（内联，原 css.css 中的 .toast） */
+			.toast {
+				position: fixed;
+				bottom: 120px;
+				left: 50%;
+				transform: translateX(-50%);
+				background-color: rgba(0, 0, 0, 0.7);
+				color: white;
+				padding: 10px 20px;
+				border-radius: 4px;
+				z-index: 9999;
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="br_wrap">
+			<div class="br_title">
+				<div class="br_title_icon">
+					<img src="image/frame_2165.png" alt="" />
+				</div>
+				<div class="br_title_text">宽带报修</div>
+			</div>
+
+			<div class="br_content">
+				<div class="br_glow"></div>
+
+				<!-- 产品卡片1：宽带 -->
+				<div class="br_item" data-type="宽带">
+					<div class="br_item_body">
+						<div class="br_item_top">
+							<div class="br_item_name">宽带账号：AN1*****0</div>
+							<div class="br_item_tag">宽带</div>
+						</div>
+						<div class="br_item_addr">装机地址：装机地址:深圳市盐田区沙头角街**************栋A单元3层301</div>
+					</div>
+					<div class="br_item_arrow">
+						<img src="image/ic_arrow_right_shixin.png" alt="" />
+					</div>
+				</div>
+
+				<!-- 产品卡片2：ITV -->
+				<div class="br_item" data-type="ITV">
+					<div class="br_item_body">
+						<div class="br_item_top">
+							<div class="br_item_name">宽带账号：AN1*****0</div>
+							<div class="br_item_tag">ITV</div>
+						</div>
+						<div class="br_item_addr">装机地址：装机地址:深圳市盐田区沙头角街**************栋A单元3层301</div>
+					</div>
+					<div class="br_item_arrow">
+						<img src="image/ic_arrow_right_shixin.png" alt="" />
+					</div>
+				</div>
+
+				<!-- 产品卡片3：宽带 -->
+				<div class="br_item" data-type="宽带">
+					<div class="br_item_body">
+						<div class="br_item_top">
+							<div class="br_item_name">宽带账号：AN1*****0</div>
+							<div class="br_item_tag">宽带</div>
+						</div>
+						<div class="br_item_addr">装机地址：装机地址:深圳市盐田区沙头角街**************栋A单元3层301</div>
+					</div>
+					<div class="br_item_arrow">
+						<img src="image/ic_arrow_right_shixin.png" alt="" />
+					</div>
+				</div>
+
+			</div>
+		</div>
+
+		<!-- 底部标签行（悬空在容器下方，不被任何框包裹） -->
+		<div class="br_tags">
+			<div class="br_tag" data-type="手机">
+				手机<img src="image/arrow_baoxiu.png" alt="" />
+			</div>
+			<div class="br_tag" data-type="全屋wifi">
+				全屋wifi<img src="image/arrow_baoxiu.png" alt="" />
+			</div>
+			<div class="br_tag" data-type="固话">
+				固话<img src="image/arrow_baoxiu.png" alt="" />
+			</div>
+		</div>
+
+		<div class="toast" id="toast"></div>
+	</body>
+
+	<script>
+		(function() {
+
+			// ========== toast 提示 ==========
+			var toastEl = document.getElementById('toast');
+			function showToast(msg) {
+				toastEl.innerText = msg;
+				toastEl.style.display = 'block';
+				setTimeout(function() {
+					toastEl.style.display = 'none';
+				}, 1500);
+			}
+
+			// ========== 产品卡片 & 标签：单选互斥，选中后其余置灰 ==========
+			var brItems = document.querySelectorAll('.br_item');
+			var brTags = document.querySelectorAll('.br_tag');
+			var locked = false;
+
+			// 把除当前项以外的所有卡片/标签置灰
+			function lockOthers(activeEl) {
+				for (var j = 0; j < brItems.length; j++) {
+					if (brItems[j] !== activeEl) brItems[j].classList.add('disabled');
+				}
+				for (var k = 0; k < brTags.length; k++) {
+					if (brTags[k] !== activeEl) brTags[k].classList.add('disabled');
+				}
+			}
+
+			for (var i = 0; i < brItems.length; i++) {
+				brItems[i].addEventListener('click', function() {
+					if (locked) return;
+					locked = true;
+					this.classList.add('selected');
+					lockOthers(this);
+					// 取到卡片里的名称（.br_item_name 文本）
+					var nameEl = this.querySelector('.br_item_name');
+					var name = nameEl ? nameEl.innerText : this.getAttribute('data-type');
+					var type = this.getAttribute('data-type');
+					// 通知父页面：弹出"您已选择name" + iframe 27
+					if (window.parent !== window) {
+						window.parent.postMessage({
+							type: 'selectBroadbandItem',
+							name: name,
+							productType: type
+						}, '*');
+					} else {
+						showToast('已选择：' + name);
+					}
+				});
+			}
+
+			// ========== 底部标签点击：统一通知父页面，父页面负责弹 message_right + 后续iframe逻辑 ==========
+			for (var k = 0; k < brTags.length; k++) {
+				brTags[k].addEventListener('click', function() {
+					if (locked) return;
+					locked = true;
+					var type = this.getAttribute('data-type');
+					this.classList.add('selected');
+					lockOthers(this);
+					if (window.parent !== window) {
+						window.parent.postMessage({
+							type: 'brTagClicked',
+							value: type
+						}, '*');
+					} else {
+						showToast('已选择：' + type);
+					}
+				});
+			}
+
+			// ========== iframe 高度同步 ==========
+			function sendHeight() {
+				var h = document.documentElement.offsetHeight || document.body.offsetHeight;
+				if (window.parent !== window) {
+					window.parent.postMessage({ type: 'resize', height: h }, '*');
+				}
+			}
+			window.addEventListener('load', sendHeight);
+		})();
+	</script>
+</html>

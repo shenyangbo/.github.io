@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+		<!--H5页面窗口自动调整到设备宽度，并禁止用户缩放页面-->
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+		<title>星卡自助伴</title>
+		<style type="text/css">
+			*{
+							margin: 0;
+							padding:0;
+						}
+			body {
+				background: transparent;
+			}
+
+			/* 整体容器：淡蓝底 + 白色描边 */
+			.sc_wrap {
+				width: 100%;
+				background: #B7CFFF;
+				border-radius: 8px;
+				outline: 1px solid #ffffff;
+				outline-offset: -1px;
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+			}
+
+			/* 标题行 */
+			.sc_title {
+				display: flex;
+				align-items: center;
+				padding: 8px 12px;
+				gap: 4px;
+			}
+
+			.sc_title_icon {
+				width: 18px;
+				height: 19px;
+				flex-shrink: 0;
+				overflow: hidden;
+			}
+
+			.sc_title_icon img {
+				width: 100%;
+				height: 100%;
+				display: block;
+			}
+
+			.sc_title_text {
+				color: #3473F4;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 400;
+				line-height: 22px;
+			}
+
+			/* 内容卡片：渐变底 + 白边 */
+			.sc_content {
+				background: linear-gradient(180deg, #DBE8FE 0%, #F5F9FF 25%);
+				border-radius: 8px;
+				border-left: 1px solid #ffffff;
+				border-right: 1px solid #ffffff;
+				border-bottom: 1px solid #ffffff;
+				padding: 8px 8px 12px;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 16px;
+				position: relative;
+				overflow: hidden;
+			}
+
+			/* 柔和装饰光斑（还原设计稿） */
+			.sc_glow {
+				position: absolute;
+				left: 50px;
+				top: 138px;
+				width: 253px;
+				height: 60px;
+				background: #FFF5EB;
+				border-radius: 9999px;
+				filter: blur(27.3px);
+				pointer-events: none;
+				z-index: 0;
+			}
+
+			/* 提交成功：图标 + 文案 */
+			.sc_success {
+				position: relative;
+				z-index: 1;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 4px;
+			}
+
+			.sc_success img {
+				width: 60px;
+				height: 60px;
+				display: block;
+			}
+
+			.sc_success_text {
+				color: #666666;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 400;
+				line-height: 24px;
+				text-align: center;
+			}
+
+			/* 订单详情 */
+			.sc_order {
+				align-self: stretch;
+				position: relative;
+				z-index: 1;
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+			}
+
+			.sc_order_title {
+				align-self: stretch;
+				height: 16px;
+				padding-left: 8px;
+				padding-right: 16px;
+				border-left: 2px solid #3473F4;
+				display: flex;
+				align-items: center;
+				color: #333333;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 400;
+				line-height: 24px;
+				overflow: hidden;
+				white-space: nowrap;
+			}
+
+			/* 订单详情表格 */
+			.sc_table {
+				width: 100%;
+				border-collapse: collapse;
+				table-layout: fixed;
+				background: #ffffff;
+				border-radius: 8px;
+				overflow: hidden;
+			}
+
+			.sc_table th {
+				width: 88px;
+				height: 32px;
+				padding: 0 8px;
+				text-align: left;
+				background: #ffffff; /* 覆盖全局 th 的蓝底 */
+				color: #667085;
+				font-size: 12px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 400;
+				border-right: 0.5px solid #EAF0FA;
+				border-bottom: 0.5px solid #EAF0FA;
+			}
+
+			.sc_table td {
+				height: 32px;
+				padding: 0 8px;
+				text-align: left;
+				color: #666666;
+				font-size: 12px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 400;
+				border-bottom: 0.5px solid #EAF0FA;
+			}
+
+			.sc_table tr:last-child th,
+			.sc_table tr:last-child td {
+				border-bottom: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="sc_wrap">
+			<div class="sc_title">
+				<div class="sc_title_icon">
+					<img src="image/frame_2165.png" alt="" />
+				</div>
+				<div class="sc_title_text" id="scTitleText">宽带报修</div>
+			</div>
+
+			<div class="sc_content">
+				<div class="sc_glow"></div>
+
+				<!-- 提交成功 -->
+				<div class="sc_success">
+					<img src="image/pic_success_email.png" alt="" />
+					<div class="sc_success_text" id="scSuccessText">提交工单成功</div>
+				</div>
+
+				<!-- 订单详情 -->
+				<div class="sc_order">
+					<div class="sc_order_title" id="scOrderTitle">订单详情</div>
+					<table class="sc_table">
+						<tr>
+							<th>报修产品</th>
+							<td id="scProduct">19985623654@iptv.gd</td>
+						</tr>
+						<tr>
+							<th>联系人</th>
+							<td id="scContact">朱晓明</td>
+						</tr>
+						<tr>
+							<th>联系号码</th>
+							<td id="scPhone">19985623654</td>
+						</tr>
+						<tr>
+							<th>预约时间</th>
+							<td id="scTime">2026.08.06  9:00-11:00</td>
+						</tr>
+						<tr>
+							<th>故障现象</th>
+							<td id="scFault">没网络</td>
+						</tr>
+						<!-- 备注（填写时显示） -->
+						<tr id="scRemarkRow" style="display: none;">
+							<th>备注</th>
+							<td id="scRemark"></td>
+						</tr>
+					</table>
+				</div>
+			</div>
+		</div>
+	</body>
+
+	<script>
+		(function() {
+
+			// ========== 标题随 URL 参数切换 ==========
+			// type=urge 时为催修语境，否则保持默认（宽带报修）语境
+			function getParam(name) {
+				var reg = new RegExp('[?&]' + name + '=([^&]*)');
+				var match = location.search.match(reg);
+				return match ? decodeURIComponent(match[1]) : '';
+			}
+
+			if (getParam('type') === 'urge') {
+				document.getElementById('scTitleText').textContent = '故障催修';
+				document.getElementById('scSuccessText').textContent = '催修成功';
+				document.getElementById('scOrderTitle').textContent = '催修详情';
+			}
+
+			// ========== 带入报修提交信息（27 页跳转携带） ==========
+			function fillIfPresent(id, value) {
+				if (value) {
+					document.getElementById(id).textContent = value;
+				}
+			}
+			fillIfPresent('scContact', getParam('name'));
+			fillIfPresent('scPhone', getParam('phone'));
+			fillIfPresent('scTime', getParam('time'));
+			fillIfPresent('scFault', getParam('fault'));
+			var remark = getParam('remark');
+			if (remark) {
+				fillIfPresent('scRemark', remark);
+				document.getElementById('scRemarkRow').style.display = '';
+			}
+
+			// ========== iframe 高度同步 ==========
+			function sendHeight() {
+				var h = document.documentElement.offsetHeight || document.body.offsetHeight;
+				if (window.parent !== window) {
+					window.parent.postMessage({ type: 'resize', height: h }, '*');
+				}
+			}
+			window.addEventListener('load', sendHeight);
+		})();
+	</script>
+</html>

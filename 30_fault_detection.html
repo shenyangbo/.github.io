@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+		<!--H5页面窗口自动调整到设备宽度，并禁止用户缩放页面-->
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+		<title>星卡自助伴</title>
+		<style type="text/css">
+			*{
+							margin: 0;
+							padding:0;
+						}
+			body {
+				background: transparent;
+			}
+
+			/* 整体容器：淡蓝底 + 白色描边 */
+			.fd_wrap {
+				width: 100%;
+				background: #B7CFFF;
+				border-radius: 8px;
+				outline: 1px solid #ffffff;
+				outline-offset: -1px;
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+				--ease-breathe: cubic-bezier(0.23, 1, 0.32, 1);
+			}
+
+			/* 标题行 */
+			.fd_title {
+				display: flex;
+				align-items: center;
+				padding: 8px 12px;
+				gap: 4px;
+			}
+
+			.fd_title_icon {
+				width: 18px;
+				height: 19px;
+				flex-shrink: 0;
+				overflow: hidden;
+			}
+
+			.fd_title_icon img {
+				width: 100%;
+				height: 100%;
+				display: block;
+			}
+
+			.fd_title_text {
+				color: #3473F4;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 400;
+				line-height: 22px;
+			}
+
+			/* 检测结果内容：渐变底 + 白边 */
+			.fd_content {
+				background: linear-gradient(180deg, #DBE8FE 0%, #F5F9FF 25%);
+				border-radius: 8px;
+				border-left: 1px solid #ffffff;
+				border-right: 1px solid #ffffff;
+				border-bottom: 1px solid #ffffff;
+				padding: 0 12px;
+				display: flex;
+				flex-direction: column;
+				overflow: hidden;
+			}
+
+			/* 检测项行 */
+			.fd_item {
+				align-self: stretch;
+				height: 40px;
+				border-bottom: 1px solid #DEE9FF;
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				opacity: 0; /* 初始隐藏，配合逐行淡入动画 */
+				animation: fdFadeIn 0.4s var(--ease-breathe) forwards;
+			}
+
+			/* 最后一行无分隔线 */
+			.fd_item:last-child {
+				border-bottom: none;
+			}
+
+			/* 逐行错峰淡入 */
+			.fd_item:nth-child(1) { animation-delay: 0s; }
+			.fd_item:nth-child(2) { animation-delay: 0.12s; }
+			.fd_item:nth-child(3) { animation-delay: 0.24s; }
+			.fd_item:nth-child(4) { animation-delay: 0.36s; }
+			.fd_item:nth-child(5) { animation-delay: 0.48s; }
+			.fd_item:nth-child(6) { animation-delay: 0.6s; }
+
+			/* 淡入上移动画（沿用项目 breatheIn 风格） */
+			@keyframes fdFadeIn {
+				0% {
+					opacity: 0;
+					transform: translateY(10px);
+				}
+				100% {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			.fd_item_icon {
+				width: 16px;
+				height: 16px;
+				flex-shrink: 0;
+				display: block;
+			}
+
+			.fd_item_name {
+				flex: 1;
+				min-width: 0;
+				color: #333333;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 400;
+				overflow: hidden;
+				white-space: nowrap;
+				text-overflow: ellipsis;
+			}
+
+			/* 状态标签 */
+			.fd_item_tag {
+				padding: 0 4px;
+				border-radius: 47px;
+				font-size: 12px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 400;
+				line-height: 20px;
+				flex-shrink: 0;
+			}
+
+			/* 正常/成功状态：蓝底蓝字 */
+			.fd_item_tag.ok {
+				background: rgba(0, 104, 255, 0.06);
+				color: #0068FF;
+			}
+
+			/* 异常状态：红底红字 */
+			.fd_item_tag.error {
+				background: rgba(255, 0, 0, 0.04);
+				color: #FF0000;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="fd_wrap">
+			<div class="fd_title">
+				<div class="fd_title_icon">
+					<img src="image/frame_2168.png" alt="" />
+				</div>
+				<div class="fd_title_text">故障检测</div>
+			</div>
+
+			<div class="fd_content">
+				<!-- 检测项1 -->
+				<div class="fd_item">
+					<img class="fd_item_icon" src="image/finished.png" alt="" />
+					<div class="fd_item_name">获取用户业务号码</div>
+					<span class="fd_item_tag ok">成功</span>
+				</div>
+
+				<!-- 检测项2 -->
+				<div class="fd_item">
+					<img class="fd_item_icon" src="image/finished.png" alt="" />
+					<div class="fd_item_name">查询客户套餐情况</div>
+					<span class="fd_item_tag ok">正常</span>
+				</div>
+
+				<!-- 检测项3 -->
+				<div class="fd_item">
+					<img class="fd_item_icon" src="image/finished.png" alt="" />
+					<div class="fd_item_name">查询客户宽带账号状态</div>
+					<span class="fd_item_tag ok">正常</span>
+				</div>
+
+				<!-- 检测项4：光猫异常 -->
+				<div class="fd_item">
+					<img class="fd_item_icon" src="image/abnormality_fill.png" alt="" />
+					<div class="fd_item_name">查询光猫状态</div>
+					<span class="fd_item_tag error">ONU离线</span>
+				</div>
+
+				<!-- 检测项5 -->
+				<div class="fd_item">
+					<img class="fd_item_icon" src="image/finished.png" alt="" />
+					<div class="fd_item_name">是否区域故障</div>
+					<span class="fd_item_tag ok">非故障</span>
+				</div>
+
+				<!-- 检测项6 -->
+				<div class="fd_item">
+					<img class="fd_item_icon" src="image/finished.png" alt="" />
+					<div class="fd_item_name">网络状态查询</div>
+					<span class="fd_item_tag ok">无故障</span>
+				</div>
+			</div>
+		</div>
+	</body>
+
+	<script>
+		(function() {
+
+			// ========== iframe 高度同步 ==========
+			function sendHeight() {
+				var h = document.documentElement.offsetHeight || document.body.offsetHeight;
+				if (window.parent !== window) {
+					window.parent.postMessage({ type: 'resize', height: h }, '*');
+				}
+			}
+			window.addEventListener('load', sendHeight);
+		})();
+	</script>
+</html>

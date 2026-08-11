@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+		<!--H5页面窗口自动调整到设备宽度，并禁止用户缩放页面-->
+		<meta name="viewport"
+			content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+		<title>星卡自助伴</title>
+		<style type="text/css">
+			*{
+				margin: 0;
+				padding:0;
+			}
+			body {
+				background: transparent;
+			}
+
+			/* 整体容器：淡蓝底 + 白色描边 */
+			.pr_wrap {
+				width: 100%;
+				background: #B7CFFF;
+				border-radius: 8px;
+				outline: 1px solid #ffffff;
+				outline-offset: -1px;
+				display: flex;
+				flex-direction: column;
+				gap: 4px;
+			}
+
+			/* 标题行 */
+			.pr_title {
+				display: flex;
+				align-items: center;
+				padding: 8px 12px;
+				gap: 4px;
+			}
+
+			/* 标题图标（与宽带报修页一致） */
+			.pr_title_icon {
+				width: 18px;
+				height: 19px;
+				flex-shrink: 0;
+				overflow: hidden;
+			}
+
+			.pr_title_icon img {
+				width: 100%;
+				height: 100%;
+				display: block;
+			}
+
+			.pr_title_text {
+				color: #3473F4;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 400;
+				line-height: 22px;
+			}
+
+			/* 内容卡片：渐变底 + 白边 */
+			.pr_content {
+				background: linear-gradient(180deg, #DBE8FE 0%, #F5F9FF 25%);
+				border-radius: 8px;
+				border-left: 1px solid #ffffff;
+				border-right: 1px solid #ffffff;
+				border-bottom: 1px solid #ffffff;
+				padding: 8px 8px 12px;
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+				position: relative;
+				overflow: hidden;
+			}
+
+			/* 柔和装饰光斑（还原设计稿） */
+			.pr_glow {
+				position: absolute;
+				left: 50px;
+				top: 138px;
+				width: 253px;
+				height: 60px;
+				background: #FFF5EB;
+				border-radius: 9999px;
+				filter: blur(27.3px);
+				pointer-events: none;
+				z-index: 0;
+			}
+
+			/* 号码卡片 */
+			.pr_item {
+				position: relative;
+				z-index: 1;
+				background: #ffffff;
+				border-radius: 4px;
+				padding: 12px 6px;
+				display: flex;
+				align-items: center;
+				justify-content: flex-end;
+				gap: 8px;
+				cursor: pointer;
+				transition: box-shadow 0.15s ease;
+			}
+			#pr_list{
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+			}
+			/* 选中态：蓝色描边 */
+			.pr_item.selected {
+				outline: 1px solid #3C78FF;
+				outline-offset: -1px;
+			}
+
+			/* 置灰禁用态：点击任意一张后，其余卡片不可再点 */
+			.pr_item.disabled {
+				opacity: 0.5;
+				pointer-events: none;
+				cursor: not-allowed;
+			}
+
+			.pr_item_body {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+				min-width: 0;
+			}
+
+			.pr_item_top {
+				display: flex;
+				align-items: flex-start;
+				gap: 4px;
+			}
+
+			.pr_item_num {
+				color: #333333;
+				font-size: 14px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 500;
+				line-height: 14px;
+				white-space: nowrap;
+			}
+
+			.pr_item_tag {
+				padding: 0 12px;
+				background: rgba(0, 104, 255, 0.06);
+				border-radius: 47px;
+				color: #0068FF;
+				font-size: 12px;
+				font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+				font-weight: 400;
+				line-height: 20px;
+				flex-shrink: 0;
+			}
+
+			/* 号码卡片右侧箭头按钮（与宽带报修页一致） */
+			.pr_item_arrow {
+				width: 16px;
+				height: 16px;
+				flex-shrink: 0;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+
+			.pr_item_arrow img {
+				width: 100%;
+				height: 100%;
+				display: block;
+			}
+
+			/* 提示条（内联，原 css.css 中的 .toast） */
+			.toast {
+				position: fixed;
+				bottom: 80px;
+				left: 50%;
+				transform: translateX(-50%);
+				background-color: rgba(0, 0, 0, 0.7);
+				color: white;
+				padding: 10px 20px;
+				border-radius: 4px;
+				z-index: 9999;
+				display: none;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="pr_wrap">
+			<div class="pr_title">
+				<div class="pr_title_icon">
+					<img src="image/frame_2165.png" alt="" />
+				</div>
+				<div class="pr_title_text">手机号码报修</div>
+			</div>
+
+			<div class="pr_content">
+				<div class="pr_glow"></div>
+
+				<!-- 号码卡片由 JS 根据数据动态渲染 -->
+				<div id="pr_list"></div>
+			</div>
+		</div>
+
+		<!-- 号码卡片模板：接入后端后按接口数据循环填充 -->
+		<div type="text/template" id="pr_item_tpl" style="display: none;">
+			<div class="pr_item" data-number="{number}">
+				<div class="pr_item_body">
+					<div class="pr_item_top">
+						<div class="pr_item_num">{number}</div>
+						<div class="pr_item_tag">{tag}</div>
+					</div>
+				</div>
+				<div class="pr_item_arrow">
+					<img src="image/ic_arrow_right_shixin.png" alt="" />
+				</div>
+			</div>
+		</div>
+
+		<div class="toast" id="toast"></div>
+	</body>
+
+	<script>
+		(function() {
+
+			// ========== 号码数据 ==========
+			// 接入后端接口后，把 mockData 换成接口返回的数据即可，示例：
+			// fetch('http://your-api/phone/repair/list').then(function(res) {
+			//     return res.json();
+			// }).then(function(res) {
+			//     renderItems(res.data); // 假设接口返回 { code:0, data:[{number:'199****5632', tag:'主卡'}, ...] }
+			// });
+			var mockData = [
+				{ number: '199****5632', tag: '主卡' },
+				{ number: '199****8954', tag: '副卡' },
+				{ number: '199****7854', tag: '副卡' },
+			];
+
+			var prList = document.getElementById('pr_list');
+
+			// ========== 渲染号码卡片 ==========
+			function renderItems(list) {
+				var tpl = document.getElementById('pr_item_tpl').innerHTML;
+				var html = '';
+				for (var i = 0; i < list.length; i++) {
+					html += tpl
+						.replace(/\{number\}/g, list[i].number)
+						.replace(/\{tag\}/g, list[i].tag);
+				}
+				prList.innerHTML = html;
+				sendHeight(); // 卡片增减后重新同步 iframe 高度
+			}
+
+			// ========== 向上查找指定 class 的元素（兼容旧浏览器） ==========
+			function closestByClass(el, cls) {
+				while (el && el !== document) {
+					if (el.classList && el.classList.contains(cls)) return el;
+					el = el.parentNode;
+				}
+				return null;
+			}
+
+			// ========== 号码卡片选择（事件委托，卡片为动态渲染）：单选互斥，选中后其余置灰，通知父页面 ==========
+			var locked = false;
+			document.addEventListener('click', function(e) {
+				var item = closestByClass(e.target, 'pr_item');
+				if (!item) return;
+				if (locked) return;
+				locked = true;
+
+				var items = document.querySelectorAll('.pr_item');
+				for (var j = 0; j < items.length; j++) {
+					if (items[j] !== item) items[j].classList.add('disabled');
+				}
+				item.classList.add('selected');
+
+				var number = item.getAttribute('data-number');
+				if (window.parent !== window) {
+					window.parent.postMessage({
+						type: 'selectPhoneItem',
+						name: number
+					}, '*');
+				} else {
+					showToast('已选择：' + number);
+				}
+			});
+
+			// ========== iframe 高度同步 ==========
+			function sendHeight() {
+				var h = document.documentElement.offsetHeight || document.body.offsetHeight;
+				if (window.parent !== window) {
+					window.parent.postMessage({ type: 'resize', height: h }, '*');
+				}
+			}
+			window.addEventListener('load', sendHeight);
+
+			// ========== toast 提示 ==========
+			var toastEl = document.getElementById('toast');
+			function showToast(msg) {
+				toastEl.innerText = msg;
+				toastEl.style.display = 'block';
+				setTimeout(function() {
+					toastEl.style.display = 'none';
+				}, 1500);
+			}
+
+			// ========== 初始渲染（当前使用 mock 数据） ==========
+			renderItems(mockData);
+		})();
+	</script>
+</html>
